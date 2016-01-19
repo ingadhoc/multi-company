@@ -1,0 +1,1 @@
+odoo-argentina https://github.com/ingadhoc/odoo-argentina.git

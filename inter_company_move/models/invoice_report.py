@@ -4,17 +4,12 @@
 # directory
 ##############################################################################
 from openerp import models, fields
-# from openerp.osv import fields, osv
 
 
-# class account_invoice_report(osv.osv):
 class account_invoice_report(models.Model):
     _inherit = 'account.invoice.report'
 
-    # _columns = {
-    #     'active': fields.boolean('Sales Team'),
-    # }
-    active = fields.Boolean('Sales Team')
+    active = fields.Boolean('Active')
 
     _depends = {
         'account.invoice': ['active'],

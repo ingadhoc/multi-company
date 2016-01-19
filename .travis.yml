@@ -21,6 +21,13 @@ addons:
       - python-simplejson
       - python-serial
       - python-yaml
+      # FE
+      - python-dev
+      - swig
+      - libffi-dev
+      - libssl-dev
+      - python-m2crypto
+      - python-httplib2
 #     Search your packages here:
 #       https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-precise
 #      - wkhtmltopdf  # only add if needed and check the before_install section below
@@ -58,6 +65,11 @@ virtualenv:
 install:
   # repository requirements
   - pip install -r requirements.txt
+
+  # odoo argentina
+  - pip install geopy==0.95.1 BeautifulSoup #because l10n_ar_states is installed
+  - pip install pyOpenSSL suds m2crypto cryptography pysimplesoap fpdf dbf Pillow
+  - pip install pyafipws
 
   - git clone --depth=1 https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
   - export PATH=${HOME}/maintainer-quality-tools/travis:${PATH}
