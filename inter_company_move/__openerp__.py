@@ -27,6 +27,7 @@
     'description': """
 Inter Company Move
 ==================
+This module allows you to move documents between companies
     """,
     'author':  'ADHOC SA',
     'website': 'www.adhoc.com.ar',
