@@ -13,7 +13,8 @@ class account_invoice(models.Model):
     active = fields.Boolean('Active', default=True)
     invoice_move_type = fields.Selection(
         related='company_id.invoice_move_type',
-        string='Invoice Move Type',)
+        string='Invoice Move Type',
+        readonly=True,)
     moved_invoice_id = fields.Many2one(
         'account.invoice', 'Moved Invoice', readonly=True, copy=False)
 
