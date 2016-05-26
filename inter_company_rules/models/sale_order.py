@@ -130,7 +130,7 @@ class sale_order(models.Model):
             'product_id': so_line.product_id and so_line.product_id.id or False,
             'product_uom': so_line.product_id and so_line.product_id.uom_po_id.id or so_line.product_uom.id,
             'price_unit': price or 0.0,
-            'company_id': so_line.order_id.company_id.id,
+            'company_id': company.id,
             'date_planned': so_line.order_id.commitment_date or date_order,
             'taxes_id': [(6, 0, company_taxes)],
         }
