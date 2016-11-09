@@ -3,8 +3,21 @@
 # For copyright and license notices, see __openerp__.py file in module root
 # directory
 ##############################################################################
-from openerp import api, models, fields
-# from openerp.exceptions import Warning
+from openerp import api, models
+
+
+class AccountFiscalPosition(models.Model):
+    _inherit = 'account.fiscal.position'
+
+    @api.multi
+    def name_get(self):
+        res = []
+        for record in self:
+            record_name = '%s%s' % (
+                record.name,
+                record.company_id.get_company_sufix())
+            res.append((record.id, record_name))
+        return res
 
 
 class AccountMove(models.Model):
@@ -69,7 +82,7 @@ class AccountJournal(models.Model):
         """
         res = []
         for record in self:
-            currency = record.currency or record.company_id.currency_id
+            currency = record.currency_id or record.company_id.currency_id
             record_name = '%s (%s)%s' % (
                 record.name,
                 currency.name,
