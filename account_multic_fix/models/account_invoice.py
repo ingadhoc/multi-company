@@ -4,7 +4,7 @@
 # directory
 ##############################################################################
 from openerp import api, _
-from openerp.addons.account.account_invoice import account_invoice
+from openerp.addons.account.models.account_invoice import AccountInvoice
 from openerp.exceptions import RedirectWarning, except_orm
 # from openerp.exceptions import except_orm, Warning, RedirectWarning
 
@@ -69,4 +69,4 @@ def _onchange_partner_id(self):
         self.partner_bank_id = bank_id
 
 
-account_invoice._onchange_partner_id = _onchange_partner_id
+AccountInvoice._onchange_partner_id = _onchange_partner_id
