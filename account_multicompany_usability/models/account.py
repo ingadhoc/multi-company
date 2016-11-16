@@ -44,7 +44,7 @@ class AccountAnalyticAccount(models.Model):
         res = []
         for record in self:
             record_name = '%s%s' % (
-                record._get_one_full_name(record),
+                super(AccountAnalyticAccount, record).name_get()[0][1],
                 record.company_id.get_company_sufix())
             res.append((record.id, record_name))
         return res
