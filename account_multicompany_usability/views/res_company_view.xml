@@ -8,9 +8,9 @@
             <field name="inherit_id" ref="base.view_company_form"/>
             <field name="arch" type="xml">
                 <div class="oe_title">
-                    <field name="short_name"/>
+                    <field name="short_name" placeholder="Short Name..."/>
                 </div>
-                <group name="account_grp" string="Accounting">  
+                <group name="account_grp">  
                     <field name="consolidation_company"/>
                 </group>
             </field>
