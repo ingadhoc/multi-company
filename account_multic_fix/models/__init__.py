@@ -5,4 +5,5 @@
 ##############################################################################
 from . import account
 from . import account_invoice
+from . import account_journal_dashboard
 # from . import account_statement

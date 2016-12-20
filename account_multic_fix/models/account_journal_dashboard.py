@@ -1,0 +1,17 @@
+# -*- coding: utf-8 -*-
+##############################################################################
+# For copyright and license notices, see __openerp__.py file in module root
+# directory
+##############################################################################
+from openerp import models, api
+
+
+class AccountJournal(models.Model):
+    _inherit = "account.journal"
+
+    @api.multi
+    def action_create_new(self):
+        # we fix that if we call create invoice from dashboard of a journal
+        # of a child company, user company is set
+        self = self.with_context(default_company_id=self.company_id.id)
+        return super(AccountJournal, self).action_create_new()
