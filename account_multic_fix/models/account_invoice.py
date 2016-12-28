@@ -3,7 +3,7 @@
 # For copyright and license notices, see __openerp__.py file in module root
 # directory
 ##############################################################################
-from openerp import models, api
+from openerp import models, api, fields
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -23,3 +23,8 @@ class AccountInvoice(models.Model):
             vals['company_id'] = self.env['account.journal'].browse(
                 journal_id).company_id.id
         return super(AccountInvoice, self).create(vals)
+
+    fiscal_position_id = fields.Many2one(
+        domain="['|', ('company_id', '=', False), "
+        "('company_id', '=', company_id)]"
+    )
