@@ -27,6 +27,7 @@
         # 'security/rule.xml',
         'views/account_invoice_view.xml',
         'views/account_move_view.xml',
+        'data/account_reconcile_data.xml',
         # 'views/account_move_view.xml',
         # 'wizard/account_move_line_reconcile_writeoff_view.xml',
         # 'wizard/account_statement_from_invoice_view.xml',
@@ -47,5 +48,5 @@ A su vez hay que cambiar self.env.user.company_id por self.journal_id.company_id
     'installable': True,
     'name': 'Account Multi Company Fixes',
     'test': [],
-    'version': '9.0.1.0.0',
+    'version': '9.0.1.1.0',
 }
