@@ -3,7 +3,8 @@
 # For copyright and license notices, see __openerp__.py file in module root
 # directory
 ##############################################################################
-from openerp import models, api, fields
+from openerp import models, api, fields, _
+from openerp.exceptions import ValidationError
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -28,3 +29,12 @@ class AccountInvoice(models.Model):
         domain="['|', ('company_id', '=', False), "
         "('company_id', '=', company_id)]"
     )
+
+    @api.one
+    @api.constrains('fiscal_position_id', 'company_id')
+    def _check_fiscal_position_company(self):
+        position_company = self.fiscal_position_id.company_id
+        if position_company and position_company != self.company_id:
+            raise ValidationError(_(
+                'The company of the invoice and from the fiscal position must'
+                ' be the same!'))
