@@ -10,6 +10,7 @@
                     <!-- agregamos este campo para que el related de company_id se compute con el onchange y entonces ande el filtro nativo de odoo de la funcion _set_taxes -->
                     <field name="invoice_id" invisible="1"/>
                 </xpath>
+
             </field>
         </record>
 
@@ -22,6 +23,7 @@
                     <!-- agregamos este campo para que el related de company_id se compute con el onchange y entonces ande el filtro nativo de odoo de la funcion _set_taxes -->
                     <field name="invoice_id" invisible="1"/>
                 </xpath>
+
             </field>
         </record>
     </data>

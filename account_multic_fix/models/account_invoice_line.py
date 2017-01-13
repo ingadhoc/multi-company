@@ -3,21 +3,8 @@
 # For copyright and license notices, see __openerp__.py file in module root
 # directory
 ##############################################################################
-from openerp import models, fields, api, _
-from openerp.exceptions import except_orm, Warning, RedirectWarning
-
-
-class account_invoice(models.Model):
-    _inherit = "account.invoice"
-
-    @api.onchange('company_id')
-    def _onchange_company(self):
-        # get first journal for new company
-        self.journal_id = self.with_context(
-            company_id=self.company_id.id)._default_journal()
-        # update lines
-        for line in self.invoice_line_ids:
-            line._onchange_product_id()
+from openerp import models, api
+# from openerp.exceptions import except_orm, Warning, RedirectWarning
 
 
 class AccountInvoiceLine(models.Model):
