@@ -77,11 +77,11 @@ class AccountInvoice(models.Model):
             company_id=self.company_id.id,
             change_company=True)._default_journal()
 
-        # we force cache update of company_id value on invoice lines
-        # this fix right tax choose
-        self.invoice_line_ids.company_id = self.company_id
         # update lines
         for line in self.invoice_line_ids:
+            # we force cache update of company_id value on invoice lines
+            # this fix right tax choose
+            line.company_id = self.company_id
             line._onchange_product_id()
 
     @api.model
