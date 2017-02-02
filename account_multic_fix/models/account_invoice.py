@@ -81,8 +81,13 @@ class AccountInvoice(models.Model):
         for line in self.invoice_line_ids:
             # we force cache update of company_id value on invoice lines
             # this fix right tax choose
+            # prevent price and name being overwrited
+            price_unit = line.price_unit
+            name = line.name
             line.company_id = self.company_id
             line._onchange_product_id()
+            line.name = name
+            line.price_unit = price_unit
 
     @api.model
     def create(self, vals):
