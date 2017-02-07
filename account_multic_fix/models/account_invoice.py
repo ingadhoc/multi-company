@@ -14,30 +14,34 @@ class AccountInvoice(models.Model):
 
     @api.model
     def _default_journal(self):
-        """
-        Fix that, if for eg, we came from a sale order of company a and we can
-        also se company b journals, odoo could select a journal of b
-        """
-        change_company = self._context.get('change_company')
-        default_journal_id = self._context.get('default_journal_id')
+        context = self._context
+        change_company = context.get('change_company')
+        default_journal_id = context.get('default_journal_id')
         # if we come, for eg, from journal dashboard and we came company
         # we need to remove the defauly key
         if change_company and default_journal_id:
-            context = self._context.copy()
+            context = context.copy()
             context.pop('default_journal_id')
             self = self.with_context(context)
 
-        active_model = self._context.get('active_model')
-        active_id = self._context.get('active_id')
-        company_id = self._context.get('company_id')
-        if active_model and active_id and not company_id and \
-                not default_journal_id:
-            model = self.env[active_model]
-            if 'company_id' in model._fields:
-                company = model.browse(active_id).company_id
-                if company:
-                    self = self.with_context(
-                        company_id=model.browse(active_id).company_id.id)
+        # TODO borrar o arreglar, al final este fix lo hicimos en
+        # sale_mutlic_fix porque nos rompia el comportamiento para generar
+        # factura  usando boton de dashboard contable en una tarjeta de otra
+        # cia diferente a la del usuario
+        # Fix that, if for eg, we came from a sale order of company a and we
+        # can also se company b journals, odoo could select a journal of b
+        # active_model = context.get('active_model')
+        # active_id = context.get('active_id')
+        # company_id = context.get(
+        #     'company_id', context.get('default_company_id'))
+        # if active_model and active_id and not company_id and \
+        #         not default_journal_id:
+        #     model = self.env[active_model]
+        #     if 'company_id' in model._fields:
+        #         company = model.browse(active_id).company_id
+        #         if company:
+        #             self = self.with_context(
+        #                 company_id=model.browse(active_id).company_id.id)
         return super(AccountInvoice, self)._default_journal()
 
     # we need this to overwrite default

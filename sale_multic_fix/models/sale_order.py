@@ -68,3 +68,8 @@ class SaleOrder(models.Model):
         # TODO mejorar, no se porque este no funciona
         # return super(SaleOrder, self.with_context(
         #     force_company=self.company_id.id)).onchange_partner_shipping_id()
+
+    @api.multi
+    def _prepare_invoice(self):
+        return super(SaleOrder, self.with_context(
+            company_id=self.company_id.id))._prepare_invoice()
