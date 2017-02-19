@@ -20,7 +20,7 @@
 ##############################################################################
 {
     'name': 'Account Multicompany Usability',
-    'version': '9.0.1.3.0',
+    'version': '9.0.1.4.0',
     'author': 'ADHOC SA',
     'website': 'www.adhoc.com.ar',
     'license': 'AGPL-3',
@@ -33,6 +33,7 @@
         'views/res_partner_view.xml',
         'views/product_view.xml',
         'views/account_journal_dashboard_view.xml',
+        'wizard/res_config_view.xml',
         'security/security.xml',
         'security/ir.model.access.csv',
     ],

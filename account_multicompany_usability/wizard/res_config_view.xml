@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_account_config_settings" model="ir.ui.view">
+            <field name="name">account settings</field>
+            <field name="model">account.config.settings</field>
+            <field name="inherit_id" ref="account.view_account_config_settings"/>
+            <field name="arch" type="xml">
+                <div name="invoice_taxes" position="replace">
+                    <div name="invoice_taxes">
+                        <div>
+                            <label for="default_sale_tax_ids"/>
+                            <field name="default_sale_tax_ids"
+                                domain="[('type_tax_use', 'in', ('sale', 'all')), ('company_id', 'child_of', company_id)]"
+                                class="oe_inline" widget="many2many_tags"/>
+                        </div>
+                        <div>
+                            <label for="default_purchase_tax_ids"/>
+                            <field name="default_purchase_tax_ids"
+                                domain="[('type_tax_use', 'in', ('purchase', 'all')), ('company_id', 'child_of', company_id)]"
+                                class="oe_inline" widget="many2many_tags"/>
+                        </div>
+                    </div>
+                </div>
+                <!-- <label for="sale_tax_id"/> -->
+                <!-- <field name="defaul_sale_tax_id" position="replace">
+                    <field name="defaul_sale_tax_ids"
+                        domain="[('type_tax_use', 'in', ('sale', 'all')), ('company_id', '=', company_id)]"
+                        class="oe_inline"/>
+                </field>
+                <field name="defaul_purchase_tax_id" position="replace">
+                    <field name="defaul_purchase_tax_ids"
+                        domain="[('type_tax_use', 'in', ('purchase', 'all')), ('company_id', '=', company_id)]"
+                        class="oe_inline"/>
+                </field> -->
+            </field>
+        </record>
+
+    </data>
+</openerp>
