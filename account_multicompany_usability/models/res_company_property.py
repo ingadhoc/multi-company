@@ -124,7 +124,8 @@ class ResCompanyProperty(models.Model):
 
     @api.model
     def fields_view_get(
-            self, view_id=None, view_type=False, toolbar=False, submenu=False):
+            self, view_id=None, view_type='form', toolbar=False,
+            submenu=False):
         """
         Con esta funcion hacemos dos cosas:
         1. Mostrar solo la columna que corresponda segun el modelo
