@@ -3,14 +3,16 @@
 # * account_multic_fix
 # 
 # Translators:
+# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2016
+# Nicolas Mac Rouillon <nmr@ingadhoc.com>, 2017
 msgid ""
 msgstr ""
-"Project-Id-Version: odoo-addons (8.0)\n"
+"Project-Id-Version: Odoo Server 9.0c\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-22 13:44+0000\n"
-"PO-Revision-Date: 2015-10-22 14:33+0000\n"
-"Last-Translator: Juan Jose Scarafia <scarafia.juanjose@gmail.com>\n"
-"Language-Team: Spanish (http://www.transifex.com/adhoc/ingadhoc-odoo-addons-8-0/language/es/)\n"
+"POT-Creation-Date: 2017-03-05 23:04+0000\n"
+"PO-Revision-Date: 2017-03-05 23:04+0000\n"
+"Last-Translator: Nicolas Mac Rouillon <nmr@ingadhoc.com>, 2017\n"
+"Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -18,48 +20,32 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: account_multic_fix
-#: model:ir.model,name:account_multic_fix.model_account_move
-msgid "Account Entry"
-msgstr "Asiento contable"
-
-#. module: account_multic_fix
-#: model:ir.model,name:account_multic_fix.model_account_move_line_reconcile_writeoff
-msgid "Account move line reconcile (writeoff)"
-msgstr ""
-
-#. module: account_multic_fix
 #: code:addons/account_multic_fix/wizard/account_move_line_reconcile_writeoff.py:19
 #, python-format
 msgid "All move lines must be from the same company!"
-msgstr ""
+msgstr "¡Todos las líneas de movimiento deben ser de la misma empresa!"
 
 #. module: account_multic_fix
 #: code:addons/account_multic_fix/wizard/account_statement_from_invoice.py:19
 #, python-format
 msgid "All statements must be from the same company!"
+msgstr "¡Todos los Extractos deben ser de la misma companía!"
+
+#. module: account_multic_fix
+#: code:addons/account_multic_fix/models/account_invoice_mokey_patch.py:53
+#, python-format
+msgid ""
+"Cannot find a chart of accounts for this company, You should configure it. \n"
+"Please go to Account Configuration."
 msgstr ""
+"No se ha podido encontrar un árbol de cuentas de esta compañía, debería "
+"configurar una. Por favor, diríjase a la configuración de cuentas."
 
 #. module: account_multic_fix
-#: model:ir.model,name:account_multic_fix.model_account_bank_statement
-msgid "Bank Statement"
-msgstr "Extracto bancario"
-
-#. module: account_multic_fix
-#: model:ir.model,name:account_multic_fix.model_account_bank_statement_line
-msgid "Bank Statement Line"
-msgstr "Línea de extracto bancario"
-
-#. module: account_multic_fix
-#: field:account.move.line.reconcile.writeoff,company_id:0
-#: field:account.statement.from.invoice.lines,company_id:0
-#: field:account.statement.operation.template,company_id:0
-msgid "Company"
-msgstr "Compañía"
-
-#. module: account_multic_fix
-#: model:ir.model,name:account_multic_fix.model_account_statement_from_invoice_lines
-msgid "Entries by Statement from Invoices"
-msgstr ""
+#: code:addons/account_multic_fix/models/account_invoice_mokey_patch.py:54
+#, python-format
+msgid "Go to the configuration panel"
+msgstr "Ir al panel de configuración"
 
 #. module: account_multic_fix
 #: model:ir.model,name:account_multic_fix.model_account_invoice
@@ -72,43 +58,13 @@ msgid "Invoice Line"
 msgstr "Línea de factura"
 
 #. module: account_multic_fix
-#: model:ir.model,name:account_multic_fix.model_account_statement_operation_template
-msgid ""
-"Preset for the lines that can be created in a bank statement reconciliation"
-msgstr ""
+#: model:ir.model,name:account_multic_fix.model_account_journal
+msgid "Journal"
+msgstr "Diario"
 
 #. module: account_multic_fix
-#: constraint:account.bank.statement:0
-msgid "The journal and period chosen have to belong to the same company."
-msgstr ""
-
-#. module: account_multic_fix
-#: code:addons/account_multic_fix/account.py:18
+#: code:addons/account_multic_fix/models/account_invoice.py:119
 #, python-format
 msgid ""
-"You cannot change the company of a invoice that has lines. You should delete"
-" them first."
-msgstr "No se puede cambiar la compañía de una factura que tiene líneas. Usted debe eliminar primero."
-
-#. module: account_multic_fix
-#: view:account.statement.from.invoice.lines:account_multic_fix.view_account_statement_from_invoice_lines
-msgid ""
-"[('account_id.type','in',['receivable','payable']),('reconcile_id','=',False),"
-" ('reconcile_partial_id','=',False), ('state', '=', 'valid'), ('company_id',"
-" '=', company_id)]"
-msgstr ""
-
-#. module: account_multic_fix
-#: view:account.move.line.reconcile.writeoff:account_multic_fix.account_move_line_reconcile_writeoff
-msgid "[('company_id', '=', company_id), ('type', '!=', 'view')]"
-msgstr ""
-
-#. module: account_multic_fix
-#: view:account.move.line.reconcile.writeoff:account_multic_fix.account_move_line_reconcile_writeoff
-msgid "[('company_id', '=', company_id)]"
-msgstr ""
-
-#. module: account_multic_fix
-#: view:account.move.line.reconcile.writeoff:account_multic_fix.account_move_line_reconcile_writeoff
-msgid "[('type', '<>', 'view'), ('company_id', '=', company_id)]"
-msgstr ""
+"The company of the invoice and from the fiscal position must be the same!"
+msgstr "¡La empresa de la factura y de la posición fiscal debe ser la misma!"
