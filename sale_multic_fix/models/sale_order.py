@@ -71,5 +71,44 @@ class SaleOrder(models.Model):
 
     @api.multi
     def _prepare_invoice(self):
+        """
+        Arreglos para que se tomen cuentas de compania hija si estamos parados
+        en una cia padre
+        """
         return super(SaleOrder, self.with_context(
-            company_id=self.company_id.id))._prepare_invoice()
+            company_id=self.company_id.id,
+            force_company=self.company_id.id))._prepare_invoice()
+
+
+class SaleOrderLine(models.Model):
+    _inherit = "sale.order.line"
+
+    @api.multi
+    def _prepare_invoice_line(self, qty):
+        """
+        Arreglos para que se tomen cuentas de compania hija si estamos parados
+        en una cia padre
+        """
+        return super(SaleOrderLine, self.with_context(
+            force_company=self.company_id.id))._prepare_invoice_line(qty)
+
+
+class SaleAdvancePaymentInv(models.TransientModel):
+    _inherit = "sale.advance.payment.inv"
+
+    @api.multi
+    def _create_invoice(self, order, so_line, amount):
+        self.ensure_one()
+        order = order.with_context(
+            force_company=order.company_id.id)
+        self = self.with_context(
+            company_id=order.company_id.id,
+            default_company_id=order.company_id.id,
+            force_company=order.company_id.id)
+        invoice = super(SaleAdvancePaymentInv, self)._create_invoice(
+            order, so_line, amount)
+        # este es el metodo que odoo usa en sale pero mas corrrecto seria
+        # usar el get_journal
+        invoice.journal_id = self.env['account.invoice'].default_get(
+            ['journal_id'])['journal_id']
+        return invoice

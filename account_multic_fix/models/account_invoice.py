@@ -12,74 +12,84 @@ _logger = logging.getLogger(__name__)
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
-    @api.model
-    def _default_journal(self):
-        context = self._context
-        change_company = context.get('change_company')
-        default_journal_id = context.get('default_journal_id')
-        # if we come, for eg, from journal dashboard and we came company
-        # we need to remove the defauly key
-        if change_company and default_journal_id:
-            context = context.copy()
-            context.pop('default_journal_id')
-            self = self.with_context(context)
+    # Juan no pusde recordar porque esta todo esto, pareciera que ahora
+    # no es necesario
+    # @api.model
+    # def _default_journal(self):
+    #     context = self._context
+    #     change_company = context.get('change_company')
+    #     default_journal_id = context.get('default_journal_id')
+    #     # if we come, for eg, from journal dashboard and we came company
+    #     # we need to remove the defauly key
+    #     if change_company and default_journal_id:
+    #         context = context.copy()
+    #         context.pop('default_journal_id')
+    #         self = self.with_context(context)
 
-        # TODO borrar o arreglar, al final este fix lo hicimos en
-        # sale_mutlic_fix porque nos rompia el comportamiento para generar
-        # factura  usando boton de dashboard contable en una tarjeta de otra
-        # cia diferente a la del usuario
-        # Fix that, if for eg, we came from a sale order of company a and we
-        # can also se company b journals, odoo could select a journal of b
-        # active_model = context.get('active_model')
-        # active_id = context.get('active_id')
-        # company_id = context.get(
-        #     'company_id', context.get('default_company_id'))
-        # if active_model and active_id and not company_id and \
-        #         not default_journal_id:
-        #     model = self.env[active_model]
-        #     if 'company_id' in model._fields:
-        #         company = model.browse(active_id).company_id
-        #         if company:
-        #             self = self.with_context(
-        #                 company_id=model.browse(active_id).company_id.id)
-        return super(AccountInvoice, self)._default_journal()
-
-    # we need this to overwrite default
-    journal_id = fields.Many2one(
-        default=_default_journal
-    )
-
-    @api.model
-    def _default_company(self):
-        """
-        Fix for eg, creation of invoice with user in company a but from a sale
-        order of company b (advance invoice, normal invoice works ok)
-        """
-        active_model = self._context.get('active_model')
-        active_id = self._context.get('active_id')
-        company_id = self._context.get('company_id')
-        default_journal_id = self._context.get('default_journal_id')
-        default_company_id = self._context.get('default_company_id')
-        if active_model and active_id and not company_id and \
-                not default_journal_id and not default_company_id:
-            model = self.env[active_model]
-            if 'company_id' in model._fields:
-                company = model.browse(active_id).company_id
-                if company:
-                    return company
-        return self.env['res.company']._company_default_get('account.invoice')
+    #     # TODO borrar o arreglar, al final este fix lo hicimos en
+    #     # sale_mutlic_fix porque nos rompia el comportamiento para generar
+    #     # factura  usando boton de dashboard contable en una tarjeta de otra
+    #     # cia diferente a la del usuario
+    #     # Fix that, if for eg, we came from a sale order of company a and we
+    #     # can also se company b journals, odoo could select a journal of b
+    #     # active_model = context.get('active_model')
+    #     # active_id = context.get('active_id')
+    #     # company_id = context.get(
+    #     #     'company_id', context.get('default_company_id'))
+    #     # if active_model and active_id and not company_id and \
+    #     #         not default_journal_id:
+    #     #     model = self.env[active_model]
+    #     #     if 'company_id' in model._fields:
+    #     #         company = model.browse(active_id).company_id
+    #     #         if company:
+    #     #             self = self.with_context(
+    #     #                 company_id=model.browse(active_id).company_id.id)
+    #     return super(AccountInvoice, self)._default_journal()
 
     # we need this to overwrite default
-    company_id = fields.Many2one(
-        default=_default_company
-    )
+    # journal_id = fields.Many2one(
+    #     default=_default_journal
+    # )
+
+    # Comentamos porque resolvia setear la compania pero no llamaba
+    # al onchange, por lo cual todas las cuentas y demas seguian siendo de la
+    # cia padre. Probamos cambiar metodos en sale para que tengan en cuenta
+    # la cia correcta. Si no funciona o necesitamos sto, habria que ver de
+    # llamar al onchange company luego de la creacion para que actualice
+    # diarios, impuestos y cuentas
+    # @api.model
+    # def _default_company(self):
+    #     """
+    #     Fix for eg, creation of invoice with user in company a but from a
+    #     sale order of company b (advance invoice, normal invoice works ok)
+    #     """
+    #     active_model = self._context.get('active_model')
+    #     active_id = self._context.get('active_id')
+    #     company_id = self._context.get('company_id')
+    #     default_journal_id = self._context.get('default_journal_id')
+    #     default_company_id = self._context.get('default_company_id')
+    #     if active_model and active_id and not company_id and \
+    #             not default_journal_id and not default_company_id:
+    #         model = self.env[active_model]
+    #         if 'company_id' in model._fields:
+    #             company = model.browse(active_id).company_id
+    #             if company:
+    #                 return company
+    #     return self.env['res.company']._company_default_get(
+    #         'account.invoice')
+
+    # # we need this to overwrite default
+    # company_id = fields.Many2one(
+    #     default=_default_company
+    # )
 
     @api.onchange('company_id')
     def _onchange_company(self):
         # get first journal for new company
         self.journal_id = self.with_context(
             company_id=self.company_id.id,
-            change_company=True)._default_journal()
+            # change_company=True,
+        )._default_journal()
 
         # update lines
         for line in self.invoice_line_ids:
