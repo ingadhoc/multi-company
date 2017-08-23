@@ -73,11 +73,16 @@ class SaleOrder(models.Model):
     def _prepare_invoice(self):
         """
         Arreglos para que se tomen cuentas de compania hija si estamos parados
-        en una cia padre
+        en una cia padre.
+        Agregamos la opcion de force para que otros modulos puedan forzar
+        usar una compania diferente
         """
-        return super(SaleOrder, self.with_context(
-            company_id=self.company_id.id,
-            force_company=self.company_id.id))._prepare_invoice()
+        company_id = self._context.get('force_company', self.company_id.id)
+        res = super(SaleOrder, self.with_context(
+            company_id=company_id,
+            force_company=company_id))._prepare_invoice()
+        res['company_id'] = company_id
+        return res
 
 
 class SaleOrderLine(models.Model):
@@ -89,8 +94,19 @@ class SaleOrderLine(models.Model):
         Arreglos para que se tomen cuentas de compania hija si estamos parados
         en una cia padre
         """
-        return super(SaleOrderLine, self.with_context(
-            force_company=self.company_id.id))._prepare_invoice_line(qty)
+        company_id = self._context.get('force_company', self.company_id.id)
+        self = self.with_context(force_company=company_id)
+        res = super(SaleOrderLine, self)._prepare_invoice_line(qty)
+        # si se fuerza una cia tenemos que cambiar los impuestos
+        if self._context.get('force_company'):
+            fpos = (
+                self.order_id.fiscal_position_id or
+                self.order_id.partner_id.property_account_position_id)
+            taxes = self.product_id.taxes_id.filtered(
+                lambda r: company_id == r.company_id.id)
+            taxes = fpos.map_tax(taxes) if fpos else taxes
+            res['invoice_line_tax_ids'] = [(6, 0, taxes.ids)]
+        return res
 
 
 class SaleAdvancePaymentInv(models.TransientModel):
