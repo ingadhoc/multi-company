@@ -86,8 +86,21 @@ class AccountInvoice(models.Model):
     @api.onchange('company_id')
     def _onchange_company(self):
         # get first journal for new company
+
+        # si viene un default journal y no es de la misma cia que la actual
+        # limpiamos el default
+        default_journal_id = self.env.context.get('default_journal_id')
+        if default_journal_id and self.company_id and self.env[
+                'account.journal'].browse(
+                    default_journal_id).company_id != self.company_id:
+            default_journal_id = False
+            # self = self.with_context(default_journal_id=False)
+
         self.journal_id = self.with_context(
             company_id=self.company_id.id,
+            default_journal_id=default_journal_id,
+            # necesitamos mandar type para que default elija correctamente
+            type=self.type,
             # change_company=True,
         )._default_journal()
 
