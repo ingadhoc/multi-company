@@ -97,8 +97,12 @@ class SaleOrderLine(models.Model):
         company_id = self._context.get('force_company', self.company_id.id)
         self = self.with_context(force_company=company_id)
         res = super(SaleOrderLine, self)._prepare_invoice_line(qty)
-        # si se fuerza una cia tenemos que cambiar los impuestos
-        if self._context.get('force_company'):
+        # si se fuerza una cia y es distinta a la de la sale order
+        # tenemos que cambiar los impuestos, no solo vale el chequeo de forzar
+        # cia porque forzamos siempre por si estamos en una padre creando para
+        # hija
+        if self._context.get('force_company') and \
+                company_id != self.company_id.id:
             fpos = (
                 self.order_id.fiscal_position_id or
                 self.order_id.partner_id.property_account_position_id)
