@@ -104,6 +104,9 @@ class AccountInvoice(models.Model):
             # change_company=True,
         )._default_journal()
 
+        price_security_installed = False
+        if 'invoice_line_tax_ids_readonly' in self.invoice_line_ids._fields:
+            price_security_installed = True
         # update lines
         for line in self.invoice_line_ids:
             # we force cache update of company_id value on invoice lines
@@ -113,6 +116,8 @@ class AccountInvoice(models.Model):
             name = line.name
             line.company_id = self.company_id
             line._onchange_product_id()
+            if price_security_installed:
+                line.invoice_line_tax_ids_readonly = line.invoice_line_tax_ids
             line.name = name
             line.price_unit = price_unit
 
