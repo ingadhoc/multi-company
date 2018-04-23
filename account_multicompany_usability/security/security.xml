@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
+<odoo>
 <data noupdate="0">
         <record model="ir.rule" id="multi_company_company_property">
             <field name="name">Company Property Multi Company</field>
@@ -12,4 +12,4 @@
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
         </record>
 </data>
-</openerp>
+</odoo>

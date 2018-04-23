@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    Copyright (C) 2015  ADHOC SA  (http://www.adhoc.com.ar)
@@ -29,6 +28,5 @@
     'depends': ['sale'],
     'installable': False,
     'name': 'Sale Multi Company Fixes',
-    'test': [],
     'version': '9.0.1.0.0',
 }

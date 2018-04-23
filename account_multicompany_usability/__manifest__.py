@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    Copyright (C) 2015  ADHOC SA  (http://www.adhoc.com.ar)
@@ -36,8 +35,6 @@
         'wizard/res_config_view.xml',
         'security/security.xml',
         'security/ir.model.access.csv',
-    ],
-    'test': [
     ],
     'demo': [],
     'installable': False,

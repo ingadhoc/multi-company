@@ -6,7 +6,7 @@
     The licence is in the file __openerp__.py
 -->
 
-<openerp>
+<odoo>
 <data noupdate="1">
 
 <!-- Multi-company Rules -->
@@ -18,4 +18,4 @@
 </record>
 
 </data>
-</openerp>
+</odoo>
