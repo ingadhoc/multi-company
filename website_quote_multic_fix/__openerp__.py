@@ -31,7 +31,7 @@
 Online Quotes Multi Company Fixes
 =================================
 ''',
-    'installable': True,
+    'installable': False,
     'name': 'Online Quotes Multi Company Fixes',
     'test': [],
     'version': '9.0.1.0.0',

@@ -28,7 +28,7 @@
     ],
     'demo': [],
     'depends': ['purchase'],
-    'installable': True,
+    'installable': False,
     'name': 'Purchase Multi Company Fixes',
     'test': [],
     'version': '9.0.1.1.0',

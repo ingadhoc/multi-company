@@ -27,7 +27,7 @@
     ],
     'demo': [],
     'depends': ['sale'],
-    'installable': True,
+    'installable': False,
     'name': 'Sale Multi Company Fixes',
     'test': [],
     'version': '9.0.1.0.0',

@@ -45,7 +45,7 @@ Al respecto de como se genera esto esta este codigo:
 
 A su vez hay que cambiar self.env.user.company_id por self.journal_id.company_id en "account.bank.statement", tal vez un pr a odoo?
 ''',
-    'installable': True,
+    'installable': False,
     'name': 'Account Multi Company Fixes',
     'test': [],
     'version': '9.0.1.2.0',
