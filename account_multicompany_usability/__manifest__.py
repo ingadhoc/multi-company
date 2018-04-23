@@ -36,8 +36,6 @@
         'security/security.xml',
         'security/ir.model.access.csv',
     ],
-    'test': [
-    ],
     'demo': [],
     'installable': False,
     'auto_install': False,
