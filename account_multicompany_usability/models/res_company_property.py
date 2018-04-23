@@ -3,12 +3,12 @@
 # For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
-from openerp import api, fields, models, _
-from openerp.exceptions import Warning
-from openerp import tools
+from odoo import api, fields, models, _
+from odoo.exceptions import Warning
+from odoo import tools
 from lxml import etree
 from ast import literal_eval
-from openerp.osv.orm import setup_modifiers
+from odoo.osv.orm import setup_modifiers
 import logging
 _logger = logging.getLogger(__name__)
 

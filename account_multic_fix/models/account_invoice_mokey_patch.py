@@ -3,10 +3,10 @@
 # For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
-from openerp import api, _
-from openerp.addons.account.models.account_invoice import AccountInvoice
-from openerp.exceptions import RedirectWarning, except_orm
-# from openerp.exceptions import except_orm, Warning, RedirectWarning
+from odoo import api, _
+from odoo.addons.account.models.account_invoice import AccountInvoice
+from odoo.exceptions import RedirectWarning, except_orm
+# from odoo.exceptions import except_orm, Warning, RedirectWarning
 
 # mapping invoice type to journal type
 TYPE2JOURNAL = {

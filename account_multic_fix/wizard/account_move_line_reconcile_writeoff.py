@@ -3,7 +3,7 @@
 # For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
-from openerp import models, fields, api, _
+from odoo import models, fields, api, _
 
 
 class account_move_line_reconcile_writeoff(models.TransientModel):
