@@ -33,7 +33,7 @@
         'views/product_category_views.xml',
         'views/product_template_views.xml',
         'views/account_journal_dashboard_views.xml',
-        'wizard/res_config_views.xml',
+        'wizards/res_config_views.xml',
         'security/security.xml',
         'security/ir.model.access.csv',
     ],
