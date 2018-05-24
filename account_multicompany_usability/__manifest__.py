@@ -34,7 +34,7 @@
         'views/product_template_views.xml',
         'views/account_journal_dashboard_views.xml',
         'wizards/res_config_views.xml',
-        'security/security.xml',
+        'security/account_multicompany_usability_security.xml',
         'security/ir.model.access.csv',
     ],
     'demo': [],
