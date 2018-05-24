@@ -42,30 +42,30 @@ class ResCompanyProperty(models.Model):
         )""" % (self._table, query))
 
     property_field = fields.Char(
-        compute='_get_property_field'
+        compute='_compute_property_field',
     )
     property_account_id = fields.Many2one(
         'account.account',
         string='Account',
-        compute='_get_property_account',
+        compute='_compute_property_account',
         inverse='_set_property_account',
     )
     property_term_id = fields.Many2one(
         'account.payment.term',
         string='Payment Term',
-        compute='_get_property_term',
+        compute='_compute_property_term',
         inverse='_set_property_term',
     )
     property_position_id = fields.Many2one(
         'account.fiscal.position',
         string='Fiscal Position',
-        compute='_get_property_position',
+        compute='_compute_property_position',
         inverse='_set_property_position',
     )
     property_pricelist_id = fields.Many2one(
         'product.pricelist',
         string='Pricelist',
-        compute='_get_property_pricelist',
+        compute='_compute_property_pricelist',
         inverse='_set_property_pricelist',
     )
     display_name = fields.Char(
@@ -199,9 +199,10 @@ class ResCompanyProperty(models.Model):
             self.company_id.get_company_sufix())
         self.display_name = display_name
 
-    @api.one
-    def _get_property_field(self):
-        self.property_field = self._context.get('property_field')
+    @api.depends()
+    def _compute_property_field(self):
+        for record in self:
+            record.property_field = self._context.get('property_field', '')
 
     @api.multi
     def _get_property_value(self):
@@ -214,28 +215,33 @@ class ResCompanyProperty(models.Model):
             record,
             property_field)
 
-    @api.one
-    def _get_property_account(self):
-        if self._get_property_comodel() == 'account.account':
-            self.property_account_id = self._get_property_value()
+    @api.depends()
+    def _compute_property_account(self):
+        for record in self:
+            if record._get_property_comodel() == 'account.account':
+                record.property_account_id = record._get_property_value()
 
-    @api.one
-    def _get_property_position(self):
-        if self._get_property_comodel() == 'account.fiscal.position':
-            self.property_position_id = self._get_property_value()
+    @api.depends()
+    def _compute_property_position(self):
+        for record in self:
+            if record._get_property_comodel() == 'account.fiscal.position':
+                record.property_position_id = record._get_property_value()
 
-    @api.one
-    def _get_property_term(self):
-        if self._get_property_comodel() == 'account.payment.term':
-            self.property_term_id = self._get_property_value()
+    @api.depends()
+    def _compute_property_term(self):
+        for record in self:
+            if record._get_property_comodel() == 'account.payment.term':
+                record.property_term_id = record._get_property_value()
 
-    @api.one
-    def _get_property_pricelist(self):
-        if self._get_property_comodel() == 'product.pricelist':
-            self.property_pricelist_id = self._get_property_value()
+    @api.depends()
+    def _compute_property_pricelist(self):
+        for record in self:
+            if record._get_property_comodel() == 'product.pricelist':
+                record.property_pricelist_id = record._get_property_value()
 
-    @api.one
+    @api.multi
     def _set_property_value(self, value):
+        self.ensure_one()
         record = self._get_record()
         property_field = self.property_field
         if not record or not property_field:
