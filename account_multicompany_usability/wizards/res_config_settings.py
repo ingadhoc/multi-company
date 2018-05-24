@@ -1,9 +1,9 @@
 from odoo import api, fields, models
-# from odoo.exceptions import UserError
 
 
-class AccountConfigSettings(models.TransientModel):
-    _inherit = 'account.config.settings'
+class ResConfigSettings(models.TransientModel):
+
+    _inherit = 'res.config.settings'
 
     default_sale_tax_ids = fields.Many2many(
         'account.tax',
@@ -20,36 +20,40 @@ class AccountConfigSettings(models.TransientModel):
         help="This purchase tax will be assigned by default on new products.",
     )
 
-    @api.multi
-    @api.onchange('company_id')
-    def change_company_get_default_taxes(self):
-        ir_values = self.env['ir.values']
-        taxes_ids = ir_values.get_default(
-            'product.template', 'taxes_id', company_id=self.company_id.id)
-        supplier_taxes_ids = ir_values.get_default(
+    @api.model
+    def get_values(self):
+        res = super(ResConfigSettings, self).get_values()
+
+        company_id = self.company_id.id or self.env.user.company_id.id
+        ir_default = self.env['ir.default'].sudo()
+
+        taxes_ids = ir_default.get(
+            'product.template', 'taxes_id', company_id=company_id)
+        supplier_taxes_ids = ir_default.get(
             'product.template', 'supplier_taxes_id',
-            company_id=self.company_id.id)
-        self.default_sale_tax_ids = taxes_ids
-        self.default_purchase_tax_id = supplier_taxes_ids
+            company_id=company_id)
+
+        res.update({
+            'default_sale_tax_ids': taxes_ids,
+            'default_purchase_tax_id': supplier_taxes_ids,
+        })
+        return res
 
     @api.multi
-    def set_product_taxes(self):
-        """
-        We overwrite original function so we can set multiple default taxes
-        """
-        # res = super(AccountConfigSettings, self).onchange_company_id()
-        ir_values_obj = self.env['ir.values']
+    def set_values(self):
+        super(ResConfigSettings, self).set_values()
+
+        ir_default = self.env['ir.default'].sudo()
+
         if self.default_sale_tax_ids:
-            ir_values_obj.sudo().set_default(
+            ir_default.set(
                 'product.template',
                 "taxes_id",
                 self.default_sale_tax_ids.ids,
-                for_all_users=True,
                 company_id=self.company_id.id)
         if self.default_purchase_tax_ids:
-            ir_values_obj.sudo().set_default(
+            ir_default.set(
                 'product.template',
                 "supplier_taxes_id",
                 self.default_purchase_tax_ids.ids,
-                for_all_users=True,
                 company_id=self.company_id.id)
