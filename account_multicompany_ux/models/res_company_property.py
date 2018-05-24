@@ -90,7 +90,7 @@ class ResCompanyProperty(models.Model):
 
         company_properties = self._get_companies()
         action = self.env.ref(
-            'account_multicompany_usability.action_res_company_property')
+            'account_multicompany_ux.action_res_company_property')
 
         if not action:
             return False
