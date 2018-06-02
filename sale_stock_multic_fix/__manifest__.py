@@ -27,8 +27,8 @@
     ],
     'demo': [],
     'depends': ['sale_stock'],
-    'installable': True,
+    'installable': False,
     'name': 'Sale-Stock Multi Company Fixes',
     'test': [],
-    'version': '9.0.1.0.0',
+    'version': '11.0.1.0.0',
 }
