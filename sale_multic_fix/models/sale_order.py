@@ -48,16 +48,6 @@ class SaleOrder(models.Model):
         "('company_id', '=', company_id)]"
     )
 
-    @api.multi
-    @api.constrains('company_id', 'warehouse_id')
-    def check_company(self):
-        for rec in self:
-            warehouse_id_company = rec.warehouse_id.company_id
-            if warehouse_id_company and warehouse_id_company != rec.company_id:
-                raise Warning(_(
-                    'The warehouse company must be the same as the sale '
-                    'order company'))
-
     @api.one
     @api.constrains('fiscal_position_id', 'company_id')
     def _check_fiscal_position_company(self):
