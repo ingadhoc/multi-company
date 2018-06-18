@@ -3,7 +3,7 @@
 # For copyright and license notices, see __openerp__.py file in module root
 # directory
 ##############################################################################
-from openerp import models, api, _
+from openerp import models, api, fields, _
 
 
 class purchase_order(models.Model):
@@ -21,6 +21,12 @@ class purchase_order(models.Model):
 
 class purchase_order_line(models.Model):
     _inherit = "purchase.order.line"
+
+    # this is tu fix when you are on a child company and you change state of an
+    # invoice linked to a PO of parent company (validate it, set as paid, etc)
+    qty_invoiced = fields.Float(
+        compute_sudo=True,
+    )
 
     @api.onchange('product_id')
     def onchange_product_id(self):
