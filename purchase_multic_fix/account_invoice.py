@@ -2,11 +2,17 @@
 # For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
-from odoo import models
+from odoo import models, fields
 
 
-class AccountInvoice(models.Model):
-    _inherit = "account.invoice"
+class AccountInvoiceLine(models.Model):
+    _inherit = "account.invoice.line"
+
+    # this is tu fix when you are on a child company on an invoice linked to
+    # a PO of the parent company
+    purchase_id = fields.Many2one(
+        related_sudo=True,
+    )
 
 # al final este arreglo no fue necesario por cambios en _onchange_company
 # de account_multic_fix
