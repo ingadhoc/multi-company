@@ -88,6 +88,12 @@ class SaleOrder(models.Model):
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
+    # this is tu fix when you are on a child company and you change state of an
+    # invoice linked to a SO of parent company (validate it, set as paid, etc)
+    qty_invoiced = fields.Float(
+        compute_sudo=True,
+    )
+
     @api.multi
     def _prepare_invoice_line(self, qty):
         """
