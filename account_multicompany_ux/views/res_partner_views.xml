@@ -17,7 +17,7 @@
             <field name="property_account_receivable_id" position="after">
                 <label for="property_account_receivable_ids"/>
                 <div class="oe_inline">
-                    <field name="property_account_receivable_ids" widget="many2many_tags" class="oe_inline"/>
+                    <field name="property_account_receivable_ids" widget="many2many_tags" class="oe_inline" context="{'active_model': 'res.partner', 'active_id': id, 'property_field': 'property_account_receivable_id'}"/>
                     <button name="action_company_properties" string="(edit)" class="oe_link" type="object" context="{'property_field': 'property_account_receivable_id'}"/>
                 </div>
             </field>
@@ -31,7 +31,7 @@
             <field name="property_account_payable_id" position="after">
                 <label for="property_account_payable_ids"/>
                 <div class="oe_inline">
-                    <field name="property_account_payable_ids" widget="many2many_tags"/>
+                    <field name="property_account_payable_ids" widget="many2many_tags" context="{'active_model': 'res.partner', 'active_id': id, 'property_field': 'property_account_payable_id'}"/>
                     <button name="action_company_properties" string="(edit)" class="oe_link" type="object" context="{'property_field': 'property_account_payable_id'}"/>
                 </div>
             </field>
@@ -44,7 +44,7 @@
             <field name="property_account_position_id" position="after">
                 <label for="property_account_position_ids"/>
                 <div class="oe_inline">
-                    <field name="property_account_position_ids" widget="many2many_tags"/>
+                    <field name="property_account_position_ids" widget="many2many_tags" context="{'active_model': 'res.partner', 'active_id': id, 'property_field': 'property_account_position_id'}"/>
                     <button name="action_company_properties" string="(edit)" class="oe_link" type="object" context="{'property_field': 'property_account_position_id'}"/>
                 </div>
             </field>
@@ -57,7 +57,7 @@
             <field name="property_payment_term_id" position="after">
                 <label for="property_payment_term_ids"/>
                 <div class="oe_inline">
-                    <field name="property_payment_term_ids" widget="many2many_tags"/>
+                    <field name="property_payment_term_ids" widget="many2many_tags" context="{'active_model': 'res.partner', 'active_id': id, 'property_field': 'property_payment_term_id'}"/>
                     <button name="action_company_properties" string="(edit)" class="oe_link" type="object" context="{'property_field': 'property_payment_term_id'}"/>
                 </div>
             </field>
@@ -70,7 +70,7 @@
             <field name="property_supplier_payment_term_id" position="after">
                 <label for="property_supplier_payment_term_ids"/>
                 <div class="oe_inline">
-                    <field name="property_supplier_payment_term_ids" widget="many2many_tags"/>
+                    <field name="property_supplier_payment_term_ids" widget="many2many_tags" context="{'active_model': 'res.partner', 'active_id': id, 'property_field': 'property_supplier_payment_term_id'}"/>
                     <button name="action_company_properties" string="(edit)" class="oe_link" type="object" context="{'property_field': 'property_supplier_payment_term_id'}"/>
                 </div>
             </field>
@@ -92,7 +92,7 @@
             <field name="property_product_pricelist" position="after">
                 <label for="property_product_pricelist_ids"/>
                 <div class="oe_inline">
-                    <field name="property_product_pricelist_ids" widget="many2many_tags"/>
+                    <field name="property_product_pricelist_ids" widget="many2many_tags" context="{'active_model': 'res.partner', 'active_id': id, 'property_field': 'property_product_pricelist'}"/>
                     <button name="action_company_properties" string="(edit)" class="oe_link" type="object" context="{'property_field': 'property_product_pricelist'}"/>
                 </div>
             </field>

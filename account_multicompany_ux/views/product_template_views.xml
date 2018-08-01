@@ -15,7 +15,7 @@
             <field name="property_account_income_id" position="after">
                 <label for="property_account_income_ids"/>
                 <div class="oe_inline">
-                    <field name="property_account_income_ids" widget="many2many_tags" class="oe_inline"/>
+                    <field name="property_account_income_ids" widget="many2many_tags" class="oe_inline" context="{'active_model': 'product.template', 'active_id': id, 'property_field': 'property_account_income_id'}"/>
                     <!-- pasamos property_domain igual al definido en vista -->
                     <button name="action_company_properties" string="(edit)" class="oe_link" type="object" context="{'property_field': 'property_account_income_id', 'property_domain': [('internal_type','=','other'),('deprecated','=',False)]}"/>
                 </div>
@@ -29,7 +29,7 @@
             <field name="property_account_expense_id" position="after">
                 <label for="property_account_expense_ids"/>
                 <div class="oe_inline">
-                    <field name="property_account_expense_ids" widget="many2many_tags" class="oe_inline"/>
+                    <field name="property_account_expense_ids" widget="many2many_tags" class="oe_inline" context="{'active_model': 'product.template', 'active_id': id, 'property_field': 'property_account_expense_id'}"/>
                     <!-- pasamos property_domain igual al definido en vista -->
                     <button name="action_company_properties" string="(edit)" class="oe_link" type="object" context="{'property_field': 'property_account_expense_id', 'property_domain': [('internal_type','=','other'),('deprecated','=',False)]}"/>
                 </div>
