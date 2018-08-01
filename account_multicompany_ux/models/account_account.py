@@ -10,6 +10,7 @@ class AccountAccount(models.Model):
     _inherit = 'account.account'
 
     @api.multi
+    @api.depends('name', 'code')
     def name_get(self):
         """
         No llamamos a super porque tendriamos que igualmente hacer un read
@@ -17,8 +18,8 @@ class AccountAccount(models.Model):
         """
         res = []
         for record in self:
-            record_name = '%s%s%s' % (
-                record.code and record.code + ' ' or '',
+            record_name = '%s %s%s' % (
+                record.code,
                 record.name,
                 record.company_id.get_company_sufix())
             res.append((record.id, record_name))

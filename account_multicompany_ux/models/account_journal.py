@@ -10,6 +10,7 @@ class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
     @api.multi
+    @api.depends('name', 'currency_id', 'company_id', 'company_id.currency_id')
     def name_get(self):
         """
         No llamamos a super porque tendriamos que igualmente hacer un read

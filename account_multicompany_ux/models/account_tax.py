@@ -9,6 +9,7 @@ class AccountTax(models.Model):
     _inherit = 'account.tax'
 
     @api.multi
+    @api.depends('name', 'company_id')
     def name_get(self):
         """
         No llamamos a super porque tendriamos que igualmente hacer un read
@@ -17,7 +18,7 @@ class AccountTax(models.Model):
         res = []
         for record in self:
             record_name = '%s%s' % (
-                record.description or record.name,
+                record.name,
                 record.company_id.get_company_sufix())
             res.append((record.id, record_name))
         return res
