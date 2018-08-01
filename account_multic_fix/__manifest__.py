@@ -18,33 +18,20 @@
 #
 ##############################################################################
 {
+    'name': 'Account Multi Company Fixes',
+    'version': '11.0.1.0.0',
     'author': 'ADHOC SA',
     'website': 'www.adhoc.com.ar',
     'license': 'AGPL-3',
     'category': 'Accounting & Finance',
+    'depends': ['account'],
     'data': [
-        # 'security/rule.xml',
-        'views/account_invoice_view.xml',
-        'views/account_move_view.xml',
+        'views/account_invoice_views.xml',
+        'views/account_move_views.xml',
+        'views/account_move_line_views.xml',
+        'views/account_journal_views.xml',
         'data/account_reconcile_data.xml',
-        # 'views/account_move_view.xml',
-        # 'wizard/account_move_line_reconcile_writeoff_view.xml',
-        # 'wizard/account_statement_from_invoice_view.xml',
     ],
     'demo': [],
-    'depends': ['account'],
-    'description': '''
-Account Multi Company Fixes
-===========================
-TODO:
-arreglar para los statments, por ahora no pudismo hacer que nade bien, sobre todo la parte de que 
-cuentas ofrece para seleccionar. Tal vez podemos ver de dejar eso de esa manera.
-Al respecto de como se genera esto esta este codigo:
-<table class="o_group o_inner_group o_group_col_6 create_group_right"><!-- here come some form_create_field --></table>
-
-A su vez hay que cambiar self.env.user.company_id por self.journal_id.company_id en "account.bank.statement", tal vez un pr a odoo?
-''',
-    'installable': False,
-    'name': 'Account Multi Company Fixes',
-    'version': '9.0.1.2.0',
+    'installable': True,
 }

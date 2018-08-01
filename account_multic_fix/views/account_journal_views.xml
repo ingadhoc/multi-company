@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="account.open_account_journal_dashboard_kanban" model="ir.actions.act_window">
+        <field name="domain">[]</field>
+    </record>
+</odoo>
