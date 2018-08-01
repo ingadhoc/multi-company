@@ -4,7 +4,5 @@
 ##############################################################################
 from . import account_invoice
 from . import account_invoice_line
-from . import account_invoice_mokey_patch
-from . import account_journal_dashboard
+from . import account_journal
 from . import account_tax
-# from . import account_statement
