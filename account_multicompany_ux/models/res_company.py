@@ -14,6 +14,8 @@ class ResCompany(models.Model):
     )
 
     consolidation_company = fields.Boolean(
+        help='Journal entries are not allowed on consolidation companies. (so'
+        ' invoices, payments, etc neither)'
     )
 
     @api.multi
