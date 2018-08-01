@@ -27,9 +27,15 @@ class ResCompanyProperty(models.Model):
         ],
     }
 
-    company_id = fields.Many2one('res.company', 'Company', required=True,)
+    company_id = fields.Many2one(
+        'res.company',
+        'Company',
+        required=True,
+    )
 
-    def init(self, cr):
+    @api.model_cr
+    def init(self):
+        cr = self._cr
         tools.drop_view_if_exists(cr, self._table)
         query = """
             SELECT
@@ -137,7 +143,6 @@ class ResCompanyProperty(models.Model):
         property_field = self._context.get('property_field')
         domain = self._context.get('property_domain')
         record = self._get_record()
-        print 'record', record
         if record:
             field = self._get_record()._fields.get(property_field)
             # si no viene definido un property_domain buscamos uno para
