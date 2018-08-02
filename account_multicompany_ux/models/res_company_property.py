@@ -27,9 +27,15 @@ class ResCompanyProperty(models.Model):
         ],
     }
 
-    company_id = fields.Many2one('res.company', 'Company', required=True,)
+    company_id = fields.Many2one(
+        'res.company',
+        'Company',
+        required=True,
+    )
 
-    def init(self, cr):
+    @api.model_cr
+    def init(self):
+        cr = self._cr
         tools.drop_view_if_exists(cr, self._table)
         query = """
             SELECT
@@ -42,34 +48,34 @@ class ResCompanyProperty(models.Model):
         )""" % (self._table, query))
 
     property_field = fields.Char(
-        compute='_get_property_field'
+        compute='_compute_property_field',
     )
     property_account_id = fields.Many2one(
         'account.account',
         string='Account',
-        compute='_get_property_account',
-        inverse='_set_property_account',
+        compute='_compute_property_account',
+        inverse='_inverse_property_account',
     )
     property_term_id = fields.Many2one(
         'account.payment.term',
         string='Payment Term',
-        compute='_get_property_term',
-        inverse='_set_property_term',
+        compute='_compute_property_term',
+        inverse='_inverse_property_term',
     )
     property_position_id = fields.Many2one(
         'account.fiscal.position',
         string='Fiscal Position',
-        compute='_get_property_position',
-        inverse='_set_property_position',
+        compute='_compute_property_position',
+        inverse='_inverse_property_position',
     )
     property_pricelist_id = fields.Many2one(
         'product.pricelist',
         string='Pricelist',
-        compute='_get_property_pricelist',
-        inverse='_set_property_pricelist',
+        compute='_compute_property_pricelist',
+        inverse='_inverse_property_pricelist',
     )
     display_name = fields.Char(
-        compute='_get_display_name'
+        compute='_compute_display_name'
     )
 
     @api.model
@@ -90,7 +96,7 @@ class ResCompanyProperty(models.Model):
 
         company_properties = self._get_companies()
         action = self.env.ref(
-            'account_multicompany_usability.action_res_company_property')
+            'account_multicompany_ux.action_res_company_property')
 
         if not action:
             return False
@@ -137,7 +143,6 @@ class ResCompanyProperty(models.Model):
         property_field = self._context.get('property_field')
         domain = self._context.get('property_domain')
         record = self._get_record()
-        print 'record', record
         if record:
             field = self._get_record()._fields.get(property_field)
             # si no viene definido un property_domain buscamos uno para
@@ -185,23 +190,28 @@ class ResCompanyProperty(models.Model):
                 _('Property for model %s not implemented yet' % comodel))
         return company_property_field
 
-    @api.one
-    def _get_display_name(self):
+    @api.multi
+    def _compute_display_name(self):
         """
         No llamamos a super porque tendriamos que igualmente hacer un read
         para obtener la compania y no queremos disminuir la performance
         """
-        company_field = getattr(
-            self.with_context(no_company_sufix=True),
-            self._get_company_property_field())
-        display_name = '%s%s' % (
-            company_field.display_name or _('None'),
-            self.company_id.get_company_sufix())
-        self.display_name = display_name
+        # por ahora en campos calculados no podemos cambiar el contexto de esta
+        # manera
+        # for rec in self.with_context(no_company_sufix=True):
+        for rec in self:
+            company_field = getattr(
+                rec.with_context(no_company_sufix=True),
+                rec._get_company_property_field())
+            display_name = '%s%s' % (
+                company_field.display_name or _('None'),
+                rec.company_id.get_company_sufix())
+            rec.display_name = display_name
 
-    @api.one
-    def _get_property_field(self):
-        self.property_field = self._context.get('property_field')
+    @api.depends()
+    def _compute_property_field(self):
+        for record in self:
+            record.property_field = self._context.get('property_field', '')
 
     @api.multi
     def _get_property_value(self):
@@ -214,28 +224,33 @@ class ResCompanyProperty(models.Model):
             record,
             property_field)
 
-    @api.one
-    def _get_property_account(self):
-        if self._get_property_comodel() == 'account.account':
-            self.property_account_id = self._get_property_value()
+    @api.depends()
+    def _compute_property_account(self):
+        for record in self:
+            if record._get_property_comodel() == 'account.account':
+                record.property_account_id = record._get_property_value()
 
-    @api.one
-    def _get_property_position(self):
-        if self._get_property_comodel() == 'account.fiscal.position':
-            self.property_position_id = self._get_property_value()
+    @api.depends()
+    def _compute_property_position(self):
+        for record in self:
+            if record._get_property_comodel() == 'account.fiscal.position':
+                record.property_position_id = record._get_property_value()
 
-    @api.one
-    def _get_property_term(self):
-        if self._get_property_comodel() == 'account.payment.term':
-            self.property_term_id = self._get_property_value()
+    @api.depends()
+    def _compute_property_term(self):
+        for record in self:
+            if record._get_property_comodel() == 'account.payment.term':
+                record.property_term_id = record._get_property_value()
 
-    @api.one
-    def _get_property_pricelist(self):
-        if self._get_property_comodel() == 'product.pricelist':
-            self.property_pricelist_id = self._get_property_value()
+    @api.depends()
+    def _compute_property_pricelist(self):
+        for record in self:
+            if record._get_property_comodel() == 'product.pricelist':
+                record.property_pricelist_id = record._get_property_value()
 
-    @api.one
+    @api.multi
     def _set_property_value(self, value):
+        self.ensure_one()
         record = self._get_record()
         property_field = self.property_field
         if not record or not property_field:
@@ -245,18 +260,22 @@ class ResCompanyProperty(models.Model):
             property_field,
             value)
 
-    @api.one
-    def _set_property_account(self):
-        self._set_property_value(self.property_account_id.id)
+    @api.multi
+    def _inverse_property_account(self):
+        for rec in self:
+            rec._set_property_value(rec.property_account_id.id)
 
-    @api.one
-    def _set_property_position(self):
-        self._set_property_value(self.property_position_id.id)
+    @api.multi
+    def _inverse_property_position(self):
+        for rec in self:
+            rec._set_property_value(rec.property_position_id.id)
 
-    @api.one
-    def _set_property_term(self):
-        self._set_property_value(self.property_term_id.id)
+    @api.multi
+    def _inverse_property_term(self):
+        for rec in self:
+            rec._set_property_value(rec.property_term_id.id)
 
-    @api.one
-    def _set_property_pricelist(self):
-        self._set_property_value(self.property_pricelist_id.id)
+    @api.multi
+    def _inverse_property_pricelist(self):
+        for rec in self:
+            rec._set_property_value(rec.property_pricelist_id.id)
