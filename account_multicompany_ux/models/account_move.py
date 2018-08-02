@@ -5,6 +5,7 @@
 from odoo import api, models, _
 from odoo.exceptions import ValidationError
 
+
 class AccountMove(models.Model):
     _inherit = 'account.move'
 

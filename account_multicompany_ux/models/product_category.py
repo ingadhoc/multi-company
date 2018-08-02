@@ -9,21 +9,14 @@ class ProductCategory(models.Model):
 
     _inherit = 'product.category'
 
-    def _get_property_context(property_field):
-        return (
-            "{'active_model': 'product.category', 'active_id': id, "
-            "'property_field': '%s'}" % property_field)
-
     property_account_income_categ_ids = fields.Many2many(
         'res.company.property',
         string="Income Account",
-        context=_get_property_context('property_account_income_categ_id'),
         compute='_compute_properties',
     )
     property_account_expense_categ_ids = fields.Many2many(
         'res.company.property',
         string="Expense Account",
-        context=_get_property_context('property_account_expense_categ_id'),
         compute='_compute_properties',
     )
 
@@ -31,10 +24,10 @@ class ProductCategory(models.Model):
     def _compute_properties(self):
         company_property = self.env['res.company.property']
         property_fields = dict(
-            property_account_income_categ_ids=
-            'property_account_income_categ_id',
-            property_account_expense_categ_ids=
-            'property_account_expense_categ_id',
+            property_account_income_categ_ids=(
+                'property_account_income_categ_id'),
+            property_account_expense_categ_ids=(
+                'property_account_expense_categ_id'),
         )
 
         for category in self:

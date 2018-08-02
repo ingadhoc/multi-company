@@ -43,18 +43,14 @@ class ResPartner(models.Model):
     @api.multi
     def _compute_properties(self):
         property_fields = dict(
-            property_account_receivable_ids=
-            'property_account_receivable_id',
-            property_account_payable_ids=
-            'property_account_payable_id',
-            property_account_position_ids=
-            'property_account_position_id',
-            property_payment_term_ids=
-            'property_payment_term_id',
-            property_supplier_payment_term_ids=
-            'property_supplier_payment_term_id',
-            property_product_pricelist_ids=
-            'property_product_pricelist',
+            property_account_receivable_ids='property_account_receivable_id',
+            property_account_payable_ids='property_account_payable_id',
+            property_account_position_ids='property_account_position_id',
+            property_payment_term_ids='property_payment_term_id',
+            property_supplier_payment_term_ids=(
+                'property_supplier_payment_term_id'
+            ),
+            property_product_pricelist_ids='property_product_pricelist',
         )
         for partner in self:
             company_properties = self.env['res.company.property'].with_context(
