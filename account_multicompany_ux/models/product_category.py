@@ -30,17 +30,17 @@ class ProductCategory(models.Model):
                 'property_account_expense_categ_id'),
         )
 
-        for category in self:
+        for rec in self:
             company_properties = company_property.with_context(
                 active_model=self._name,
-                active_id=category.id)
+                active_id=rec.id)
             values = {}
             for newfield, oldfield in property_fields.items():
                 values.update({
                     newfield: company_properties.with_context(
                         property_field=oldfield)._get_companies()
                 })
-            category.update(values)
+            rec.update(values)
 
     @api.multi
     def action_company_properties(self):

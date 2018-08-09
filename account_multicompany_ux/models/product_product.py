@@ -28,17 +28,17 @@ class ProductProduct(models.Model):
             property_account_income_ids='property_account_income_id',
             property_account_expense_ids='property_account_expense_id',
         )
-        for product in self:
+        for rec in self:
             company_properties = company_property.with_context(
                 active_model='product.template',
-                active_id=self.product_tmpl_id.id)
+                active_id=rec.product_tmpl_id.id)
             values = {}
             for newfield, oldfield in property_fields.items():
                 values.update({
                     newfield: company_properties.with_context(
                         property_field=oldfield)._get_companies()
                 })
-            product.update(values)
+            rec.update(values)
 
     @api.multi
     def action_company_properties(self):
