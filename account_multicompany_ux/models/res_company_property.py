@@ -190,7 +190,7 @@ class ResCompanyProperty(models.Model):
                 _('Property for model %s not implemented yet' % comodel))
         return company_property_field
 
-    @api.multi
+    @api.depends('property_field', 'company_id')
     def _compute_display_name(self):
         """
         No llamamos a super porque tendriamos que igualmente hacer un read
