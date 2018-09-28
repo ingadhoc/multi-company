@@ -3,49 +3,20 @@
 # * account_multic_fix
 # 
 # Translators:
-# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2016
-# Nicolas Mac Rouillon <nmr@ingadhoc.com>, 2017
+# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2018
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 9.0c\n"
+"Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-05 23:04+0000\n"
-"PO-Revision-Date: 2017-03-05 23:04+0000\n"
-"Last-Translator: Nicolas Mac Rouillon <nmr@ingadhoc.com>, 2017\n"
+"POT-Creation-Date: 2018-08-23 20:24+0000\n"
+"PO-Revision-Date: 2018-08-23 20:24+0000\n"
+"Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2018\n"
 "Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: es\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#. module: account_multic_fix
-#: code:addons/account_multic_fix/wizard/account_move_line_reconcile_writeoff.py:19
-#, python-format
-msgid "All move lines must be from the same company!"
-msgstr "¡Todos las líneas de movimiento deben ser de la misma empresa!"
-
-#. module: account_multic_fix
-#: code:addons/account_multic_fix/wizard/account_statement_from_invoice.py:19
-#, python-format
-msgid "All statements must be from the same company!"
-msgstr "¡Todos los Extractos deben ser de la misma companía!"
-
-#. module: account_multic_fix
-#: code:addons/account_multic_fix/models/account_invoice_mokey_patch.py:53
-#, python-format
-msgid ""
-"Cannot find a chart of accounts for this company, You should configure it. \n"
-"Please go to Account Configuration."
-msgstr ""
-"No se ha podido encontrar un árbol de cuentas de esta compañía, debería "
-"configurar una. Por favor, diríjase a la configuración de cuentas."
-
-#. module: account_multic_fix
-#: code:addons/account_multic_fix/models/account_invoice_mokey_patch.py:54
-#, python-format
-msgid "Go to the configuration panel"
-msgstr "Ir al panel de configuración"
 
 #. module: account_multic_fix
 #: model:ir.model,name:account_multic_fix.model_account_invoice
@@ -63,7 +34,12 @@ msgid "Journal"
 msgstr "Diario"
 
 #. module: account_multic_fix
-#: code:addons/account_multic_fix/models/account_invoice.py:119
+#: model:ir.model,name:account_multic_fix.model_account_tax
+msgid "Tax"
+msgstr "Impuesto"
+
+#. module: account_multic_fix
+#: code:addons/account_multic_fix/models/account_invoice.py:71
 #, python-format
 msgid ""
 "The company of the invoice and from the fiscal position must be the same!"

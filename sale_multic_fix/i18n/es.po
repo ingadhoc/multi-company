@@ -3,15 +3,14 @@
 # * sale_multic_fix
 # 
 # Translators:
-# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2017
-# emiquinodoz <eq@ingadhoc.com>, 2017
+# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2018
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 9.0c\n"
+"Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-20 15:08+0000\n"
-"PO-Revision-Date: 2017-07-20 15:08+0000\n"
-"Last-Translator: emiquinodoz <eq@ingadhoc.com>, 2017\n"
+"POT-Creation-Date: 2018-08-23 20:24+0000\n"
+"PO-Revision-Date: 2018-08-23 20:24+0000\n"
+"Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2018\n"
 "Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,14 +19,19 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: sale_multic_fix
-#: model:ir.model,name:sale_multic_fix.model_sale_advance_payment_inv
-msgid "Sales Advance Payment Invoice"
-msgstr "Factura de pago por adelantado de ventas"
+#: model:ir.model,name:sale_multic_fix.model_account_invoice
+msgid "Invoice"
+msgstr "Factura"
 
 #. module: sale_multic_fix
 #: model:ir.model,name:sale_multic_fix.model_sale_order
-msgid "Sales Order"
-msgstr "Pedido de Venta"
+msgid "Quotation"
+msgstr ""
+
+#. module: sale_multic_fix
+#: model:ir.model,name:sale_multic_fix.model_sale_advance_payment_inv
+msgid "Sales Advance Payment Invoice"
+msgstr "Factura de pago por adelantado de ventas"
 
 #. module: sale_multic_fix
 #: model:ir.model,name:sale_multic_fix.model_sale_order_line
@@ -35,7 +39,7 @@ msgid "Sales Order Line"
 msgstr "Línea de orden de venta"
 
 #. module: sale_multic_fix
-#: code:addons/sale_multic_fix/models/sale_order.py:56
+#: code:addons/sale_multic_fix/models/sale_order.py:21
 #, python-format
 msgid ""
 "The company of the sale order and from the fiscal position must be the same!"
