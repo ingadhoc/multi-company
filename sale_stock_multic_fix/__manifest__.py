@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    Copyright (C) 2015  ADHOC SA  (http://www.adhoc.com.ar)
@@ -19,16 +18,17 @@
 #
 ##############################################################################
 {
+    'name': 'Sale-Stock Multi Company Fixes',
+    'version': '11.0.1.0.0',
     'author': 'ADHOC SA',
     'website': 'www.adhoc.com.ar',
     'license': 'AGPL-3',
     'category': 'Accounting & Finance',
+    'depends': [
+        'sale_stock'
+    ],
     'data': [
     ],
     'demo': [],
-    'depends': ['sale_stock'],
-    'installable': False,
-    'name': 'Sale-Stock Multi Company Fixes',
-    'test': [],
-    'version': '11.0.1.0.0',
+    'installable': True,
 }
