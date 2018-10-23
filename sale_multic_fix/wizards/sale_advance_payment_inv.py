@@ -15,23 +15,23 @@ class SaleAdvancePaymentInv(models.TransientModel):
         if 'type_id' in order._fields and order.type_id.journal_id:
             company_id = order.type_id.journal_id.company_id.id
 
-        if company_id != order.company_id.id:
-            order = order.with_context(
-                force_company=company_id)
-            self = self.with_context(
-                company_id=company_id,
-                default_company_id=company_id,
-                force_company=company_id)
+        order = order.with_context(
+            force_company=company_id)
+        self = self.with_context(
+            company_id=company_id,
+            default_company_id=company_id,
+            force_company=company_id)
 
         invoice = super(SaleAdvancePaymentInv, self)._create_invoice(
             order, so_line, amount)
         # este es el metodo que odoo usa en sale pero mas corrrecto seria
         # usar el get_journal
-        if company_id != order.company_id.id:
-            invoice.journal_id = self.env['account.invoice'].default_get(
-                ['journal_id'])['journal_id']
+        invoice.journal_id = self.env['account.invoice'].default_get(
+            ['journal_id'])['journal_id']
 
-            # fix taxes of advance product
+        # fix taxes of advance product only for sale_order_type compatibility
+        # when company of journal is different from SO
+        if company_id != order.company_id.id:
             for inv_line in invoice.invoice_line_ids:
                 inv_line._set_taxes()
             invoice.compute_taxes()
