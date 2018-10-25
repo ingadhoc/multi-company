@@ -55,13 +55,9 @@ class ResPartner(models.Model):
         for rec in self:
             company_properties = self.env['res.company.property'].with_context(
                 active_model=self._name, active_id=rec.id)
-            values = {}
             for newfield, oldfield in property_fields.items():
-                values.update({
-                    newfield: company_properties.with_context(
-                        property_field=oldfield)._get_companies()
-                })
-            rec.update(values)
+                rec[newfield] = company_properties.with_context(
+                    property_field=oldfield)._get_companies()
 
     @api.multi
     def action_company_properties(self):

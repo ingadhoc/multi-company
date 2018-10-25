@@ -34,13 +34,9 @@ class ProductCategory(models.Model):
             company_properties = company_property.with_context(
                 active_model=self._name,
                 active_id=rec.id)
-            values = {}
             for newfield, oldfield in property_fields.items():
-                values.update({
-                    newfield: company_properties.with_context(
-                        property_field=oldfield)._get_companies()
-                })
-            rec.update(values)
+                rec[newfield] = company_properties.with_context(
+                    property_field=oldfield)._get_companies()
 
     @api.multi
     def action_company_properties(self):
