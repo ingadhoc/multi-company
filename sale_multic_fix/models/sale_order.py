@@ -41,8 +41,10 @@ class SaleOrder(models.Model):
             company_id=company_id,
             force_company=company_id))._prepare_invoice()
         res['company_id'] = company_id
-        if self.env['account.fiscal.position'].browse(
-                res['fiscal_position_id']).company_id != company_id:
+        so_fiscal_position = self.env['account.fiscal.position'].browse(
+            res['fiscal_position_id'])
+        if so_fiscal_position.company_id and\
+                so_fiscal_position.company_id.id != company_id:
             res['fiscal_position_id'] = self.with_context(
                 force_company=company_id).partner_invoice_id\
                 .property_account_position_id.id
