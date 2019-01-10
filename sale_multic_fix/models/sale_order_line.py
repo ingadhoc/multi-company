@@ -37,3 +37,17 @@ class SaleOrderLine(models.Model):
             taxes = fpos.map_tax(taxes) if fpos else taxes
             res['invoice_line_tax_ids'] = [(6, 0, taxes.ids)]
         return res
+
+    def _get_real_price_currency(
+                self, product, rule_id, qty, uom, pricelist_id):
+        """ En escenarios multicia puede ser que los productos se compartan
+        o que un usuario pueda ver un determinado producto pero no tener
+        permisos para la compañia seteada en el producto. Si ese es el caso
+        daria un error al consultar por product.company_id.currency_id.
+        Para que se llame este metodo la lista de precios debe tener
+        Política de descuento =
+        Mostrar al cliente el precio público y el descuento
+        """
+        product = product.sudo()
+        return super(SaleOrderLine, self)._get_real_price_currency(
+            product, rule_id, qty, uom, pricelist_id)

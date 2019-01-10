@@ -16,6 +16,8 @@ Sale Multi Company Fixes
 
 This module resolves some fixes using sale with multi-company installed.
 
+#. Arreglar posible error de permisos relativo a cias al agregar lineas de venta
+
 Installation
 ============
 
