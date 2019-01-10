@@ -39,7 +39,7 @@ class SaleOrderLine(models.Model):
         return res
 
     def _get_real_price_currency(
-                self, product, rule_id, qty, uom, pricelist_id):
+            self, product, rule_id, qty, uom, pricelist_id):
         """ En escenarios multicia puede ser que los productos se compartan
         o que un usuario pueda ver un determinado producto pero no tener
         permisos para la compañia seteada en el producto. Si ese es el caso
