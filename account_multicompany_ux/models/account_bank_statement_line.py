@@ -2,6 +2,7 @@
 # For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
+# flake8: noqa
 from odoo import api, models
 from odoo.tools import float_repr, float_round
 
