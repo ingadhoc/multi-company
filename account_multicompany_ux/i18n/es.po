@@ -5,13 +5,15 @@
 # Translators:
 # Juan José Scarafía <scarafia.juanjose@gmail.com>, 2018
 # Daniel Blanco <daniel@blancomartin.com.ar>, 2018
+# Katherine Zaoral <katherine.zaoral@gmail.com>, 2019
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-26 00:00+0000\n"
-"PO-Revision-Date: 2018-10-26 00:00+0000\n"
-"Last-Translator: Daniel Blanco <daniel@blancomartin.com.ar>, 2018\n"
+"POT-Creation-Date: 2019-01-17 13:59+0000\n"
+"PO-Revision-Date: 2018-08-23 20:24+0000\n"
+"Last-Translator: Katherine Zaoral <katherine.zaoral@gmail.com>, 2019\n"
 "Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -54,6 +56,16 @@ msgstr "Account Receivable"
 #: model:ir.model,name:account_multicompany_ux.model_account_analytic_account
 msgid "Analytic Account"
 msgstr "Cuenta analítica"
+
+#. module: account_multicompany_ux
+#: model:ir.model,name:account_multicompany_ux.model_account_bank_statement
+msgid "Bank Statement"
+msgstr "Extracto Bancario"
+
+#. module: account_multicompany_ux
+#: model:ir.model,name:account_multicompany_ux.model_account_bank_statement_line
+msgid "Bank Statement Line"
+msgstr "Linea de extracto bancario"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_res_company
@@ -138,6 +150,11 @@ msgstr "Income Account"
 #: model:ir.model,name:account_multicompany_ux.model_account_journal
 msgid "Journal"
 msgstr "Diario"
+
+#. module: account_multicompany_ux
+#: model:ir.model,name:account_multicompany_ux.model_account_move_line
+msgid "Journal Item"
+msgstr "Apuntes contables"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,help:account_multicompany_ux.field_res_company_consolidation_company
