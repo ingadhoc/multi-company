@@ -299,6 +299,7 @@ class ResCompanyProperty(models.Model):
     def _inverse_property_pricelist(self):
         for rec in self:
             rec._set_property_value(rec.property_pricelist_id.id)
+
     @api.multi
     def _inverse_property_standard_price(self):
         for rec in self:
