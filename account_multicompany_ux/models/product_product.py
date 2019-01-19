@@ -20,6 +20,11 @@ class ProductProduct(models.Model):
         string="Expense Account",
         compute='_compute_properties',
     )
+    standard_price_ids = fields.Many2many(
+        'res.company.property',
+        string="Accounting Cost",
+        compute='_compute_properties',
+    )
 
     @api.depends()
     def _compute_properties(self):
@@ -27,6 +32,7 @@ class ProductProduct(models.Model):
         property_fields = dict(
             property_account_income_ids='property_account_income_id',
             property_account_expense_ids='property_account_expense_id',
+            standard_price_ids='standard_price',
         )
         for rec in self:
             company_properties = company_property.with_context(
