@@ -14,6 +14,9 @@
             <field name="property_account_expense_ids" position="attributes">
                 <attribute name="context">{'active_model': 'product.template', 'active_id': product_tmpl_id, 'property_field': 'property_account_expense_id'}</attribute>
             </field>
+            <field name="standard_price_ids" position="attributes">
+                <attribute name="context">{'active_model': 'product.product', 'active_id': id, 'property_field': 'standard_price'}</attribute>
+            </field>
         </field>
     </record>
 

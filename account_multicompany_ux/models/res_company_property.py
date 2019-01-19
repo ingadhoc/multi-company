@@ -74,6 +74,11 @@ class ResCompanyProperty(models.Model):
         compute='_compute_property_pricelist',
         inverse='_inverse_property_pricelist',
     )
+    standard_price = fields.Float(
+        string="standard_price",
+        compute='_compute_property_standard_price',
+        inverse='_inverse_property_standard_price',
+    )
     display_name = fields.Char(
         compute='_compute_display_name'
     )
@@ -146,7 +151,7 @@ class ResCompanyProperty(models.Model):
         if record:
             field = self._get_record()._fields.get(property_field)
             # si no viene definido un property_domain buscamos uno para
-            # definido ene l campo de la property
+            # definido en el campo de la property
             if not domain:
                 try:
                     domain = literal_eval(field.domain)
@@ -186,8 +191,12 @@ class ResCompanyProperty(models.Model):
         elif comodel == 'product.pricelist':
             company_property_field = 'property_pricelist_id'
         else:
-            raise Warning(
-                _('Property for model %s not implemented yet' % comodel))
+            property_field = self._context.get('property_field')
+            if property_field == 'standard_price':
+                company_property_field = 'standard_price'
+            else:
+                raise Warning(
+                    _('Property for model %s not implemented yet' % comodel))
         return company_property_field
 
     @api.multi
@@ -203,9 +212,14 @@ class ResCompanyProperty(models.Model):
             company_field = getattr(
                 rec.with_context(no_company_sufix=True),
                 rec._get_company_property_field())
-            display_name = '%s%s' % (
-                company_field.display_name or _('None'),
-                rec.company_id.get_company_sufix())
+            if type(company_field) is float:
+                display_name = '%s%s' % (
+                    company_field or _('None'),
+                    rec.company_id.get_company_sufix())
+            else:
+                display_name = '%s%s' % (
+                    company_field.display_name or _('None'),
+                    rec.company_id.get_company_sufix())
             rec.display_name = display_name
 
     @api.depends()
@@ -223,6 +237,12 @@ class ResCompanyProperty(models.Model):
         return getattr(
             record,
             property_field)
+
+    @api.depends()
+    def _compute_property_standard_price(self):
+        for record in self.filtered(
+                lambda x: x.property_field == 'standard_price'):
+            record.standard_price = record._get_property_value()
 
     @api.depends()
     def _compute_property_account(self):
@@ -279,3 +299,8 @@ class ResCompanyProperty(models.Model):
     def _inverse_property_pricelist(self):
         for rec in self:
             rec._set_property_value(rec.property_pricelist_id.id)
+
+    @api.multi
+    def _inverse_property_standard_price(self):
+        for rec in self:
+            rec._set_property_value(rec.standard_price)
