@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-17 13:59+0000\n"
+"POT-Creation-Date: 2019-01-19 21:24+0000\n"
 "PO-Revision-Date: 2018-08-23 20:24+0000\n"
 "Last-Translator: Katherine Zaoral <katherine.zaoral@gmail.com>, 2019\n"
 "Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
@@ -51,6 +51,12 @@ msgstr "Account Payable"
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users_property_account_receivable_ids
 msgid "Account Receivable"
 msgstr "Account Receivable"
+
+#. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_product_product_standard_price_ids
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_product_template_standard_price_ids
+msgid "Accounting Cost"
+msgstr ""
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_account_analytic_account
@@ -171,7 +177,8 @@ msgid "Last Modified on"
 msgstr "Ultima modificación "
 
 #. module: account_multicompany_ux
-#: code:addons/account_multicompany_ux/models/res_company_property.py:207
+#: code:addons/account_multicompany_ux/models/res_company_property.py:217
+#: code:addons/account_multicompany_ux/models/res_company_property.py:221
 #, python-format
 msgid "None"
 msgstr "None"
@@ -207,7 +214,7 @@ msgid "Property Field"
 msgstr "Campo de propiedad"
 
 #. module: account_multicompany_ux
-#: code:addons/account_multicompany_ux/models/res_company_property.py:190
+#: code:addons/account_multicompany_ux/models/res_company_property.py:199
 #, python-format
 msgid "Property for model %s not implemented yet"
 msgstr "Property for model %s not implemented yet"
@@ -266,3 +273,8 @@ msgstr "Ud. no puede crear asientos en una compañía de consolidación"
 #: model:ir.model,name:account_multicompany_ux.model_res_config_settings
 msgid "res.config.settings"
 msgstr "res.config.settings"
+
+#. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property_standard_price
+msgid "standard_price"
+msgstr ""
