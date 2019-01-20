@@ -7,6 +7,7 @@ from odoo.exceptions import Warning
 from odoo import tools
 from lxml import etree
 from ast import literal_eval
+from odoo.addons import decimal_precision as dp
 from odoo.osv.orm import setup_modifiers
 import logging
 _logger = logging.getLogger(__name__)
@@ -78,6 +79,7 @@ class ResCompanyProperty(models.Model):
         string="standard_price",
         compute='_compute_property_standard_price',
         inverse='_inverse_property_standard_price',
+        digits=dp.get_precision('Product Price'),
     )
     display_name = fields.Char(
         compute='_compute_display_name'
@@ -87,9 +89,7 @@ class ResCompanyProperty(models.Model):
     def _get_companies(self):
         domain = []
         comodel = self._get_property_comodel()
-        if comodel not in [
-                'account.payment.term', 'product.pricelist',
-                'account.fiscal.position']:
+        if comodel in ['account.account']:
             domain = [('company_id.consolidation_company', '=', False)]
         return self.search(domain)
 
