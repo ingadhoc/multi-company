@@ -9,6 +9,7 @@ from lxml import etree
 from ast import literal_eval
 from odoo.addons import decimal_precision as dp
 from odoo.osv.orm import setup_modifiers
+# from odoo.tools import float_round
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -213,6 +214,14 @@ class ResCompanyProperty(models.Model):
                 rec.with_context(no_company_sufix=True),
                 rec._get_company_property_field())
             if type(company_field) is float:
+                precision_digits = self.env['decimal.precision'].precision_get(
+                    'Product Price')
+                # por alguna razon el float_round no nos está funcionando
+                # y usamos round directamente (por ej. para valor 42,66)
+                company_field = company_field and round(
+                    company_field, precision_digits)
+                # company_field = company_field and float_round(
+                #     company_field, precision_digits=precision_digits)
                 display_name = '%s%s' % (
                     company_field or _('None'),
                     rec.company_id.get_company_sufix())
