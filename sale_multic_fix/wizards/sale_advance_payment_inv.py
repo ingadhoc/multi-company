@@ -2,7 +2,7 @@
 # For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
-from odoo import models, api
+from odoo import models, api, fields
 
 
 class SaleAdvancePaymentInv(models.TransientModel):
@@ -41,3 +41,17 @@ class SaleAdvancePaymentInv(models.TransientModel):
         invoice._onchange_company()
         invoice.compute_taxes()
         return invoice
+
+    @api.model
+    def _default_deposit_taxes_id(self):
+        """ A priori esto no es necesario pero ya que luego al crear
+        factura limpia impuestos segun la compania que corresponda
+        Pero para sale_ux donde mostramos precio con/sin impuestos
+        entonces si viene bien tenerlo bien
+        """
+        sale_obj = self.env['sale.order']
+        order = sale_obj.browse(self._context.get('active_ids'))[0]
+        return self._default_product_id().taxes_id.filtered(
+            lambda r: not order.company_id or r.company_id == order.company_id)
+
+    deposit_taxes_id = fields.Many2many(default=_default_deposit_taxes_id)
