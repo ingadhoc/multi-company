@@ -10,7 +10,6 @@
                 <field name="property_account_id" invisible="1"/>
                 <field name="property_position_id" invisible="1"/>
                 <field name="property_term_id" invisible="1"/>
-                <field name="property_pricelist_id" invisible="1"/>
                 <field name="standard_price" invisible="1"/>
             </tree>
         </field>
