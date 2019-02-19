@@ -101,7 +101,11 @@ class ResCompanyProperty(models.Model):
         if not action:
             return False
         action_read = action.read()[0]
-        action_read['context'] = self._context
+        # do this because raise an error if came from a view
+        #  with group_by activated
+        ctx = self._context.copy()
+        ctx.pop('group_by', None)
+        action_read['context'] = ctx
         action_read['domain'] = [('id', 'in', company_properties.ids)]
         return action_read
 
