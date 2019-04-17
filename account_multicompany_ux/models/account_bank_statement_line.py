@@ -3,6 +3,7 @@
 # directory
 ##############################################################################
 # flake8: noqa
+# pylint: disable=sql-injection
 from odoo import api, models
 from odoo.tools import float_repr, float_round
 
@@ -18,6 +19,7 @@ class AccountBankStatementLine(models.Model):
         """ Returns move lines that constitute the best guess to reconcile a statement line
             Note: it only looks for move lines in the same currency as the statement line.
         """
+        # flake8: noqa
         self.ensure_one()
         if not excluded_ids:
             excluded_ids = []

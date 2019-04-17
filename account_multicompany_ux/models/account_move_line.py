@@ -35,6 +35,8 @@ class AccountMoveLine(models.Model):
                 the vendor-related journal entries and 'receivable' for the customer-related entries.
         """
         # flake8: noqa
+        # pylint: disable=sql-injection
+
         ## INIT OF OUR FIRST CHANGE
         prev_rows = super(
             AccountMoveLine, self).get_data_for_manual_reconciliation(

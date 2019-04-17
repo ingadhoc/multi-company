@@ -19,6 +19,8 @@ class AccountBankStatement(models.Model):
             Return ids of statement lines left to reconcile and other data for the reconciliation widget.
         """
         # flake8: noqa
+        # pylint: disable=pointless-string-statement
+
         statements = self
         # NB : The field account_id can be used at the statement line creation/import to avoid the reconciliation process on it later on,
         # this is why we filter out statements lines where account_id is set
