@@ -18,6 +18,9 @@ class AccountBankStatement(models.Model):
         """ Get statement lines of the specified statements or all unreconciled statement lines and try to automatically reconcile them / find them a partner.
             Return ids of statement lines left to reconcile and other data for the reconciliation widget.
         """
+        # flake8: noqa
+        # pylint: disable=pointless-string-statement
+
         statements = self
         # NB : The field account_id can be used at the statement line creation/import to avoid the reconciliation process on it later on,
         # this is why we filter out statements lines where account_id is set
@@ -27,9 +30,14 @@ class AccountBankStatement(models.Model):
                         WHERE account_id IS NULL AND stl.amount != 0.0 AND not exists (select 1 from account_move_line aml where aml.statement_line_id = stl.id)
                             AND company_id = %s
                 """
-        # THIS IS NEW CHANGE
-        # params = (self.env.user.company_id.id,)
+        # COMMENTED CODE
+        """
+        params = (self.env.user.company_id.id,)
+        """
+        # INIT NEW CHANGE
         params = (self.mapped('company_id').id,)
+        # END NEW CHANGE
+
         if statements:
             sql_query += ' AND stl.statement_id IN %s'
             params += (tuple(statements.ids),)
@@ -57,13 +65,18 @@ class AccountBankStatement(models.Model):
                                     )
                                 AND aml.ref IN %s
                                 """
-            # THIS IS NEW CHANGE
-            # params = (self.env.user.company_id.id, (st_lines_left[0].journal_id.default_credit_account_id.id, st_lines_left[0].journal_id.default_debit_account_id.id), tuple(refs))
+
+            # COMMENTED CODE
+            """
+            params = (self.env.user.company_id.id, (st_lines_left[0].journal_id.default_credit_account_id.id, st_lines_left[0].journal_id.default_debit_account_id.id), tuple(refs))
+            """
+            # INIT NEW CHANGE
             params = (
                 self.mapped('company_id').id,
                 (st_lines_left[0].journal_id.default_credit_account_id.id,
                  st_lines_left[0].journal_id.default_debit_account_id.id),
                 tuple(refs))
+            # END NEW CHANGE
 
             if statements:
                 sql_query += 'AND stl.id IN %s'
