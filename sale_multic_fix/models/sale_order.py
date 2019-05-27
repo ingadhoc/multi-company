@@ -46,9 +46,10 @@ class SaleOrder(models.Model):
             res['fiscal_position_id'])
         if so_fiscal_position.company_id and\
                 so_fiscal_position.company_id.id != company_id:
-            res['fiscal_position_id'] = self.with_context(
-                force_company=company_id).partner_invoice_id\
-                .property_account_position_id.id
+            res['fiscal_position_id'] = \
+                self.env['account.fiscal.position'].with_context(
+                    force_company=company_id).get_fiscal_position(
+                    self.partner_invoice_id.id, self.partner_shipping_id.id)
         return res
 
     # Overwrite this method because odoo filter by company when search the
