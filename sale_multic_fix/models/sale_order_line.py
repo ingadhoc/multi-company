@@ -29,9 +29,13 @@ class SaleOrderLine(models.Model):
         # hija
         if self._context.get('force_company') and \
                 company_id != self.company_id.id:
-            fpos = (
-                self.order_id.fiscal_position_id or
-                self.order_id.partner_id.property_account_position_id)
+            # como no tenemos link a la factura tenemos que obtener la fiscal
+            # position que tendria la factura
+            fpos_id = self.env['account.fiscal.position'].with_context(
+                force_company=company_id).get_fiscal_position(
+                self.order_id.partner_id.id,
+                self.order_id.partner_shipping_id.id)
+            fpos = self.env['account.fiscal.position'].browse(fpos_id)
             taxes = self.product_id.taxes_id.filtered(
                 lambda r: company_id == r.company_id.id)
             taxes = fpos.map_tax(taxes) if fpos else taxes

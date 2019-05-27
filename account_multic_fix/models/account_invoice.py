@@ -11,6 +11,15 @@ class AccountInvoice(models.Model):
 
     @api.onchange('company_id')
     def _onchange_company(self):
+
+        # odoo llama primero a este metodo antes del _onchange_partner_id,
+        # entonces al hacer el cambio por interfaz no se terminan actualizando
+        # los impuestos porque la fp es la de la compania anterior. Con esto
+        # verificamos forzamos siempre la actualización de la fp
+        if self.fiscal_position_id and \
+           self.fiscal_position_id.company_id != self.company_id:
+            self._onchange_partner_id()
+
         # get first journal for new company
 
         # si viene un default journal y no es de la misma cia que la actual
@@ -75,6 +84,9 @@ class AccountInvoice(models.Model):
     # TODO. this should go in a PR to ODOO
     @api.onchange('partner_id', 'company_id')
     def _onchange_partner_id(self):
+        """ This fixes that odoo is not sending the force_company while getting
+        the fiscal position (this line: https://bit.ly/2VSbLcA)
+        """
         res = super(AccountInvoice, self)._onchange_partner_id()
         delivery_partner_id = self.get_delivery_partner_id()
         fiscal_position = self.env[
