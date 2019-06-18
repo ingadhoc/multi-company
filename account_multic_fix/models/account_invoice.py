@@ -84,3 +84,16 @@ class AccountInvoice(models.Model):
         if fiscal_position:
             self.fiscal_position_id = fiscal_position
         return res
+
+    @api.multi
+    def action_move_create(self):
+        """ TODO remove this on v12
+        We send on the context the company_id, this is needed to get the
+        currency rate for the company of the invoice and not for the
+        company of the user. This is already fixed on v12 due to usage of
+        new _convert method """
+        for rec in self:
+            super(
+                AccountInvoice, rec.with_context(
+                    company_id=rec.company_id.id)).action_move_create()
+        return True
