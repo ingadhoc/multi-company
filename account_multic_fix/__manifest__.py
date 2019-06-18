@@ -19,7 +19,7 @@
 ##############################################################################
 {
     'name': 'Account Multi Company Fixes',
-    'version': '11.0.1.1.0',
+    'version': '11.0.1.3.0',
     'author': 'ADHOC SA',
     'website': 'www.adhoc.com.ar',
     'license': 'AGPL-3',
