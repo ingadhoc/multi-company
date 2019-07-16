@@ -19,7 +19,7 @@
 ##############################################################################
 {
     'name': 'Purchase Multi Company Fixes',
-    'version': '11.0.1.0.0',
+    'version': '12.0.1.0.0',
     'author': 'ADHOC SA',
     'website': 'www.adhoc.com.ar',
     'depends': ['purchase'],
@@ -29,5 +29,5 @@
         'views/purchase_order_views.xml',
     ],
     'demo': [],
-    'installable': True,
+    'installable': False,
 }
