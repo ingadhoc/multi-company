@@ -16,3 +16,8 @@ class PurchaseOrder(models.Model):
             raise ValidationError(_(
                 'The picking type company must be the same as the purchase '
                 'order company'))
+
+    @api.onchange('partner_id', 'company_id')
+    def onchange_partner_id(self):
+        return super(PurchaseOrder, self.with_context(
+            force_company=self.company_id.id)).onchange_partner_id()
