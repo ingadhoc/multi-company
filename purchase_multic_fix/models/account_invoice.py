@@ -4,7 +4,7 @@
 ##############################################################################
 # flake8: noqa
 # pylint: disable=pointless-string-statement
-from odoo import api
+from odoo import api, _
 from odoo.addons.purchase.models.account_invoice import AccountInvoice
 
 
