@@ -41,8 +41,10 @@ class AccountInvoice(models.Model):
         price_security_installed = False
         if 'invoice_line_tax_ids_readonly' in self.invoice_line_ids._fields:
             price_security_installed = True
-        # update lines
-        for line in self.invoice_line_ids:
+        # update lines if account is from another company
+        # (we need to choose right taxes, accounts, etc)
+        for line in self.invoice_line_ids.filtered(
+                lambda x: x.account_id.company_id != self.company_id):
             # we force cache update of company_id value on invoice lines
             # this fix right tax choose
             # prevent price and name being overwrited
