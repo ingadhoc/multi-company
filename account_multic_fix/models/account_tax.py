@@ -19,5 +19,5 @@ class AccountTax(models.Model):
         if line_taxes:
             prod_taxes = prod_taxes.filtered(
                 lambda x: x.company_id in line_taxes.mapped('company_id'))
-        return super(AccountTax, self)._fix_tax_included_price(
+        return super()._fix_tax_included_price(
             price, prod_taxes, line_taxes)
