@@ -22,7 +22,7 @@ class SaleOrderLine(models.Model):
         """
         company_id = self._context.get('force_company', self.company_id.id)
         self = self.with_context(force_company=company_id)
-        res = super(SaleOrderLine, self)._prepare_invoice_line(qty)
+        res = super()._prepare_invoice_line(qty)
         # si se fuerza una cia y es distinta a la de la sale order
         # tenemos que cambiar los impuestos, no solo vale el chequeo de forzar
         # cia porque forzamos siempre por si estamos en una padre creando para
@@ -53,5 +53,5 @@ class SaleOrderLine(models.Model):
         Mostrar al cliente el precio público y el descuento
         """
         product = product.sudo()
-        return super(SaleOrderLine, self)._get_real_price_currency(
+        return super()._get_real_price_currency(
             product, rule_id, qty, uom, pricelist_id)
