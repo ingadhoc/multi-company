@@ -29,5 +29,5 @@
         'views/purchase_order_views.xml',
     ],
     'demo': [],
-    'installable': False,
+    'installable': True,
 }
