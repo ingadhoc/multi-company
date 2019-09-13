@@ -18,15 +18,16 @@
 #
 ##############################################################################
 {
-    'name': 'Purchase Multi Company Fixes',
+    'name': 'Purchase-Stock Multi Company Fixes',
     'version': '12.0.1.0.0',
     'author': 'ADHOC SA',
     'website': 'www.adhoc.com.ar',
-    'depends': ['purchase'],
     'license': 'AGPL-3',
     'category': 'Accounting & Finance',
+    'depends': [
+        'purchase_stock'
+    ],
     'data': [
-        'views/purchase_order_views.xml',
     ],
     'demo': [],
     'installable': True,
