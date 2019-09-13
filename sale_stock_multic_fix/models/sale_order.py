@@ -18,9 +18,9 @@ class SaleOrder(models.Model):
         crear venta en cia hija y admin obtiene valor por defecto de warehouse
         para cia padre
         """
-        for rec in self.filtered(
+        if any(self.filtered(
                 lambda s: s.warehouse_id and s.warehouse_id.company_id !=
-                s.company_id):
+                s.company_id)):
             raise ValidationError(_(
                 'The warehouse company must be the same as the sale '
                 'order company'))
