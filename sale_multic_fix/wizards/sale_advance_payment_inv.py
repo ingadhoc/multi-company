@@ -8,6 +8,10 @@ from odoo import models, api, fields
 class SaleAdvancePaymentInv(models.TransientModel):
     _inherit = "sale.advance.payment.inv"
 
+    deposit_taxes_id = fields.Many2many(
+        default=lambda self: self._default_deposit_taxes_id()
+    )
+
     @api.multi
     def _create_invoice(self, order, so_line, amount):
         """ Corregimos facturas de adelantos para dos casos:
@@ -33,7 +37,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
                 fiscal_position_id.company_id.id != company_id:
             original_fiscal_position_id = order.fiscal_position_id
             order.fiscal_position_id = False
-        invoice = super(SaleAdvancePaymentInv, self)._create_invoice(
+        invoice = super()._create_invoice(
             order, so_line, amount)
 
         if original_fiscal_position_id:
@@ -53,5 +57,3 @@ class SaleAdvancePaymentInv(models.TransientModel):
         order = sale_obj.browse(self._context.get('active_ids'))[0]
         return self._default_product_id().taxes_id.filtered(
             lambda r: not order.company_id or r.company_id == order.company_id)
-
-    deposit_taxes_id = fields.Many2many(default=_default_deposit_taxes_id)
