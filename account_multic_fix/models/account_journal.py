@@ -13,4 +13,4 @@ class AccountJournal(models.Model):
         # we fix that if we call create invoice from dashboard of a journal
         # of a child company, user company is set
         self = self.with_context(default_company_id=self.company_id.id)
-        return super(AccountJournal, self).action_create_new()
+        return super().action_create_new()

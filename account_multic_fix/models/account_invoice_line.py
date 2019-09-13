@@ -10,7 +10,7 @@ class AccountInvoiceLine(models.Model):
 
     @api.v8
     def get_invoice_line_account(self, type, product, fpos, company):
-        return super(AccountInvoiceLine, self).get_invoice_line_account(
+        return super().get_invoice_line_account(
             type,
             product.with_context(force_company=company.id),
             fpos,

@@ -9,6 +9,11 @@ from odoo.exceptions import ValidationError
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
+    fiscal_position_id = fields.Many2one(
+        domain="['|', ('company_id', '=', False), "
+        "('company_id', '=', company_id)]"
+    )
+
     @api.onchange('company_id')
     def _onchange_company(self):
 
@@ -66,17 +71,13 @@ class AccountInvoice(models.Model):
         if journal_id and not company_id:
             vals['company_id'] = self.env['account.journal'].browse(
                 journal_id).company_id.id
-        return super(AccountInvoice, self).create(vals)
-
-    fiscal_position_id = fields.Many2one(
-        domain="['|', ('company_id', '=', False), "
-        "('company_id', '=', company_id)]"
-    )
+        return super().create(vals)
 
     @api.constrains('fiscal_position_id', 'company_id')
     def _check_fiscal_position_company(self):
-        position_company = self.fiscal_position_id.company_id
-        if position_company and position_company != self.company_id:
+        if any(self.filtered(
+                lambda x: x.fiscal_position_id.company_id
+                and x.fiscal_position_id.company_id != x.company_id)):
             raise ValidationError(_(
                 'The company of the invoice and from the fiscal position must'
                 ' be the same!'))
@@ -87,7 +88,7 @@ class AccountInvoice(models.Model):
         """ This fixes that odoo is not sending the force_company while getting
         the fiscal position (this line: https://bit.ly/2VSbLcA)
         """
-        res = super(AccountInvoice, self)._onchange_partner_id()
+        res = super()._onchange_partner_id()
         delivery_partner_id = self.get_delivery_partner_id()
         fiscal_position = self.env[
             'account.fiscal.position'].with_context(
@@ -96,16 +97,3 @@ class AccountInvoice(models.Model):
         if fiscal_position:
             self.fiscal_position_id = fiscal_position
         return res
-
-    @api.multi
-    def action_move_create(self):
-        """ TODO remove this on v12
-        We send on the context the company_id, this is needed to get the
-        currency rate for the company of the invoice and not for the
-        company of the user. This is already fixed on v12 due to usage of
-        new _convert method """
-        for rec in self:
-            super(
-                AccountInvoice, rec.with_context(
-                    company_id=rec.company_id.id)).action_move_create()
-        return True
