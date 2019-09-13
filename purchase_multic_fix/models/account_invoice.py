@@ -14,7 +14,7 @@ def new_write(self, vals):
     for invoice in self:
         inv = invoice.sudo()
         purchase_old = inv.invoice_line_ids.mapped('purchase_line_id.order_id')
-        result = result and super(AccountInvoice, invoice).write(vals)
+        result = result and super().write(vals)
         purchase_new = inv.invoice_line_ids.mapped('purchase_line_id.order_id')
         #To get all po reference when updating invoice line or adding purchase order reference from vendor bill.
         purchase = (purchase_old | purchase_new) - (purchase_old & purchase_new)

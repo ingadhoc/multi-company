@@ -1,5 +1,5 @@
 ##############################################################################
-# For copyright and license notices, see __openerp__.py file in module root
+# For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
 from odoo import models, api, _
@@ -18,9 +18,9 @@ class SaleOrder(models.Model):
         crear venta en cia hija y admin obtiene valor por defecto de warehouse
         para cia padre
         """
-        for rec in self.filtered(
+        if any(self.filtered(
                 lambda s: s.warehouse_id and s.warehouse_id.company_id !=
-                s.company_id):
+                s.company_id)):
             raise ValidationError(_(
                 'The warehouse company must be the same as the sale '
                 'order company'))
