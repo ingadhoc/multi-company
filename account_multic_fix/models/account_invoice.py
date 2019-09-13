@@ -9,6 +9,11 @@ from odoo.exceptions import ValidationError
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
+    fiscal_position_id = fields.Many2one(
+        domain="['|', ('company_id', '=', False), "
+        "('company_id', '=', company_id)]"
+    )
+
     @api.onchange('company_id')
     def _onchange_company(self):
 
@@ -68,15 +73,11 @@ class AccountInvoice(models.Model):
                 journal_id).company_id.id
         return super().create(vals)
 
-    fiscal_position_id = fields.Many2one(
-        domain="['|', ('company_id', '=', False), "
-        "('company_id', '=', company_id)]"
-    )
-
     @api.constrains('fiscal_position_id', 'company_id')
     def _check_fiscal_position_company(self):
-        position_company = self.fiscal_position_id.company_id
-        if position_company and position_company != self.company_id:
+        if any(self.filtered(
+                lambda x: x.fiscal_position_id.company_id
+                and x.fiscal_position_id.company_id != x.company_id)):
             raise ValidationError(_(
                 'The company of the invoice and from the fiscal position must'
                 ' be the same!'))
