@@ -11,17 +11,17 @@ class ResPartner(models.Model):
 
     property_account_receivable_ids = fields.Many2many(
         'res.company.property',
-        string="Account Receivable",
+        string="Accounts Receivable",
         compute='_compute_properties',
     )
     property_account_payable_ids = fields.Many2many(
         'res.company.property',
-        string="Account Payable",
+        string="Accounts Payable",
         compute='_compute_properties',
     )
     property_account_position_ids = fields.Many2many(
         'res.company.property',
-        string="Fiscal Position",
+        string="Fiscal Positions",
         compute='_compute_properties',
     )
     property_payment_term_ids = fields.Many2many(
@@ -31,12 +31,12 @@ class ResPartner(models.Model):
     )
     property_supplier_payment_term_ids = fields.Many2many(
         'res.company.property',
-        string='Supplier Payment Term',
+        string='Supplier Payment Terms',
         compute='_compute_properties',
     )
     property_product_pricelist_ids = fields.Many2many(
         'res.company.property',
-        string='Sale Pricelist',
+        string='Sale Pricelists',
         compute='_compute_properties',
     )
 

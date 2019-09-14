@@ -11,12 +11,12 @@ class ProductCategory(models.Model):
 
     property_account_income_categ_ids = fields.Many2many(
         'res.company.property',
-        string="Income Account",
+        string="Income Accounts",
         compute='_compute_properties',
     )
     property_account_expense_categ_ids = fields.Many2many(
         'res.company.property',
-        string="Expense Account",
+        string="Expense Accounts",
         compute='_compute_properties',
     )
 

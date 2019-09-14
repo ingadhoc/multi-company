@@ -12,17 +12,17 @@ class ProductProduct(models.Model):
 
     property_account_income_ids = fields.Many2many(
         'res.company.property',
-        string="Income Account",
+        string="Income Accounts",
         compute='_compute_properties',
     )
     property_account_expense_ids = fields.Many2many(
         'res.company.property',
-        string="Expense Account",
+        string="Expense Accounts",
         compute='_compute_properties',
     )
     standard_price_ids = fields.Many2many(
         'res.company.property',
-        string="Accounting Cost",
+        string="Accounting Costs",
         compute='_compute_properties',
     )
 

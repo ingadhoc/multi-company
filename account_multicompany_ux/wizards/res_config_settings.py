@@ -5,14 +5,14 @@ class ResConfigSettings(models.TransientModel):
 
     _inherit = 'res.config.settings'
 
-    default_sale_tax_ids = fields.Many2many(
+    sale_tax_ids = fields.Many2many(
         'account.tax',
         'config_tax_default_rel',
         'account_id', 'tax_id',
         string="Default Sale Taxes",
         help="This sale tax will be assigned by default on new products.",
     )
-    default_purchase_tax_ids = fields.Many2many(
+    purchase_tax_ids = fields.Many2many(
         'account.tax',
         'config_purchase_tax_default_rel',
         'account_id', 'purchase_tax_id',
@@ -34,8 +34,8 @@ class ResConfigSettings(models.TransientModel):
             company_id=company_id)
 
         res.update({
-            'default_sale_tax_ids': [(6, 0, taxes_ids)],
-            'default_purchase_tax_ids': [(6, 0, supplier_taxes_ids)],
+            'sale_tax_ids': [(6, 0, taxes_ids)],
+            'purchase_tax_ids': [(6, 0, supplier_taxes_ids)],
         })
         return res
 
@@ -45,15 +45,15 @@ class ResConfigSettings(models.TransientModel):
 
         ir_default = self.env['ir.default'].sudo()
 
-        if self.default_sale_tax_ids:
+        if self.sale_tax_ids:
             ir_default.set(
                 'product.template',
                 "taxes_id",
-                self.default_sale_tax_ids.ids,
+                self.sale_tax_ids.ids,
                 company_id=self.company_id.id)
-        if self.default_purchase_tax_ids:
+        if self.purchase_tax_ids:
             ir_default.set(
                 'product.template',
                 "supplier_taxes_id",
-                self.default_purchase_tax_ids.ids,
+                self.purchase_tax_ids.ids,
                 company_id=self.company_id.id)

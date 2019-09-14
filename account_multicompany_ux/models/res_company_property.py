@@ -22,7 +22,7 @@ class ResCompanyProperty(models.Model):
     _name = "res.company.property"
     _description = "Company Property"
     _auto = False
-    _rec_name = 'display_name'
+    # _rec_name = 'display_name'
     _depends = {
         'res.company': [
             'id',
@@ -76,9 +76,9 @@ class ResCompanyProperty(models.Model):
         inverse='_inverse_property_standard_price',
         digits=dp.get_precision('Product Price'),
     )
-    display_name = fields.Char(
-        compute='_compute_display_name'
-    )
+    # display_name = fields.Char(
+    #     compute='_compute_display_name'
+    # )
 
     @api.model
     def _get_companies(self):
@@ -197,7 +197,7 @@ class ResCompanyProperty(models.Model):
         return company_property_field
 
     @api.multi
-    def _compute_display_name(self):
+    def name_get(self):
         """
         No llamamos a super porque tendriamos que igualmente hacer un read
         para obtener la compania y no queremos disminuir la performance
@@ -205,6 +205,7 @@ class ResCompanyProperty(models.Model):
         # por ahora en campos calculados no podemos cambiar el contexto de esta
         # manera
         # for rec in self.with_context(no_company_sufix=True):
+        res = []
         for rec in self:
             company_field = getattr(
                 rec.with_context(no_company_sufix=True),
@@ -225,9 +226,9 @@ class ResCompanyProperty(models.Model):
                 display_name = '%s%s' % (
                     company_field.display_name or _('None'),
                     rec.company_id.get_company_sufix())
-            rec.display_name = display_name
+            res.append((rec.id, display_name))
+        return res
 
-    @api.depends()
     def _compute_property_field(self):
         for record in self:
             record.property_field = self._context.get('property_field', '')
@@ -243,25 +244,21 @@ class ResCompanyProperty(models.Model):
             record,
             property_field)
 
-    @api.depends()
     def _compute_property_standard_price(self):
         for record in self.filtered(
                 lambda x: x.property_field == 'standard_price'):
             record.standard_price = record._get_property_value()
 
-    @api.depends()
     def _compute_property_account(self):
         for record in self:
             if record._get_property_comodel() == 'account.account':
                 record.property_account_id = record._get_property_value()
 
-    @api.depends()
     def _compute_property_position(self):
         for record in self:
             if record._get_property_comodel() == 'account.fiscal.position':
                 record.property_position_id = record._get_property_value()
 
-    @api.depends()
     def _compute_property_term(self):
         for record in self:
             if record._get_property_comodel() == 'account.payment.term':
