@@ -56,6 +56,10 @@ class AccountInvoice(models.Model):
                 line.invoice_line_tax_ids_readonly = line.invoice_line_tax_ids
             line.name = name
             line.price_unit = price_unit
+        # We remove the manual tax include in the invoice because if you added
+        # before change the company the tax_id are belong to the previous
+        # company
+        self.tax_line_ids -= self.tax_line_ids.filtered('manual')
 
     @api.model
     def create(self, vals):
