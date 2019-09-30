@@ -5,6 +5,7 @@
 # flake8: noqa
 # pylint: disable=sql-injection
 from odoo import api, models
+from odoo.osv import expression
 from odoo.tools import float_repr, float_round
 
 
@@ -144,12 +145,14 @@ class AccountBankStatementLine(models.Model):
             self, partner_id=None, excluded_ids=None, str=False,
             offset=0, limit=None, additional_domain=None,
             overlook_partner=False):
-        res = super(AccountBankStatementLine,
-                    self).get_move_lines_for_reconciliation(
+        additional_domain = expression.AND([
+            [('company_id', '=', self.company_id.id)],
+            additional_domain
+        ])
+        return super().get_move_lines_for_reconciliation(
             partner_id=partner_id, excluded_ids=excluded_ids, str=str,
             offset=offset, limit=limit, additional_domain=additional_domain,
             overlook_partner=overlook_partner)
-        return res.filtered(lambda x: x.company_id == self.company_id)
 
     def get_statement_line_for_reconciliation_widget(self):
         data = super(AccountBankStatementLine, self). \
