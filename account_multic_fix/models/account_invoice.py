@@ -92,12 +92,6 @@ class AccountInvoice(models.Model):
         """ This fixes that odoo is not sending the force_company while getting
         the fiscal position (this line: https://bit.ly/2VSbLcA)
         """
-        res = super()._onchange_partner_id()
-        delivery_partner_id = self.get_delivery_partner_id()
-        fiscal_position = self.env[
-            'account.fiscal.position'].with_context(
-                force_company=self.company_id.id).get_fiscal_position(
-                self.partner_id.id, delivery_id=delivery_partner_id)
-        if fiscal_position:
-            self.fiscal_position_id = fiscal_position
+        res = super(AccountInvoice, self.with_context(
+            force_company=self.company_id.id))._onchange_partner_id()
         return res
