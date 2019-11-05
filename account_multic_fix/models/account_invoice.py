@@ -64,6 +64,12 @@ class AccountInvoice(models.Model):
         # company
         self.tax_line_ids -= self.tax_line_ids.filtered('manual')
 
+        # we change the bank account in case if the type are out_invoice or in_refund
+        if self.type in ('out_invoice', 'in_refund') and\
+                self.partner_bank_id and self.company_id not in self.partner_bank_id.partner_id.ref_company_ids:
+            bank_account = self._get_default_bank_id(self.type, self.company_id.id)
+            self.partner_bank_id = bank_account
+
     @api.model
     def create(self, vals):
         """
