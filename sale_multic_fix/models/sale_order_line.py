@@ -2,7 +2,8 @@
 # For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
-from odoo import models, api, fields
+from odoo import models, api, fields, _
+from odoo.exceptions import UserError
 
 
 class SaleOrderLine(models.Model):
@@ -39,6 +40,15 @@ class SaleOrderLine(models.Model):
             taxes = self.product_id.taxes_id.filtered(
                 lambda r: company_id == r.company_id.id)
             taxes = fpos.map_tax(taxes) if fpos else taxes
+            # If the company of account that come in res are different than the company forced, we change the account
+            # to use the account that belongs to the force company
+            account = self.product_id.property_account_income_id or \
+                self.product_id.categ_id.property_account_income_categ_id
+            if not account:
+                raise UserError(_('Please define income account for this product: "%s" (id:%d)'
+                                  ' - or for its category: "%s".') %
+                                (self.product_id.name, self.product_id.id, self.product_id.categ_id.name))
+            res['account_id'] = account.id
             res['invoice_line_tax_ids'] = [(6, 0, taxes.ids)]
         return res
 
