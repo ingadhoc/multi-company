@@ -3,8 +3,7 @@
 # * account_multicompany_ux
 # 
 # Translators:
-# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2019
-# Federico La Torre <3doeste@gmail.com>, 2019
+# Vincent Garand <expressite.fr@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
@@ -12,140 +11,140 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-22 15:40+0000\n"
 "PO-Revision-Date: 2019-09-14 01:20+0000\n"
-"Last-Translator: Federico La Torre <3doeste@gmail.com>, 2019\n"
-"Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
+"Last-Translator: Vincent Garand <expressite.fr@gmail.com>, 2019\n"
+"Language-Team: French (https://www.transifex.com/adhoc/teams/46451/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. module: account_multicompany_ux
 #: model_terms:ir.ui.view,arch_db:account_multicompany_ux.product_template_form_view
 #: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_category_property_form
 #: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_partner_property_form
 msgid "(edit)"
-msgstr "(edit)"
+msgstr "(éditer)"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_account_account
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__property_account_id
 msgid "Account"
-msgstr "Cuenta"
+msgstr "Compte"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_account_reconciliation_widget
 msgid "Account Reconciliation widget"
-msgstr "Widget de Reconciliación de Cuenta"
+msgstr ""
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_product_product__standard_price_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_product_template__standard_price_ids
 msgid "Accounting Costs"
-msgstr "Costos Contables"
+msgstr "Charges comptables"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_account_payable_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_account_payable_ids
 msgid "Accounts Payable"
-msgstr "Cuentas por Pagar"
+msgstr "Comptes créditeurs"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_account_receivable_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_account_receivable_ids
 msgid "Accounts Receivable"
-msgstr "Cuentas por Cobrar"
+msgstr "Comptes débiteurs"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_account_analytic_account
 msgid "Analytic Account"
-msgstr "Cuenta analítica"
+msgstr "Compte analytique"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_account_bank_statement
 msgid "Bank Statement"
-msgstr "Extracto Bancario"
+msgstr "Relevé de compte bancaire"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_account_bank_statement_line
 msgid "Bank Statement Line"
-msgstr "Linea de extracto bancario"
+msgstr "Ligne de relevé bancaire"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_res_company
 msgid "Companies"
-msgstr "Compañías"
+msgstr "Entreprises"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__company_id
 msgid "Company"
-msgstr "Company"
+msgstr "Entreprise"
 
 #. module: account_multicompany_ux
 #: model:ir.actions.act_window,name:account_multicompany_ux.action_res_company_property
 #: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_res_company_property_form
 msgid "Company Properties"
-msgstr "Propiedades de la compañia"
+msgstr "Propriétés de l'entreprise"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_res_company_property
 msgid "Company Property"
-msgstr "Company Property"
+msgstr "Propriété de l'entreprise"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_res_config_settings
 msgid "Config Settings"
-msgstr "Parámetros de Configuración"
+msgstr "Paramètres de configuration"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company__consolidation_company
 msgid "Consolidation Company"
-msgstr "Compañía de consolidación"
+msgstr "Entreprise de consolidation"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_res_partner
 msgid "Contact"
-msgstr "Contacto"
+msgstr "Contact"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_payment_term_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_payment_term_ids
 msgid "Customer Payment Term"
-msgstr "Customer Payment Term"
+msgstr "Délai de paiement du client"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_config_settings__purchase_tax_ids
 msgid "Default Purchase Taxes"
-msgstr "Impuestos de compra por defecto"
+msgstr "Taxes d'achat par défaut"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_config_settings__sale_tax_ids
 msgid "Default Sale Taxes"
-msgstr "Impuestos de venta por defecto"
+msgstr "Taxes de vente par défaut"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__display_name
 msgid "Display Name"
-msgstr "Nombre Mostrado"
+msgstr "Nom affiché"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_product_category__property_account_expense_categ_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_product_product__property_account_expense_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_product_template__property_account_expense_ids
 msgid "Expense Accounts"
-msgstr "Cuenta de Gastos"
+msgstr "Comptes de dépense"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_account_fiscal_position
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__property_position_id
 msgid "Fiscal Position"
-msgstr "Fiscal Position"
+msgstr "Position fiscale"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_account_position_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_account_position_ids
 msgid "Fiscal Positions"
-msgstr "Posiciones Fiscales"
+msgstr "Positions fiscales"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__id
@@ -157,22 +156,22 @@ msgstr "ID"
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_product_product__property_account_income_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_product_template__property_account_income_ids
 msgid "Income Accounts"
-msgstr "Cuenta de Ingresos"
+msgstr "Comptes d'entrée"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_account_journal
 msgid "Journal"
-msgstr "Diario"
+msgstr "Journal"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_account_move
 msgid "Journal Entries"
-msgstr "Entradas de Diario"
+msgstr "Entrées de journal"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_account_move_line
 msgid "Journal Item"
-msgstr "Apuntes contables"
+msgstr "Élément de journal"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,help:account_multicompany_ux.field_res_company__consolidation_company
@@ -180,103 +179,104 @@ msgid ""
 "Journal entries are not allowed on consolidation companies. (so invoices, "
 "payments, etc neither)"
 msgstr ""
-"Los asientos en los diarios no están permitidos en compañías de "
-"consolidación. (tampoco facturas, pagos, etc)"
+"Les entrées de journaux ne sont pas autorisées pour les entreprises de consolidation.\n"
+"(telles que les factures, les paiements, etc)"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property____last_update
 msgid "Last Modified on"
-msgstr "Ultima modificación "
+msgstr "Dernière modification"
 
 #. module: account_multicompany_ux
 #: code:addons/account_multicompany_ux/models/res_company_property.py:223
 #: code:addons/account_multicompany_ux/models/res_company_property.py:227
 #, python-format
 msgid "None"
-msgstr "None"
+msgstr "Aucun"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__property_term_id
 msgid "Payment Term"
-msgstr "Payment Term"
+msgstr "Délai de paiement"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_product_product
 msgid "Product"
-msgstr "Producto"
+msgstr "Produit"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_product_category
 msgid "Product Category"
-msgstr "Categoría de producto"
+msgstr "Catégorie de produit"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_product_template
 msgid "Product Template"
-msgstr "Plantilla de producto"
+msgstr "Modèle de produit"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__property_field
 msgid "Property Field"
-msgstr "Campo de propiedad"
+msgstr "Champ de propriété"
 
 #. module: account_multicompany_ux
 #: code:addons/account_multicompany_ux/models/res_company_property.py:196
 #, python-format
 msgid "Property for model %s not implemented yet"
-msgstr "Property for model %s not implemented yet"
+msgstr "La propriété du modèle %s n'est pas encore implémentée"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_product_pricelist_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_product_pricelist_ids
 msgid "Sale Pricelists"
-msgstr "Lista de Precios de Venta"
+msgstr "Listes de prix de vente"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company__short_name
 msgid "Short Name"
-msgstr "Nombre corto"
+msgstr "Nom court"
 
 #. module: account_multicompany_ux
 #: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_company_form
 msgid "Short Name..."
-msgstr "Nombre corto..."
+msgstr "Nom court..."
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,help:account_multicompany_ux.field_res_company__short_name
 msgid "Short name used to identify this company"
-msgstr "Short name used to identify this company"
+msgstr "Nom court utilisé pour identifier l'entreprise"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_supplier_payment_term_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_supplier_payment_term_ids
 msgid "Supplier Payment Terms"
-msgstr "Condiciones de Pago del Proveedor"
+msgstr "Conditions de paiement fournisseur"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_account_tax
 msgid "Tax"
-msgstr "Impuesto"
+msgstr "Taxe"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,help:account_multicompany_ux.field_res_config_settings__purchase_tax_ids
 msgid "This purchase tax will be assigned by default on new products."
 msgstr ""
-"Se aplicará por defecto este impuesto de compra en los nuevos productos."
+"Cette taxe sur les achats sera affectée par défaut aux nouveaux produits."
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,help:account_multicompany_ux.field_res_config_settings__sale_tax_ids
 msgid "This sale tax will be assigned by default on new products."
 msgstr ""
-"Se aplicará por defecto este impuesto de venta en los nuevos productos."
+"Cette taxe sur les ventes sera affectée par défaut aux nouveaux produits."
 
 #. module: account_multicompany_ux
 #: code:addons/account_multicompany_ux/models/account_move.py:16
 #, python-format
 msgid "You can not create entries on a consolidation company"
-msgstr "Ud. no puede crear asientos en una compañía de consolidación"
+msgstr ""
+"Vous ne pouvez pas créer d'entrées pour une entreprise de consolidation"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__standard_price
 msgid "standard_price"
-msgstr ""
+msgstr "prix_standard"
