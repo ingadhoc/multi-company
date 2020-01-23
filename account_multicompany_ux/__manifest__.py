@@ -19,7 +19,7 @@
 ##############################################################################
 {
     'name': 'Account Multicompany Usability',
-    'version': '12.0.1.1.0',
+    'version': '12.0.1.2.0',
     'author': 'ADHOC SA',
     'website': 'www.adhoc.com.ar',
     'license': 'AGPL-3',
@@ -35,7 +35,6 @@
         'views/product_product_views.xml',
         'views/account_journal_dashboard_views.xml',
         'views/assets.xml',
-        'wizards/res_config_settings_views.xml',
         'security/account_multicompany_ux_security.xml',
         'security/ir.model.access.csv',
     ],
