@@ -24,7 +24,7 @@ class AccountInvoice(models.Model):
 
         # si viene un default journal y no es de la misma cia que la actual
         # limpiamos el default
-        default_journal_id = self.env.context.get('default_journal_id')
+        default_journal_id = self.env.context.get('default_journal_id') or self.journal_id.id
         if default_journal_id and self.company_id and self.env[
                 'account.journal'].browse(
                     default_journal_id).company_id != self.company_id:
