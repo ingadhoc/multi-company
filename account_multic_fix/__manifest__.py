@@ -33,5 +33,5 @@
         'data/account_reconcile_data.xml',
     ],
     'demo': [],
-    'installable': True,
+    'installable': False,
 }
