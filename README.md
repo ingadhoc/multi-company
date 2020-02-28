@@ -1,6 +1,6 @@
-[![Runbot Status](http://runbot.adhoc.com.ar/runbot/badge/flat/24/12.0.svg)](http://runbot.adhoc.com.ar/runbot/repo/github-com-ingadhoc-multi-company-24)
-[![Build Status](https://travis-ci.org/ingadhoc/multi-company.svg?branch=12.0)](https://travis-ci.org/ingadhoc/multi-company)
-[![Coverage Status](https://coveralls.io/repos/ingadhoc/multi-company/badge.png?branch=12.0)](https://coveralls.io/r/ingadhoc/multi-company?branch=12.0)
+[![Runbot Status](http://runbot.adhoc.com.ar/runbot/badge/flat/24/13.0.svg)](http://runbot.adhoc.com.ar/runbot/repo/github-com-ingadhoc-multi-company-24)
+[![Build Status](https://travis-ci.org/ingadhoc/multi-company.svg?branch=13.0)](https://travis-ci.org/ingadhoc/multi-company)
+[![Coverage Status](https://coveralls.io/repos/ingadhoc/multi-company/badge.png?branch=13.0)](https://coveralls.io/r/ingadhoc/multi-company?branch=13.0)
 [![Code Climate](https://codeclimate.com/github/ingadhoc/multi-company/badges/gpa.svg)](https://codeclimate.com/github/ingadhoc/multi-company)
 
 # ADHOC multi-company
@@ -12,7 +12,7 @@ ADHOC Odoo multi-company Modules
 
 Translation Status
 ------------------
-[![Transifex Status](https://www.transifex.com/projects/p/ingadhoc-multi-company-12-0/chart/image_png)](https://www.transifex.com/projects/p/ingadhoc-multi-company-12-0)
+[![Transifex Status](https://www.transifex.com/projects/p/ingadhoc-multi-company-13-0/chart/image_png)](https://www.transifex.com/projects/p/ingadhoc-multi-company-13-0)
 
 ----
 
