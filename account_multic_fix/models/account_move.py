@@ -6,13 +6,8 @@ from odoo import models, api, fields, _
 from odoo.exceptions import ValidationError
 
 
-class AccountInvoice(models.Model):
-    _inherit = "account.invoice"
-
-    fiscal_position_id = fields.Many2one(
-        domain="['|', ('company_id', '=', False), "
-        "('company_id', '=', company_id)]"
-    )
+class AccountMove(models.Model):
+    _inherit = "account.move"
 
     @api.onchange('company_id')
     def _onchange_company(self):
