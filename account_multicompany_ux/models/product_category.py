@@ -38,7 +38,6 @@ class ProductCategory(models.Model):
                 rec[newfield] = company_properties.with_context(
                     property_field=oldfield)._get_companies()
 
-    @api.multi
     def action_company_properties(self):
         self.ensure_one()
         return self.env['res.company.property'].with_context(

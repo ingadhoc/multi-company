@@ -196,7 +196,6 @@ class ResCompanyProperty(models.Model):
                     _('Property for model %s not implemented yet' % comodel))
         return company_property_field
 
-    @api.multi
     def name_get(self):
         """
         No llamamos a super porque tendriamos que igualmente hacer un read
@@ -233,7 +232,6 @@ class ResCompanyProperty(models.Model):
         for record in self:
             record.property_field = self._context.get('property_field', '')
 
-    @api.multi
     def _get_property_value(self):
         self.ensure_one()
         property_field = self.property_field
@@ -264,7 +262,6 @@ class ResCompanyProperty(models.Model):
             if record._get_property_comodel() == 'account.payment.term':
                 record.property_term_id = record._get_property_value()
 
-    @api.multi
     def _set_property_value(self, value):
         self.ensure_one()
         record = self._get_record()
@@ -276,22 +273,18 @@ class ResCompanyProperty(models.Model):
             property_field,
             value)
 
-    @api.multi
     def _inverse_property_account(self):
         for rec in self:
             rec._set_property_value(rec.property_account_id.id)
 
-    @api.multi
     def _inverse_property_position(self):
         for rec in self:
             rec._set_property_value(rec.property_position_id.id)
 
-    @api.multi
     def _inverse_property_term(self):
         for rec in self:
             rec._set_property_value(rec.property_term_id.id)
 
-    @api.multi
     def _inverse_property_standard_price(self):
         for rec in self:
             rec._set_property_value(rec.standard_price)

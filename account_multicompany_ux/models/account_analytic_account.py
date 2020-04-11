@@ -9,7 +9,6 @@ class AccountAnalyticAccount(models.Model):
 
     _inherit = 'account.analytic.account'
 
-    @api.multi
     @api.depends('name', 'partner_id', 'rec.company_id')
     def name_get(self):
         """

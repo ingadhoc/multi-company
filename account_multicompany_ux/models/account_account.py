@@ -9,7 +9,6 @@ class AccountAccount(models.Model):
 
     _inherit = 'account.account'
 
-    @api.multi
     @api.depends('name', 'code')
     def name_get(self):
         """

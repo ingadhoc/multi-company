@@ -13,7 +13,6 @@ class AccountBankStatementLine(models.Model):
 
     _inherit = "account.bank.statement.line"
 
-    @api.multi
     def auto_reconcile(self):
         """ Try to automatically reconcile the statement.line ; return the counterpart journal entry/ies if the automatic reconciliation succeeded, False otherwise.
             TODO : this method could be greatly improved and made extensible

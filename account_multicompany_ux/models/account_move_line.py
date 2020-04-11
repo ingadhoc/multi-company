@@ -158,7 +158,6 @@ class AccountMoveLine(models.Model):
         # be reconciled.
         return [r for r in rows if r['reconciliation_proposition']] + [r for r in rows if not r['reconciliation_proposition']]
 
-    @api.multi
     def prepare_move_lines_for_reconciliation_widget(
             self, target_currency=False, target_date=False):
         ret = super(AccountMoveLine, self). \

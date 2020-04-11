@@ -13,7 +13,6 @@ class AccountBankStatement(models.Model):
     # NOTE This is an exact copy of odoo reconciliation_widget_preprocess
     # method, since is not easy inherit we copy and paste just to change some
     # lines in order to make it work multi company
-    @api.multi
     def reconciliation_widget_preprocess(self):
         """ Get statement lines of the specified statements or all unreconciled statement lines and try to automatically reconcile them / find them a partner.
             Return ids of statement lines left to reconcile and other data for the reconciliation widget.

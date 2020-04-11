@@ -18,7 +18,6 @@ class ResCompany(models.Model):
         ' invoices, payments, etc neither)'
     )
 
-    @api.multi
     def get_company_sufix(self):
         """ Cuando pedimos para unr registro que no tiene cia no queremos que
         ensure_one arroje error
