@@ -3,7 +3,7 @@
 # directory
 ##############################################################################
 from odoo import api, fields, models, _
-from odoo.exceptions import Warning
+from odoo.exceptions import UserError
 from odoo import tools
 from lxml import etree
 from ast import literal_eval
@@ -189,7 +189,7 @@ class ResCompanyProperty(models.Model):
             if property_field == 'standard_price':
                 company_property_field = 'standard_price'
             else:
-                raise Warning(
+                raise UserError(
                     _('Property for model %s not implemented yet' % comodel))
         return company_property_field
 
