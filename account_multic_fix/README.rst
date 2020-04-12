@@ -15,6 +15,7 @@ Account Multi Company Fixes
 ===========================
 
 #. Add check_company on account.move and account.move.line (backported from odoo master https://github.com/odoo/odoo/commit/847889b49768db290f86ab5c5f48e8134fa29266) (TODO remove on v14)
+#. Some fixes so that you can change to a journal of different company and everthing is updated correctly
 
 TODO (Viejo):
 arreglar para los statments, por ahora no pudismo hacer que nade bien, sobre todo la parte de que
