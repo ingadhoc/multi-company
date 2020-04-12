@@ -3,6 +3,7 @@
 # directory
 ##############################################################################
 from odoo import fields, models, api
+from odoo import tools
 
 
 class ResCompany(models.Model):
@@ -18,6 +19,9 @@ class ResCompany(models.Model):
         ' invoices, payments, etc neither)'
     )
 
+    # TODO habria que terminar de ver si esta bien este cache o en realidad para
+    # ser mas performante no hay que usar nada de self
+    @tools.ormcache_context('self.env.uid', 'self.name', 'self.short_name', keys=('no_company_sufix',))
     def get_company_sufix(self):
         """ Cuando pedimos para unr registro que no tiene cia no queremos que
         ensure_one arroje error

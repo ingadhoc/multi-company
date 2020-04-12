@@ -85,6 +85,13 @@ class AccountPayment(models.Model):
     partner_bank_account_id = fields.Many2one(check_company=True)
 
 
+# No los agregamos porque no se usa mucho y hay que agregar stored de company id que seguro trae conflicto porque
+# odoo lo agrega en v14, idem para 'account.fiscal.position.account'
+# class AccountFiscalPositionTax(models.Model):
+#     _inherit = "account.fiscal.position.tax"
+#     _check_company_auto = True
+
+
 class AccountReconcileModel(models.Model):
     _inherit = "account.reconcile.model"
     _check_company_auto = True
@@ -93,18 +100,6 @@ class AccountReconcileModel(models.Model):
     match_journal_ids = fields.Many2many(
         domain="[('type', 'in', ('bank', 'cash')), ('company_id', '=', company_id)]",
         check_company=True)
-
-
-# No los agregamos porque no se usa mucho y hay que agregar stored de company id que seguro trae conflicto porque
-# odoo lo agrega en v14, idem para 'account.fiscal.position.account'
-# class AccountFiscalPositionTax(models.Model):
-#     _inherit = "account.fiscal.position.tax"
-#     _check_company_auto = True
-
-class AccountReconcileModelLine(models.Model):
-    _inherit = "account.reconcile.model.line"
-    _check_company_auto = True
-
     # company_id = fields.Many2one(default=lambda self: self.env.company)
     account_id = fields.Many2one(
         domain="[('deprecated', '=', False), ('company_id', '=', company_id)]",
@@ -115,6 +110,15 @@ class AccountReconcileModelLine(models.Model):
     tax_ids = fields.Many2many(check_company=True)
     analytic_account_id = fields.Many2one(check_company=True)
     analytic_tag_ids = fields.Many2many(check_company=True)
+    second_account_id = fields.Many2one(
+        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]",
+        check_company=True)
+    second_journal_id = fields.Many2one(
+        domain="[('type', '=', 'general'), ('company_id', '=', company_id)]",
+        check_company=True)
+    second_tax_ids = fields.Many2many(check_company=True)
+    second_analytic_account_id = fields.Many2one(check_company=True)
+    second_analytic_tag_ids = fields.Many2many(check_company=True)
 
 
 class AccountMoveLine(models.Model):

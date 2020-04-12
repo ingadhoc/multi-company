@@ -22,7 +22,7 @@ cuentas ofrece para seleccionar. Tal vez podemos ver de dejar eso de esa manera.
 Al respecto de como se genera esto esta este codigo:
 <table class="o_group o_inner_group o_group_col_6 create_group_right"><!-- here come some form_create_field --></table>
 
-A su vez hay que cambiar self.env.user.company_id por self.journal_id.company_id en "account.bank.statement", tal vez un pr a odoo?
+A su vez hay que cambiar self.env.company por self.journal_id.company_id en "account.bank.statement", tal vez un pr a odoo?
 
 Installation
 ============

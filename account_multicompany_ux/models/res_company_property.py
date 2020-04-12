@@ -7,10 +7,8 @@ from odoo.exceptions import Warning
 from odoo import tools
 from lxml import etree
 from ast import literal_eval
-from odoo.addons import decimal_precision as dp
-from odoo.osv.orm import setup_modifiers
-# from odoo.tools import float_round
 import logging
+import json
 _logger = logging.getLogger(__name__)
 
 
@@ -35,7 +33,6 @@ class ResCompanyProperty(models.Model):
         required=True,
     )
 
-    @api.model_cr
     def init(self):
         cr = self._cr
         tools.drop_view_if_exists(cr, self._table)
@@ -74,7 +71,7 @@ class ResCompanyProperty(models.Model):
         string="standard_price",
         compute='_compute_property_standard_price',
         inverse='_inverse_property_standard_price',
-        digits=dp.get_precision('Product Price'),
+        digits='Product Price',
     )
     # display_name = fields.Char(
     #     compute='_compute_display_name'
@@ -132,9 +129,7 @@ class ResCompanyProperty(models.Model):
             active_id)
 
     @api.model
-    def fields_view_get(
-            self, view_id=None, view_type='form', toolbar=False,
-            submenu=False):
+    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
         """
         Con esta funcion hacemos dos cosas:
         1. Mostrar solo la columna que corresponda segun el modelo
@@ -173,8 +168,10 @@ class ResCompanyProperty(models.Model):
             for node in doc.xpath(xpath):
                 node.set('domain', str(str_domain))
                 node.set('invisible', '0')
-                # modifiers make still invisible = 1
-                setup_modifiers(node, res['fields'][company_property_field])
+                modifiers = json.loads(node.get("modifiers"))
+                modifiers['column_invisible'] = False
+                node.set("modifiers", json.dumps(modifiers))
+
         res['arch'] = etree.tostring(doc)
         return res
 
@@ -243,24 +240,32 @@ class ResCompanyProperty(models.Model):
             property_field)
 
     def _compute_property_standard_price(self):
-        for record in self.filtered(
-                lambda x: x.property_field == 'standard_price'):
-            record.standard_price = record._get_property_value()
+        for record in self:
+            if record.property_field == 'standard_price':
+                record.standard_price = record._get_property_value()
+            else:
+                record.standard_price = False
 
     def _compute_property_account(self):
         for record in self:
             if record._get_property_comodel() == 'account.account':
                 record.property_account_id = record._get_property_value()
+            else:
+                record.property_account_id = False
 
     def _compute_property_position(self):
         for record in self:
             if record._get_property_comodel() == 'account.fiscal.position':
                 record.property_position_id = record._get_property_value()
+            else:
+                record.property_position_id = False
 
     def _compute_property_term(self):
         for record in self:
             if record._get_property_comodel() == 'account.payment.term':
                 record.property_term_id = record._get_property_value()
+            else:
+                record.property_term_id = False
 
     def _set_property_value(self, value):
         self.ensure_one()
