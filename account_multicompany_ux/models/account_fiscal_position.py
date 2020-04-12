@@ -9,7 +9,6 @@ class AccountFiscalPosition(models.Model):
 
     _inherit = 'account.fiscal.position'
 
-    @api.multi
     @api.depends('company_id', 'name')
     def name_get(self):
         res = []

@@ -4,7 +4,7 @@
             <field name="name">Company Property Multi Company</field>
             <field name="model_id" ref="model_res_company_property"/>
             <field name="global" eval="True"/>
-            <field name="domain_force">[('company_id','child_of',[user.company_id.id])]</field>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
         </record>
         <!-- add multicompany to admin -->
         <record id="base.group_multi_company" model="res.groups">

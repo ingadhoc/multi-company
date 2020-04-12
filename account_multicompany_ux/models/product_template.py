@@ -44,7 +44,6 @@ class ProductTemplate(models.Model):
                 })
             rec.update(values)
 
-    @api.multi
     def action_company_properties(self):
         self.ensure_one()
         return self.env['res.company.property'].with_context(

@@ -2,7 +2,7 @@
 # For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
-from odoo import api, fields, models
+from odoo import fields, models
 
 
 class ResPartner(models.Model):
@@ -40,7 +40,6 @@ class ResPartner(models.Model):
         compute='_compute_properties',
     )
 
-    @api.multi
     def _compute_properties(self):
         property_fields = dict(
             property_account_receivable_ids='property_account_receivable_id',
@@ -59,7 +58,6 @@ class ResPartner(models.Model):
                 rec[newfield] = company_properties.with_context(
                     property_field=oldfield)._get_companies()
 
-    @api.multi
     def action_company_properties(self):
         self.ensure_one()
         return self.env['res.company.property'].with_context(

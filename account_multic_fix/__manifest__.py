@@ -19,19 +19,14 @@
 ##############################################################################
 {
     'name': 'Account Multi Company Fixes',
-    'version': '12.0.1.0.0',
+    'version': '13.0.1.0.0',
     'author': 'ADHOC SA',
     'website': 'www.adhoc.com.ar',
     'license': 'AGPL-3',
     'category': 'Accounting & Finance',
     'depends': ['account'],
     'data': [
-        'views/account_invoice_views.xml',
-        'views/account_move_views.xml',
-        'views/account_move_line_views.xml',
-        'views/account_journal_views.xml',
-        'data/account_reconcile_data.xml',
     ],
     'demo': [],
-    'installable': False,
+    'installable': True,
 }

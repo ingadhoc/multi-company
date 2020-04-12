@@ -8,7 +8,6 @@ from odoo import api, models
 class AccountTax(models.Model):
     _inherit = 'account.tax'
 
-    @api.multi
     @api.depends('name', 'company_id')
     def name_get(self):
         """
