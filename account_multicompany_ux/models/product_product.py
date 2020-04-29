@@ -36,8 +36,8 @@ class ProductProduct(models.Model):
         )
         for rec in self:
             company_properties = company_property.with_context(
-                active_model='product.template',
-                active_id=rec.product_tmpl_id.id)
+                active_model='product.product',
+                active_id=rec.id)
             for newfield, oldfield in property_fields.items():
                 rec[newfield] = company_properties.with_context(
                     property_field=oldfield)._get_companies()
@@ -45,5 +45,5 @@ class ProductProduct(models.Model):
     def action_company_properties(self):
         self.ensure_one()
         return self.env['res.company.property'].with_context(
-            active_model='product.template', active_id=self.product_tmpl_id.id
+            active_model='product.product', active_id=self.id
         ).action_company_properties()
