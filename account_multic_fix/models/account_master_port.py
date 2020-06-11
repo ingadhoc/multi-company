@@ -127,7 +127,8 @@ class AccountMoveLine(models.Model):
     move_id = fields.Many2one(check_company=True)
     # company_id = fields.Many2one(default=lambda self: self.env.company)
     account_id = fields.Many2one(
-        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]",
+        # da error al installar follow up
+        # domain="[('deprecated', '=', False), ('company_id', '=', company_id)]",
         check_company=True,
     )
     reconcile_model_id = fields.Many2one(check_company=True)
