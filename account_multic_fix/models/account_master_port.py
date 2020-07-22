@@ -155,7 +155,6 @@ class AccountMove(models.Model):
     # journal_id = fields.Many2one(check_company=True)
 
     partner_id = fields.Many2one(check_company=True)
-    reversed_entry_id = fields.Many2one(check_company=True)
     fiscal_position_id = fields.Many2one(check_company=True)
     invoice_payment_term_id = fields.Many2one(check_company=True)
     invoice_partner_bank_id = fields.Many2one(check_company=True)
