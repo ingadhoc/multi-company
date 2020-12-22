@@ -23,12 +23,14 @@ class AccountMove(models.Model):
                 # prevent price and name being overwrited
                 price_unit = line.price_unit
                 name = line.name
+                product_uom = line.product_uom_id
                 line.company_id = self.company_id
                 line._onchange_product_id()
                 if price_security_installed:
                     line.invoice_line_tax_ids_readonly = line.invoice_line_tax_ids
                 line.name = name
                 line.price_unit = price_unit
+                line.product_uom_id = product_uom
 
             # si cambiamos la compania queremos actualizar cuenta bancaria, termino de pago, apuntes de deuda, etc.
             # este metodo refrezca tmb las lineas de deuda
