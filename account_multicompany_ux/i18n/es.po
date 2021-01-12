@@ -1,19 +1,17 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# * account_multicompany_ux
+# 	* account_multicompany_ux
 # 
 # Translators:
-# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2019
-# Federico La Torre <3doeste@gmail.com>, 2019
-# Lucas L. Soto <ls@adhoc.com.ar>, 2020
+# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server 13.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-31 01:26+0000\n"
-"PO-Revision-Date: 2019-09-14 01:20+0000\n"
-"Last-Translator: Lucas L. Soto <ls@adhoc.com.ar>, 2020\n"
+"POT-Creation-Date: 2020-12-31 19:42+0000\n"
+"PO-Revision-Date: 2020-05-01 01:49+0000\n"
+"Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2020\n"
 "Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -33,11 +31,6 @@ msgstr "(edit)"
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__property_account_id
 msgid "Account"
 msgstr "Cuenta"
-
-#. module: account_multicompany_ux
-#: model:ir.model,name:account_multicompany_ux.model_account_reconciliation_widget
-msgid "Account Reconciliation widget"
-msgstr "Widget de Reconciliación de Cuenta"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_product_product__standard_price_ids
@@ -63,16 +56,6 @@ msgid "Analytic Account"
 msgstr "Cuenta analítica"
 
 #. module: account_multicompany_ux
-#: model:ir.model,name:account_multicompany_ux.model_account_bank_statement
-msgid "Bank Statement"
-msgstr "Extracto Bancario"
-
-#. module: account_multicompany_ux
-#: model:ir.model,name:account_multicompany_ux.model_account_bank_statement_line
-msgid "Bank Statement Line"
-msgstr "Linea de extracto bancario"
-
-#. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_res_company
 msgid "Companies"
 msgstr "Compañías"
@@ -94,11 +77,6 @@ msgid "Company Property"
 msgstr "Company Property"
 
 #. module: account_multicompany_ux
-#: model:ir.model,name:account_multicompany_ux.model_res_config_settings
-msgid "Config Settings"
-msgstr "Parámetros de Configuración"
-
-#. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company__consolidation_company
 msgid "Consolidation Company"
 msgstr "Compañía de consolidación"
@@ -113,16 +91,6 @@ msgstr "Contacto"
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_payment_term_ids
 msgid "Customer Payment Term"
 msgstr "Customer Payment Term"
-
-#. module: account_multicompany_ux
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_config_settings__purchase_tax_ids
-msgid "Default Purchase Taxes"
-msgstr "Impuestos de compra por defecto"
-
-#. module: account_multicompany_ux
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_config_settings__sale_tax_ids
-msgid "Default Sale Taxes"
-msgstr "Impuestos de venta por defecto"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__display_name
@@ -171,11 +139,6 @@ msgid "Journal Entries"
 msgstr "Entradas de Diario"
 
 #. module: account_multicompany_ux
-#: model:ir.model,name:account_multicompany_ux.model_account_move_line
-msgid "Journal Item"
-msgstr "Apuntes contables"
-
-#. module: account_multicompany_ux
 #: model:ir.model.fields,help:account_multicompany_ux.field_res_company__consolidation_company
 msgid ""
 "Journal entries are not allowed on consolidation companies. (so invoices, "
@@ -190,8 +153,8 @@ msgid "Last Modified on"
 msgstr "Ultima modificación "
 
 #. module: account_multicompany_ux
-#: code:addons/account_multicompany_ux/models/res_company_property.py:223
-#: code:addons/account_multicompany_ux/models/res_company_property.py:227
+#: code:addons/account_multicompany_ux/models/res_company_property.py:0
+#: code:addons/account_multicompany_ux/models/res_company_property.py:0
 #, python-format
 msgid "None"
 msgstr "None"
@@ -222,7 +185,7 @@ msgid "Property Field"
 msgstr "Campo de propiedad"
 
 #. module: account_multicompany_ux
-#: code:addons/account_multicompany_ux/models/res_company_property.py:196
+#: code:addons/account_multicompany_ux/models/res_company_property.py:0
 #, python-format
 msgid "Property for model %s not implemented yet"
 msgstr "Property for model %s not implemented yet"
@@ -260,24 +223,12 @@ msgid "Tax"
 msgstr "Impuesto"
 
 #. module: account_multicompany_ux
-#: model:ir.model.fields,help:account_multicompany_ux.field_res_config_settings__purchase_tax_ids
-msgid "This purchase tax will be assigned by default on new products."
-msgstr ""
-"Se aplicará por defecto este impuesto de compra en los nuevos productos."
-
-#. module: account_multicompany_ux
-#: model:ir.model.fields,help:account_multicompany_ux.field_res_config_settings__sale_tax_ids
-msgid "This sale tax will be assigned by default on new products."
-msgstr ""
-"Se aplicará por defecto este impuesto de venta en los nuevos productos."
-
-#. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_res_users
 msgid "Users"
 msgstr "Usuarios"
 
 #. module: account_multicompany_ux
-#: code:addons/account_multicompany_ux/models/account_move.py:16
+#: code:addons/account_multicompany_ux/models/account_move.py:0
 #, python-format
 msgid "You can not create entries on a consolidation company"
 msgstr "Ud. no puede crear asientos en una compañía de consolidación"
