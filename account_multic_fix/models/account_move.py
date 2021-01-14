@@ -16,6 +16,9 @@ class AccountMove(models.Model):
             price_security_installed = False
             if 'invoice_line_tax_ids_readonly' in self.invoice_line_ids._fields:
                 price_security_installed = True
+            # si cambiamos la compania queremos actualizar cuenta bancaria, termino de pago, apuntes de deuda, etc.
+            # este metodo refrezca tmb las lineas de deuda
+            self._onchange_partner_id()
             # update lines
             for line in self.invoice_line_ids:
                 # we force cache update of company_id value on invoice lines
@@ -32,9 +35,6 @@ class AccountMove(models.Model):
                 line.price_unit = price_unit
                 line.product_uom_id = product_uom
 
-            # si cambiamos la compania queremos actualizar cuenta bancaria, termino de pago, apuntes de deuda, etc.
-            # este metodo refrezca tmb las lineas de deuda
-            self._onchange_partner_id()
             # si bien onchange partner llama _recompute_dynamic_lines no manda el recompute_all_taxes, este refrezca
             # lineas de impuestos
             self._recompute_dynamic_lines(recompute_all_taxes=True)
