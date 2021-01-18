@@ -37,7 +37,6 @@ class SaleAdvancePaymentInv(models.TransientModel):
             order.fiscal_position_id = False
         invoice = super()._create_invoice(
             order, so_line, amount)
-
         if original_fiscal_position_id:
             order.fiscal_position_id = original_fiscal_position_id
         # invoice._onchange_company()
@@ -55,3 +54,17 @@ class SaleAdvancePaymentInv(models.TransientModel):
     #     order = sale_obj.browse(self._context.get('active_ids'))[0]
     #     return self._default_product_id().taxes_id.filtered(
     #         lambda r: not order.company_id or r.company_id == order.company_id)
+
+    def _prepare_invoice_values(self, order, name, amount, so_line):
+        res = super()._prepare_invoice_values(order,name, amount, so_line)
+        company = order.company_id
+        if 'type_id' in order._fields and order.type_id.journal_id:
+            company = order.type_id.journal_id.company_id
+        taxes = self.product_id.taxes_id.filtered(lambda r: not order.company_id or r.company_id == company)
+        if order.fiscal_position_id and taxes:
+            tax_ids = order.fiscal_position_id.map_tax(taxes).ids
+        else:
+            tax_ids = taxes.ids
+        res['invoice_line_ids'][0][2]['tax_ids'] = [(6, 0, tax_ids)]
+
+        return res
