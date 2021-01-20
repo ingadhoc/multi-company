@@ -196,7 +196,6 @@ class ResCompanyProperty(models.Model):
                     _('Property for model %s not implemented yet' % comodel))
         return company_property_field
 
-    @api.multi
     def _compute_display_name(self):
         """
         No llamamos a super porque tendriamos que igualmente hacer un read
@@ -227,7 +226,6 @@ class ResCompanyProperty(models.Model):
                     rec.company_id.get_company_sufix())
             rec.display_name = display_name
 
-    @api.depends()
     def _compute_property_field(self):
         for record in self:
             record.property_field = self._context.get('property_field', '')
@@ -243,25 +241,21 @@ class ResCompanyProperty(models.Model):
             record,
             property_field)
 
-    @api.depends()
     def _compute_property_standard_price(self):
         for record in self.filtered(
                 lambda x: x.property_field == 'standard_price'):
             record.standard_price = record._get_property_value()
 
-    @api.depends()
     def _compute_property_account(self):
         for record in self:
             if record._get_property_comodel() == 'account.account':
                 record.property_account_id = record._get_property_value()
 
-    @api.depends()
     def _compute_property_position(self):
         for record in self:
             if record._get_property_comodel() == 'account.fiscal.position':
                 record.property_position_id = record._get_property_value()
 
-    @api.depends()
     def _compute_property_term(self):
         for record in self:
             if record._get_property_comodel() == 'account.payment.term':

@@ -18,3 +18,12 @@ class AccountInvoice(models.Model):
                 self.partner_id.id, self.partner_shipping_id.id)
         if fiscal_position:
             self.fiscal_position_id = fiscal_position
+
+    @api.onchange('partner_id', 'company_id')
+    def _onchange_delivery_address(self):
+        """ when changing company, we prefer to keep original terms just in case
+             they where modified manually on SO / or invoice"""
+        original_comment = self._origin.comment
+        super(AccountInvoice, self)._onchange_delivery_address()
+        if original_comment and original_comment != self.comment:
+            self.comment = original_comment

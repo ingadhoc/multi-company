@@ -20,7 +20,6 @@ class ProductCategory(models.Model):
         compute='_compute_properties',
     )
 
-    @api.depends()
     def _compute_properties(self):
         company_property = self.env['res.company.property']
         property_fields = dict(
