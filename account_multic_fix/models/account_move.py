@@ -10,8 +10,13 @@ class AccountMove(models.Model):
 
     @api.onchange('journal_id')
     def _onchange_journal(self):
-        if self._origin.company_id and self.company_id != self._origin.company_id:
-
+        if self._origin.company_id:
+            company_changed = self.company_id != self._origin.company_id
+        elif self.line_ids:
+            company_changed = self.company_id != self.line_ids[0].account_id.company_id
+        else:
+            company_changed = False
+        if company_changed:
             # self = self.with_context(force_company=self.company_id.id)
             price_security_installed = False
             if 'invoice_line_tax_ids_readonly' in self.invoice_line_ids._fields:
