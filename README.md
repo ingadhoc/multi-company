@@ -1,5 +1,3 @@
-[![Runbot Status](http://runbot.adhoc.com.ar/runbot/badge/flat/24/13.0.svg)](http://runbot.adhoc.com.ar/runbot/repo/github-com-ingadhoc-multi-company-24)
-[![Build Status](https://travis-ci.org/ingadhoc/multi-company.svg?branch=13.0)](https://travis-ci.org/ingadhoc/multi-company)
 [![Coverage Status](https://coveralls.io/repos/ingadhoc/multi-company/badge.png?branch=13.0)](https://coveralls.io/r/ingadhoc/multi-company?branch=13.0)
 [![Code Climate](https://codeclimate.com/github/ingadhoc/multi-company/badges/gpa.svg)](https://codeclimate.com/github/ingadhoc/multi-company)
 
