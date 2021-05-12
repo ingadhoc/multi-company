@@ -14,7 +14,6 @@
 Account Multicompany Usability
 ==============================
 
-* Add new field short_name on company
 * Add that field to name get of:
 
  * Taxes
@@ -23,12 +22,9 @@ Account Multicompany Usability
  * Journals
  * Fiscalyears
  * Periods
-
-You can also set companies as consolidation companies, for this companies:
-
-* Creation of accounting entries is forbiden
-* New button to recreate their chart of account from child companies as a
-  consolidation chart
+#. Allow to work with properties of all companies without needing to change between companies (rendered as a many2many)
+#. You can also set companies as consolidation companies, for this companies creation of accounting entries is forbiden
+#. Add new field short_name on company that is used later to be appended on the "display name" of the journals. This is usefull because when you select journals you don't have a filter of the companies. (TODO check if we can avoid all this and have a different approach)
 
 Installation
 ============
