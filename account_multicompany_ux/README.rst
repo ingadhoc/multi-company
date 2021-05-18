@@ -14,14 +14,6 @@
 Account Multicompany Usability
 ==============================
 
-* Add that field to name get of:
-
- * Taxes
- * Taxes Codes
- * Accounts
- * Journals
- * Fiscalyears
- * Periods
 #. Allow to work with properties of all companies without needing to change between companies (rendered as a many2many)
 #. You can also set companies as consolidation companies, for this companies creation of accounting entries is forbiden
 #. Add new field short_name on company that is used later to be appended on the "display name" of the journals. This is usefull because when you select journals you don't have a filter of the companies. (TODO check if we can avoid all this and have a different approach)
