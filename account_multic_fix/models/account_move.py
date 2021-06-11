@@ -22,6 +22,10 @@ class AccountMove(models.Model):
         elif self.fiscal_position_id.company_id and self.fiscal_position_id.company_id != self.company_id:
             company_changed = True
         if company_changed:
+            for line in self.line_ids:
+                if line.amount_currency and self.company_id.currency_id == self.currency_id:
+                    line.amount_currency = False
+                    line.currency_id = False
             # self = self.with_context(force_company=self.company_id.id)
             price_security_installed = False
             if 'invoice_line_tax_ids_readonly' in self.invoice_line_ids._fields:
@@ -44,7 +48,6 @@ class AccountMove(models.Model):
                 line.name = name
                 line.price_unit = price_unit
                 line.product_uom_id = product_uom
-
             # si bien onchange partner llama _recompute_dynamic_lines no manda el recompute_all_taxes, este refrezca
             # lineas de impuestos
             self._recompute_dynamic_lines(recompute_all_taxes=True)
