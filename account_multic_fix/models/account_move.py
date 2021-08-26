@@ -23,9 +23,6 @@ class AccountMove(models.Model):
             company_changed = True
         if company_changed:
             # self = self.with_context(force_company=self.company_id.id)
-            price_security_installed = False
-            if 'invoice_line_tax_ids_readonly' in self.invoice_line_ids._fields:
-                price_security_installed = True
             # si cambiamos la compania queremos actualizar cuenta bancaria, termino de pago, apuntes de deuda, etc.
             # este metodo refrezca tmb las lineas de deuda
             self._onchange_partner_id()
@@ -39,8 +36,6 @@ class AccountMove(models.Model):
                 product_uom = line.product_uom_id
                 line.company_id = self.company_id
                 line._onchange_product_id()
-                if price_security_installed:
-                    line.invoice_line_tax_ids_readonly = line.invoice_line_tax_ids
                 line.name = name
                 line.price_unit = price_unit
                 line.product_uom_id = product_uom
