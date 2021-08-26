@@ -47,7 +47,6 @@ class AccountMove(models.Model):
             # we need to force change currency
             if self.currency_id != self.company_id.currency_id:
                 self._onchange_currency()
-                return super()._onchange_journal()
             # si bien onchange partner llama _recompute_dynamic_lines no manda el recompute_all_taxes, este refrezca
             # lineas de impuestos
             self._recompute_dynamic_lines(recompute_all_taxes=True)
