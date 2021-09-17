@@ -39,6 +39,20 @@ class AccountMove(models.Model):
                 line.name = name
                 line.price_unit = price_unit
                 line.product_uom_id = product_uom
+
+                # To prevent the mixen company with account and taxes when the line doesn't have a product, 
+                # we force to choose a new account after change the journal for a different company
+                if not line.display_type and not line.product_id:
+                    if line.account_id.company_id != line.company_id:
+                        if line.move_id.is_sale_document(include_receipts=True):
+                            line.account_id = line.move_id.journal_id.default_credit_account_id
+                        elif self.move_id.is_purchase_document(include_receipts=True):
+                            line.account_id = line.move_id.journal_id.default_debit_account_id
+                    if any([line.company_id.id != l.company_id.id for l in line.tax_ids]):
+                        taxes = line._get_computed_taxes()
+                        if taxes and line.move_id.fiscal_position_id:
+                            taxes = line.move_id.fiscal_position_id.map_tax(taxes, partner=line.partner_id)
+                        line.tax_ids = taxes or [(5,0,0)]
             # we need to force change currency
             if self.currency_id != self.company_id.currency_id:
                 self._onchange_currency()
