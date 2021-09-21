@@ -12,23 +12,6 @@ class SaleAdvancePaymentInv(models.TransientModel):
         default=lambda self: self._default_deposit_taxes_id()
     )
 
-
-    def _get_advance_details(self, order):
-        #TODO borrar en v15 porque Odoo ya lo arregló
-        context = {'lang': order.partner_id.lang}
-        if self.advance_payment_method == 'percentage':
-            if self.product_id.taxes_id.filtered(lambda r: not order.company_id or r.company_id == order.company_id).price_include:
-                amount = order.amount_total * self.amount / 100
-            else:
-                amount = order.amount_untaxed * self.amount / 100
-            name = _("Down payment of %s%%") % (self.amount)
-        else:
-            amount = self.fixed_amount
-            name = _('Down Payment')
-        del context
-
-        return amount, name
-
     def _create_invoice(self, order, so_line, amount):
         """ Corregimos facturas de adelantos para dos casos:
         1. Al estar logueados en una cia pero que el pedido sea de cia hija
