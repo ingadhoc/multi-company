@@ -21,14 +21,13 @@ class ResCompany(models.Model):
 
     # TODO habria que terminar de ver si esta bien este cache o en realidad para
     # ser mas performante no hay que usar nada de self
-    @tools.ormcache_context('self.env.uid', 'self.name', 'self.short_name', keys=('no_company_sufix', 'allowed_company_ids'))
+    @tools.ormcache_context('self.env.uid', 'self.name', 'self.short_name', keys=('no_company_sufix',))
     def get_company_sufix(self):
         """ Cuando pedimos para un registro que no tiene cia no queremos que
         ensure_one arroje error
         """
         condition =  \
             len(self) != 1 or \
-            len(self._context.get('allowed_company_ids')) <= 1 or \
             self._context.get('no_company_sufix') or \
             not self.env.user.has_group('base.group_multi_company')
 
