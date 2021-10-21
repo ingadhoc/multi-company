@@ -46,7 +46,7 @@ class AccountMove(models.Model):
                     if line.account_id.company_id != line.company_id:
                         if line.move_id.is_sale_document(include_receipts=True):
                             line.account_id = line.move_id.journal_id.default_credit_account_id
-                        elif self.move_id.is_purchase_document(include_receipts=True):
+                        elif line.move_id.is_purchase_document(include_receipts=True):
                             line.account_id = line.move_id.journal_id.default_debit_account_id
                     if any([line.company_id.id != l.company_id.id for l in line.tax_ids]):
                         taxes = line._get_computed_taxes()
