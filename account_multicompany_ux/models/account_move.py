@@ -9,9 +9,9 @@ from odoo.exceptions import ValidationError
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    @api.constrains('company_id')
+    @api.constrains('company_id', 'state')
     def check_company(self):
         for move in self:
-            if move.company_id.consolidation_company:
+            if move.company_id.consolidation_company and move.state != 'draft':
                 raise ValidationError(_(
                     'You can not create entries on a consolidation company'))
