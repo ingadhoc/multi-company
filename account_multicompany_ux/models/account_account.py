@@ -10,7 +10,7 @@ class AccountAccount(models.Model):
         Agregamos sufijo de compañía en reportes financieros si hay más de una compañía seleccionada
         """
         res = super().name_get()
-        if self._context.get('model') == 'account.financial.html.report' and len(self._context.get('company_ids')) > 1:
+        if self._context.get('model') == 'account.financial.html.report' and len(self._context.get('company_ids', self.env.companies.ids)) > 1:
             new_res = []
             for record, res in zip(self, res):
                 new_res.append((res[0], '%s%s' % (res[1], record.company_id.get_company_sufix())))
