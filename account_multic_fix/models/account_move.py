@@ -2,7 +2,8 @@
 # For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
-from odoo import models, api
+from odoo import models, api, _
+from odoo.exceptions import ValidationError
 
 
 class AccountMove(models.Model):
@@ -75,3 +76,9 @@ class AccountMove(models.Model):
         if not self._context.get('force_company'):
             self = self.with_context(force_company=self.company_id.id)
         return super(AccountMove, self)._recompute_payment_terms_lines()
+
+    @api.constrains('company_id')
+    def check_company_and_lines_account(self):
+        for rec in self.filtered('line_ids'):
+            if rec.company_id not in rec.line_ids.mapped('account_id.company_id'):
+                raise ValidationError(_('All of the account in the lines must belogns to the same company as the move'))
