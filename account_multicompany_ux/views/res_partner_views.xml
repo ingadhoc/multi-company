@@ -77,4 +77,26 @@
         </field>
     </record>
 
+    <record id="view_partner_property_form_pricelist" model="ir.ui.view">
+        <field name="name">res.partner.form.pricelist</field>
+        <field name="model">res.partner</field>
+        <!-- mismo grupo que vista a la que se hereda -->
+        <field name="inherit_id" ref="product.view_partner_property_form"/>
+        <field name="groups_id" eval="[(4, ref('product.group_product_pricelist'))]"/>
+        <field name="arch" type="xml">
+                <!-- prielist -->
+            <field name="property_product_pricelist" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+
+            <field name="property_product_pricelist" position="after">
+                <label for="property_product_pricelist_ids"/>
+                <div class="oe_inline">
+                    <field name="property_product_pricelist_ids" widget="many2many_tags" context="{'active_model': 'res.partner', 'active_id': id, 'property_field': 'property_product_pricelist'}"/>
+                    <button name="action_company_properties" string="(edit)" class="oe_link" type="object" context="{'property_field': 'property_product_pricelist'}"/>
+                </div>
+            </field>
+        </field>
+    </record>
+
 </odoo>
