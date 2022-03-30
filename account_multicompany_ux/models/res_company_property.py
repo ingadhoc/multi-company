@@ -67,6 +67,12 @@ class ResCompanyProperty(models.Model):
         compute='_compute_property_position',
         inverse='_inverse_property_position',
     )
+    property_pricelist_id = fields.Many2one(
+        'product.pricelist',
+        string='Pricelist',
+        compute='_compute_property_pricelist',
+        inverse='_inverse_property_pricelist',
+    )
     standard_price = fields.Float(
         string="standard_price",
         compute='_compute_property_standard_price',
@@ -184,6 +190,8 @@ class ResCompanyProperty(models.Model):
             company_property_field = 'property_position_id'
         elif comodel == 'account.payment.term':
             company_property_field = 'property_term_id'
+        elif comodel == 'product.pricelist':
+            company_property_field = 'property_pricelist_id'
         else:
             property_field = self._context.get('property_field')
             if property_field == 'standard_price':
@@ -267,6 +275,13 @@ class ResCompanyProperty(models.Model):
             else:
                 record.property_term_id = False
 
+    def _compute_property_pricelist(self):
+        for record in self:
+            if record._get_property_comodel() == 'product.pricelist':
+                record.property_pricelist_id = record._get_property_value()
+            else:
+                record.property_pricelist_id = False
+
     def _set_property_value(self, value):
         self.ensure_one()
         record = self._get_record()
@@ -289,6 +304,10 @@ class ResCompanyProperty(models.Model):
     def _inverse_property_term(self):
         for rec in self:
             rec._set_property_value(rec.property_term_id.id)
+
+    def _inverse_property_pricelist(self):
+        for rec in self:
+            rec._set_property_value(rec.property_pricelist_id.id)
 
     def _inverse_property_standard_price(self):
         for rec in self:
