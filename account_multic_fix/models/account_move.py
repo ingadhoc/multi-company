@@ -15,7 +15,7 @@ class AccountMove(models.Model):
             company_changed = self.company_id != self._origin.company_id
         if self.line_ids:
             company_changed = self.company_id != self.line_ids[0].account_id.company_id
-        elif self.invoice_partner_bank_id.company_id and self.invoice_partner_bank_id.company_id != self.company_id:
+        elif self.partner_bank_id.company_id and self.partner_bank_id.company_id != self.company_id:
             company_changed = True
         elif self.invoice_payment_term_id.company_id and self.invoice_payment_term_id.company_id != self.company_id:
             company_changed = True
@@ -57,21 +57,22 @@ class AccountMove(models.Model):
             if self.currency_id != self.company_id.currency_id:
                 self._onchange_currency()
             # si bien onchange partner llama _recompute_dynamic_lines no manda el recompute_all_taxes, este refrezca
-            # lineas de impuestos
+            # lineas de impuestos+
             self._recompute_dynamic_lines(recompute_all_taxes=True)
         return super()._onchange_journal()
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
-        if not self._context.get('force_company'):
-            self = self.with_context(force_company=self.company_id.id)
-        res = super(AccountMove, self)._onchange_partner_id()
+        res = super()._onchange_partner_id()
         partner_banks = self.bank_partner_id.bank_ids.filtered(lambda x: x.company_id == self.company_id)
-        self.invoice_partner_bank_id = partner_banks and partner_banks[0]
+        self.partner_bank_id = partner_banks and partner_banks[0]
         return res
 
-    def _recompute_payment_terms_lines(self):
-        ''' Compute the dynamic payment term lines of the journal entry.'''
-        if not self._context.get('force_company'):
-            self = self.with_context(force_company=self.company_id.id)
-        return super(AccountMove, self)._recompute_payment_terms_lines()
+    @api.depends('company_id', 'invoice_filter_type_domain')
+    def _compute_suitable_journal_ids(self):
+        # we override this method to add filter by companies in the env instead of the company of the user
+        for m in self:
+            journal_type = m.invoice_filter_type_domain or 'general'
+            company_ids = self.env.companies.ids
+            domain = [('company_id', 'in', company_ids), ('type', '=', journal_type)]
+            m.suitable_journal_ids = self.env['account.journal'].search(domain)
