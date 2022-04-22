@@ -16,12 +16,11 @@
         </field>
     </record>
 
-    <act_window name="Company Properties"
-        id="action_res_company_property"
-        res_model="res.company.property"
-        view_mode="tree"
-        domain="[]"
-        />
-        <!-- domain="[('company_id.consolidation_company', '=', False)]" -->
+    <record id="action_res_company_property" model="ir.actions.act_window">
+        <field name="name">Company Properties</field>
+        <field name="res_model">res.company.property</field>
+        <field name="view_mode">tree</field>
+        <field name="domain">[]</field>
+    </record>
 
 </odoo>
