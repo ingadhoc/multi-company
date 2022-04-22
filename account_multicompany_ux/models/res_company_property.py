@@ -130,9 +130,7 @@ class ResCompanyProperty(models.Model):
             _logger.warn(
                 'Could not get property record from context %s' % context)
             return False
-        return self.with_context(
-            force_company=self.id).env[active_model].browse(
-            active_id)
+        return self.with_company(self.id).env[active_model].browse(active_id)
 
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
