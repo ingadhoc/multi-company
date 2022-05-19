@@ -14,7 +14,7 @@ class AccountMove(models.Model):
         if self._origin.company_id:
             company_changed = self.company_id != self._origin.company_id
         if self.line_ids:
-            company_changed = self.company_id != self.line_ids[0].account_id.company_id
+            company_changed = any([self.company_id != line.account_id.company_id for line in self.line_ids])
         elif self.invoice_partner_bank_id.company_id and self.invoice_partner_bank_id.company_id != self.company_id:
             company_changed = True
         elif self.invoice_payment_term_id.company_id and self.invoice_payment_term_id.company_id != self.company_id:
