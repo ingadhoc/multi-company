@@ -103,7 +103,7 @@ class ResCompanyProperty(models.Model):
 
         if not action:
             return False
-        action_read = action.read()[0]
+        action_read = action.sudo().read()[0]
         # do this because raise an error if came from a view
         #  with group_by activated
         ctx = self._context.copy()
