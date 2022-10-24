@@ -98,12 +98,8 @@ class ResCompanyProperty(models.Model):
             return True
 
         company_properties = self._get_companies()
-        action = self.env.ref(
+        action_read = self.env["ir.actions.actions"]._for_xml_id(
             'account_multicompany_ux.action_res_company_property')
-
-        if not action:
-            return False
-        action_read = action.sudo().read()[0]
         # do this because raise an error if came from a view
         #  with group_by activated
         ctx = self._context.copy()
