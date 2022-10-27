@@ -29,5 +29,5 @@
         'views/account_bank_statement_line_views.xml',
     ],
     'demo': [],
-    'installable': True,
+    'installable': False,
 }
