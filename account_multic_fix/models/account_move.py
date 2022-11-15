@@ -2,7 +2,8 @@
 # For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
-from odoo import models, api
+from odoo import models, api, _
+from odoo.exceptions import UserError
 
 
 class AccountMove(models.Model):
@@ -76,3 +77,10 @@ class AccountMove(models.Model):
             company_ids = self.env.companies.ids
             domain = [('company_id', 'in', company_ids), ('type', '=', journal_type)]
             m.suitable_journal_ids = self.env['account.journal'].search(domain)
+
+    @api.constrains('journal_id')
+    def _check_invoice_state(self):
+        """This method don´t allow to change the journal if the state of the invoice is 'cancel'"""
+        for inv in self:
+            if inv.state == 'cancel':
+                raise UserError(_('It is not possible to change the journal if the invoice is cancelled. You can edit it changing the invoice state to draft.'))
