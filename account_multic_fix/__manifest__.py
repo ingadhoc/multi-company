@@ -19,15 +19,14 @@
 ##############################################################################
 {
     'name': 'Account Multi Company Fixes',
-    'version': "15.0.1.0.0",
+    'version': "16.0.1.0.0",
     'author': 'ADHOC SA',
     'website': 'www.adhoc.com.ar',
     'license': 'AGPL-3',
     'category': 'Accounting & Finance',
     'depends': ['account'],
     'data': [
-        'views/account_bank_statement_line_views.xml',
     ],
     'demo': [],
-    'installable': False,
+    'installable': True,
 }
