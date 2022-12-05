@@ -129,15 +129,13 @@ class ResCompanyProperty(models.Model):
         return self.with_company(self.id).env[active_model].browse(active_id)
 
     @api.model
-    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
+    def get_view(self, view_id=None, view_type='form', **options):
         """
         Con esta funcion hacemos dos cosas:
         1. Mostrar solo la columna que corresponda segun el modelo
         2. Agregar dominio segun el dominio original de la porperty mas de cia
         """
-        res = super(ResCompanyProperty, self).fields_view_get(
-            view_id=view_id, view_type=view_type, toolbar=toolbar,
-            submenu=submenu)
+        res = super(ResCompanyProperty, self).get_view(view_id, view_type, **options)
         doc = etree.XML(res['arch'])
         property_field = self._context.get('property_field')
         domain = self._context.get('property_domain')
