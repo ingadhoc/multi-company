@@ -19,12 +19,13 @@
 ##############################################################################
 {
     'name': 'Website Sale Multicompany Usability',
-    'version': "15.0.1.0.0",
+    'version': "15.0.1.1.0",
     'author': 'ADHOC SA',
     'website': 'www.adhoc.com.ar',
     'license': 'AGPL-3',
     'depends': [
-        'website_sale'
+        'website_sale',
+        'payment_multic_ux',
     ],
     'data': [],
     'demo': [],
