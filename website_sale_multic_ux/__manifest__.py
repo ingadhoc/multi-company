@@ -24,8 +24,7 @@
     'website': 'www.adhoc.com.ar',
     'license': 'AGPL-3',
     'depends': [
-        'website_sale',
-        'payment_multic_ux',
+        'website_sale'
     ],
     'data': [],
     'demo': [],
