@@ -14,16 +14,8 @@
 Account Multi Company Fixes
 ===========================
 
-#. Add check_company on account.move and account.move.line (backported from odoo master https://github.com/odoo/odoo/commit/847889b49768db290f86ab5c5f48e8134fa29266) (TODO remove on v14)
 #. Some fixes so that you can change to a journal of different company and everthing is updated correctly
 
-TODO (Viejo):
-arreglar para los statments, por ahora no pudismo hacer que nade bien, sobre todo la parte de que
-cuentas ofrece para seleccionar. Tal vez podemos ver de dejar eso de esa manera.
-Al respecto de como se genera esto esta este codigo:
-<table class="o_group o_inner_group o_group_col_6 create_group_right"><!-- here come some form_create_field --></table>
-
-A su vez hay que cambiar self.env.company por self.journal_id.company_id en "account.bank.statement", tal vez un pr a odoo?
 
 Installation
 ============
