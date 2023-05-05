@@ -1,6 +1,6 @@
 ##############################################################################
 #
-#    Copyright (C) 2015  ADHOC SA  (http://www.adhoc.com.ar)
+#    Copyright (C) 2023  ADHOC SA  (http://www.adhoc.com.ar)
 #    All Rights Reserved.
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 #
 ##############################################################################
 {
-    'name': 'Website Sale Multicompany Usability',
+    'name': 'Website Sale Multicompany shared',
     'version': "16.0.1.0.0",
     'author': 'ADHOC SA',
     'website': 'www.adhoc.com.ar',
