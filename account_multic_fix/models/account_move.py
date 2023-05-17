@@ -33,6 +33,15 @@ class AccountMove(models.Model):
             else:
                 line._compute_tax_ids()
                 line._compute_account_id()
+        # si tiene termino de pago pero no es compatible con nueva compañia, recomputamos termino de pago
+        # al recomputar el termino de pago tmb se recomputan las lineas a cobrar/pagar
+        # pero si el termino de pago no se cambia, es necesario cambiar las cuentas de las lineas de pago, por eso el else
+        if self.invoice_payment_term_id.company_id and self.invoice_payment_term_id.company_id != self.company_id:
+            self._compute_invoice_payment_term_id()
+        else:
+            self.line_ids.filtered(
+                lambda l: "payment_term" == l.display_type
+            )._compute_account_id()
         if lines_without_product:
             res["warning"] = {"title": _("Warning")}
             if len(lines_without_product) == len(invoice_lines):
