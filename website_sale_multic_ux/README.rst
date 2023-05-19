@@ -46,13 +46,10 @@ help us smashing it by providing a detailed and welcomed feedback.
 Credits
 =======
 
-.. |iconEficent| image:: https://avatars0.githubusercontent.com/u/7718403?s=200&v=4
-    :width: 13px
-    :height: 13px
-    :alt: Eficent
+Images
+------
 
 * |company| |icon|
-* Eficent |iconEficent| Part of the code used for this module was extracted from Eficent's `multicompany-fixes/mcfix_accpount <https://github.com/Eficent/multicompany-fixes/tree/11.0/mcfix_account>`_ module
 
 Contributors
 ------------

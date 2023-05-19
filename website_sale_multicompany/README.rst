@@ -33,28 +33,14 @@ To configure this module, you need to:
 Usage
 =====
 
-.. image:: https://odoo-community.org/website/image/ir.attachment/5784_f2813bd/datas
-   :alt: Try me on Runbot
-   :target: http://runbot.adhoc.com.ar/
+To use this module, you need to:
 
-Bug Tracker
-===========
-
-Bugs are tracked on `GitHub Issues
-<https://github.com/ingadhoc/multi-company/issues>`_. In case of trouble, please
-check there if your issue has already been reported. If you spotted it first,
-help us smashing it by providing a detailed and welcomed feedback.
-
-Usage
-=====
+#. For testing we recommend to create one database with "saas-provider" name and install "saas-provider" module
 
 .. image:: https://odoo-community.org/website/image/ir.attachment/5784_f2813bd/datas
    :alt: Try me on Runbot
    :target: http://runbot.adhoc.com.ar/
 
-
-* |company| |icon|
-* Eficent |iconEficent| Part of the code used for this module was extracted from Eficent's `multicompany-fixes/mcfix_accpount <https://github.com/Eficent/multicompany-fixes/tree/11.0/mcfix_account>`_ module
 
 Contributors
 ------------
