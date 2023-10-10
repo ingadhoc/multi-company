@@ -16,7 +16,7 @@ class AccountChangeCurrency(models.TransientModel):
         return move
 
     move_id = fields.Many2one('account.move', default=get_move)
-    company_ids = fields.Many2many('res.company', compute='_compute_company_ids')
+    company_ids = fields.Many2many('res.company', string='Companies', compute='_compute_company_ids')
     company_id = fields.Many2one(
         'res.company', required=True, ondelete='cascade',
         compute='_compute_company', store=True, readonly=False)
