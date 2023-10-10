@@ -56,6 +56,12 @@ class AccountChangeCurrency(models.TransientModel):
 
     def change_company(self):
         self.ensure_one()
+        old_name = False
+        # odoo no permite modificar diario si hay name, esto no es del todo correcto para facturas de proveedor con manual number y de hecho deberiamos
+        # ver de cambiarlo en el codigo original, por ahora lo permitimos desde aca haciendo backup del nro y restaurando si corresponde
+        if self.move_id._fields.get('l10n_latam_manual_document_number') and self.move_id.l10n_latam_manual_document_number and self.move_id.name:
+            old_name = self.move_id.name
+            self.move_id.name = '/'
         self.move_id.write({
             'company_id': self.company_id.id,
             'journal_id': self.journal_id.id,
@@ -68,3 +74,5 @@ class AccountChangeCurrency(models.TransientModel):
         self.move_id.invoice_line_ids.with_company(self.company_id.id)._compute_tax_ids()
         for invoice_line in self.move_id.invoice_line_ids.filtered(lambda x: not x.product_id).with_company(self.company_id.id):
             invoice_line.tax_ids = invoice_line._get_computed_taxes()
+        if old_name and self.move_id.l10n_latam_manual_document_number:
+            self.move_id.name = old_name
