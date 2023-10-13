@@ -84,3 +84,14 @@ class AccountMove(models.Model):
         for inv in self:
             if inv.state == 'cancel':
                 raise UserError(_('It is not possible to change the journal if the invoice is cancelled. You can edit it changing the invoice state to draft.'))
+
+    @api.constrains('line_ids', 'fiscal_position_id', 'company_id')
+    def _validate_taxes_country(self):
+        # cuando se esta cambiando de compañía con distinto pais da error porque en una primer instancia
+        # no viene seteada la sincronizacion de amls y viene el check validity false. Nos agarramos de esto ultimo
+        # para definir que si no estamos chequeando validez (lo vemos en el contexto) entonces no chequeamos tampoco
+        # esto que en realidad da un falso positivo
+        # NOTA en 16 ya no se necesita mas ya que cambiamos el approach
+        if self._context.get('check_move_validity') is False:
+            return
+        return super()._validate_taxes_country()
