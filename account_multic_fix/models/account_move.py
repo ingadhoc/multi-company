@@ -60,9 +60,6 @@ class AccountMove(models.Model):
             # si bien onchange partner llama _recompute_dynamic_lines no manda el recompute_all_taxes, este refrezca
             # lineas de impuestos+
             self._recompute_dynamic_lines(recompute_all_taxes=True)
-            # Este Pr impide recalcular los impuestos si ya esta definido line.tax_repartition_line_id
-            # por eso lo vuelvo a ejecutar https://github.com/odoo/odoo/pull/136047
-            self._recompute_tax_lines()
         return super()._onchange_journal()
 
     @api.onchange('partner_id')
