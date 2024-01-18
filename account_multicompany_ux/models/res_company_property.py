@@ -89,6 +89,8 @@ class ResCompanyProperty(models.Model):
         comodel = self._get_property_comodel()
         if comodel in ['account.account']:
             domain = [('company_id.consolidation_company', '=', False)]
+        if self.env.user.company_ids:
+            domain += [('company_id', 'in', self.env.user.company_ids.ids)]
         return self.search(domain)
 
     @api.model
