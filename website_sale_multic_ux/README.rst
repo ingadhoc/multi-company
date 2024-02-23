@@ -10,9 +10,9 @@
    :target: https://www.gnu.org/licenses/agpl
    :alt: License: AGPL-3
 
-==============================
-Payment Multicompany Usability
-==============================
+===================================
+Website Sale Multicompany Usability
+===================================
 
 #. This module sets the company to False when a new contact is created during the ecommerce checkout process
 
