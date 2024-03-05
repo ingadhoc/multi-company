@@ -62,6 +62,10 @@ class AccountChangeCurrency(models.TransientModel):
         if self.move_id._fields.get('l10n_latam_manual_document_number') and self.move_id.l10n_latam_manual_document_number and self.move_id.name:
             old_name = self.move_id.name
             self.move_id.name = '/'
+        old_doc_type = False
+        if self.move_id._fields.get('l10n_latam_document_type_id') and self.move_id.l10n_latam_manual_document_number:
+            old_doc_type = self.move_id.l10n_latam_document_type_id
+
         self.move_id.write({
             'company_id': self.company_id.id,
             'journal_id': self.journal_id.id,
@@ -74,5 +78,7 @@ class AccountChangeCurrency(models.TransientModel):
         self.move_id.invoice_line_ids.with_company(self.company_id.id)._compute_tax_ids()
         for invoice_line in self.move_id.invoice_line_ids.filtered(lambda x: not x.product_id).with_company(self.company_id.id):
             invoice_line.tax_ids = invoice_line._get_computed_taxes()
-        if old_name and self.move_id.l10n_latam_manual_document_number:
-            self.move_id.name = old_name
+        if old_doc_type and old_doc_type in self.move_id.l10n_latam_available_document_type_ids:
+            self.move_id.l10n_latam_document_type_id = old_doc_type
+            if self.move_id.l10n_latam_manual_document_number:
+                self.move_id.name = old_name
