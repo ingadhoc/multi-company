@@ -20,5 +20,5 @@ class Website(models.Model):
         # por eso creo la orden y luego la modifico
         vals = sale_order_sudo._sale_get_order_company_fix()
         if vals:
-            sale_order_sudo.write(vals) 
+            sale_order_sudo.write(vals)
         return sale_order_sudo
