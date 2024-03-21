@@ -3,15 +3,12 @@
 # directory
 ##############################################################################
 
-import logging
-from odoo import models, tools
-from odoo.http import request
+from odoo import models
 
 
 class Website(models.Model):
 
     _inherit = 'website'
-
 
     def _get_warehouse_available(self):
         if self._context.get('company_fix'):
