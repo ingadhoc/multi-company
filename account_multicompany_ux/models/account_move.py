@@ -18,3 +18,8 @@ class AccountMove(models.Model):
             if move.company_id.consolidation_company:
                 raise ValidationError(_(
                     'You can not create entries on a consolidation company'))
+    
+
+    @api.depends('company_id')
+    def _validate_taxes_country(self):
+        return super()._validate_taxes_country()
