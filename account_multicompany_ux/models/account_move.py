@@ -18,3 +18,4 @@ class AccountMove(models.Model):
             if move.company_id.consolidation_company:
                 raise ValidationError(_(
                     'You can not create entries on a consolidation company'))
+    

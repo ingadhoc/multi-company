@@ -66,6 +66,7 @@ class AccountChangeCurrency(models.TransientModel):
         if self.move_id._fields.get('l10n_latam_document_type_id') and self.move_id.l10n_latam_manual_document_number:
             old_doc_type = self.move_id.l10n_latam_document_type_id
 
+        self.move_id.invoice_line_ids.tax_ids = False
         self.move_id.write({
             'company_id': self.company_id.id,
             'journal_id': self.journal_id.id,
