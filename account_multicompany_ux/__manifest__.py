@@ -19,12 +19,13 @@
 ##############################################################################
 {
     'name': 'Account Multicompany Usability',
-    'version': "16.0.1.2.0",
+    'version': "17.0.1.0.0",
     'author': 'ADHOC SA',
     'website': 'www.adhoc.com.ar',
     'license': 'AGPL-3',
     'depends': [
         'account',
+        'account_reports',
     ],
     'data': [
         'views/res_company_property_views.xml',
@@ -40,6 +41,6 @@
         'security/ir.model.access.csv',
     ],
     'demo': [],
-    'installable': False,
+    'installable': True,
     'auto_install': False,
 }

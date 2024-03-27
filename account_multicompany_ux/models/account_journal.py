@@ -10,17 +10,12 @@ class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
     @api.depends('name', 'currency_id', 'company_id', 'company_id.currency_id')
-    def name_get(self):
+    def _compute_display_name(self):
         """
         No llamamos a super porque tendriamos que igualmente hacer un read
-        para obtener la compania y no queremos disminuir la performance
+        para obtener la compania y no queremos disminuir la performance. Este método lo que haría es agregar el nombre de la compañía entre paréntesis al final del nombre del diario cuando uno ingresa a la vista form esto lo hace en el nombre que está en el menú hamburguesa.
         """
-        res = []
-        for record in self:
-            currency = record.currency_id or record.company_id.currency_id
-            record_name = '%s (%s)%s' % (
-                record.name,
-                currency.name,
-                record.company_id.get_company_sufix())
-            res.append((record.id, record_name))
-        return res
+        for journal in self:
+            currency = journal.currency_id or journal.company_id.currency_id
+            name = f"{journal.name} ({currency.name}) ({journal.company_id.get_company_sufix()})"
+            journal.display_name = name

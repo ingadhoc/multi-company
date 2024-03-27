@@ -9,7 +9,7 @@
                 <label for="company_id" readonly="True" groups="base.group_multi_company"/>
                 <div groups="base.group_multi_company">
                     <field name="company_id" readonly="True" class="oe_inline"/>
-                    <button name="%(action_account_change_company)d" type="action" attrs="{'invisible':['|', ('state','!=','draft'), ('posted_before', '=', True)]}" icon="fa-pencil" class="btn-link" title="Change Company"  />
+                    <button name="%(action_account_change_company)d" type="action" invisible="state != 'draft' or posted_before" icon="fa-pencil" class="btn-link" title="Change Company"  />
                 </div>
             </label>
 
