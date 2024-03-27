@@ -193,7 +193,7 @@ class ResCompanyProperty(models.Model):
                     _('Property for model %s not implemented yet' % comodel))
         return company_property_field
 
-    def name_get(self):
+    def _compute_display_name(self):
         """
         No llamamos a super porque tendriamos que igualmente hacer un read
         para obtener la compania y no queremos disminuir la performance
@@ -201,7 +201,6 @@ class ResCompanyProperty(models.Model):
         # por ahora en campos calculados no podemos cambiar el contexto de esta
         # manera
         # for rec in self.with_context(no_company_sufix=True):
-        res = []
         for rec in self:
             company_field = getattr(
                 rec.with_context(no_company_sufix=True),
@@ -222,8 +221,7 @@ class ResCompanyProperty(models.Model):
                 display_name = '%s%s' % (
                     company_field.display_name or _('None'),
                     rec.company_id.get_company_sufix())
-            res.append((rec.id, display_name))
-        return res
+            rec.display_name = display_name
 
     def _compute_property_field(self):
         for record in self:
@@ -304,3 +302,4 @@ class ResCompanyProperty(models.Model):
     def _inverse_property_standard_price(self):
         for rec in self:
             rec._set_property_value(rec.standard_price)
+
