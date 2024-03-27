@@ -20,6 +20,7 @@ class ResCompanyProperty(models.Model):
     _name = "res.company.property"
     _description = "Company Property"
     _auto = False
+    _check_company_auto = True
     # _rec_name = 'display_name'
     _depends = {
         'res.company': [
@@ -83,6 +84,11 @@ class ResCompanyProperty(models.Model):
     #     compute='_compute_display_name'
     # )
 
+    @api.onchange('property_field', 'company_id')
+    def _onchange_property_field(self):
+        import pdb; pdb.set_trace()
+        return {'domain': {'property_account_id': [('company_id', '=', False)]}}
+
     @api.model
     def _get_companies(self):
         domain = []
@@ -128,50 +134,50 @@ class ResCompanyProperty(models.Model):
             return False
         return self.with_company(self.id).env[active_model].browse(active_id)
 
-    @api.model
-    def get_view(self, view_id=None, view_type='form', **options):
-        """
-        Con esta funcion hacemos dos cosas:
-        1. Mostrar solo la columna que corresponda segun el modelo
-        2. Agregar dominio segun el dominio original de la porperty mas de cia
-        """
-        res = super(ResCompanyProperty, self).get_view(view_id, view_type, **options)
-        doc = etree.XML(res['arch'])
-        property_field = self._context.get('property_field')
-        domain = self._context.get('property_domain')
-        record = self._get_record()
-        if record:
-            field = self._get_record()._fields.get(property_field)
-            # si no viene definido un property_domain buscamos uno para
-            # definido en el campo de la property
-            if not domain:
-                try:
-                    domain = literal_eval(field.domain)
-                except:
-                    domain = []
-            domain_elements = [str(x) for x in domain]
+    # @api.model
+    # def get_view(self, view_id=None, view_type='form', **options):
+    #     """
+    #     Con esta funcion hacemos dos cosas:
+    #     1. Mostrar solo la columna que corresponda segun el modelo
+    #     2. Agregar dominio segun el dominio original de la porperty mas de cia
+    #     """
+    #     res = super(ResCompanyProperty, self).get_view(view_id, view_type, **options)
+    #     doc = etree.XML(res['arch'])
+    #     property_field = self._context.get('property_field')
+    #     domain = self._context.get('property_domain')
+    #     record = self._get_record()
+    #     if record:
+    #         field = self._get_record()._fields.get(property_field)
+    #         # si no viene definido un property_domain buscamos uno para
+    #         # definido en el campo de la property
+    #         if not domain:
+    #             try:
+    #                 domain = literal_eval(field.domain)
+    #             except:
+    #                 domain = []
+    #         domain_elements = [str(x) for x in domain]
 
-            # add company domain if comodel has company
-            comodel = self._get_property_comodel()
-            if comodel:
-                if self.env[comodel]._fields.get('company_id'):
-                    domain_elements += [
-                        "'|'",
-                        "('company_id', '=', False)",
-                        "('company_id', '=', company_id)"]
-            str_domain = '[%s]' % ','.join(domain_elements)
+    #         # add company domain if comodel has company
+    #         comodel = self._get_property_comodel()
+    #         if comodel:
+    #             if self.env[comodel]._fields.get('company_id'):
+    #                 domain_elements += [
+    #                     "'|'",
+    #                     "('company_id', '=', False)",
+    #                     "('company_id', '=', company_id)"]
+    #         str_domain = '[%s]' % ','.join(domain_elements)
 
-            company_property_field = self._get_company_property_field()
-            xpath = "//field[@name='%s']" % company_property_field
-            for node in doc.xpath(xpath):
-                node.set('domain', str(str_domain))
-                node.set('invisible', '0')
-                modifiers = json.loads(node.get("modifiers"))
-                modifiers['column_invisible'] = False
-                node.set("modifiers", json.dumps(modifiers))
+    #         company_property_field = self._get_company_property_field()
+    #         xpath = "//field[@name='%s']" % company_property_field
+    #         for node in doc.xpath(xpath):
+    #             node.set('domain', str(str_domain))
+    #             node.set('invisible', '0')
+    #             modifiers = json.loads(node.get("modifiers"))
+    #             modifiers['column_invisible'] = False
+    #             node.set("modifiers", json.dumps(modifiers))
 
-        res['arch'] = etree.tostring(doc)
-        return res
+    #     res['arch'] = etree.tostring(doc)
+    #     return res
 
     @api.model
     def _get_company_property_field(self):
