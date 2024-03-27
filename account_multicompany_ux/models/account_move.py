@@ -24,7 +24,7 @@ class AccountMove(models.Model):
         """ If company is changed the partner bank must be updated."""
         return super()._compute_partner_bank_id()
 
-    @api.depends('company_id')
+    @api.depends('partner_id', 'company_id')
     def _compute_invoice_payment_term_id(self):
         for move in self:
             # avoid changing payment term if same partner and existing payment term is suitable for current company
@@ -32,7 +32,12 @@ class AccountMove(models.Model):
                     not move.invoice_payment_term_id.company_id or move.invoice_payment_term_id.company_id == move.company_id):
                 continue
             move = move.with_company(move.company_id)
-            return super(AccountMove,move)._compute_invoice_payment_term_id()
+            if move.is_sale_document(include_receipts=True) and move.partner_id.property_payment_term_id:
+                move.invoice_payment_term_id = move.partner_id.property_payment_term_id
+            elif move.is_purchase_document(include_receipts=True) and move.partner_id.property_supplier_payment_term_id:
+                move.invoice_payment_term_id = move.partner_id.property_supplier_payment_term_id
+            else:
+                move.invoice_payment_term_id = False
 
     @api.onchange('company_id')
     def _onchange_company_id(self):

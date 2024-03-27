@@ -7,11 +7,12 @@
         <field name="arch" type="xml">
             <tree string="Company Properties" editable="top" delete="false" create="false">
                 <field name="company_id" readonly="1"/>
-                <field name="property_account_id" column_invisible="True"/>
-                <field name="property_position_id" column_invisible="True"/>
-                <field name="property_term_id" column_invisible="True"/>
-                <field name="property_pricelist_id" column_invisible="True"/>
-                <field name="standard_price" column_invisible="True"/>
+                <field name="property_field" />
+                <field name="property_account_id" column_invisible="False"/>
+                <field name="property_position_id" column_invisible="False"/>
+                <field name="property_term_id" column_invisible="False"/>
+                <field name="property_pricelist_id" column_invisible="False"/>
+                <field name="standard_price" column_invisible="False"/>
             </tree>
         </field>
     </record>
