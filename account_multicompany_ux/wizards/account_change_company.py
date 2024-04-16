@@ -74,7 +74,6 @@ class AccountChangeCurrency(models.TransientModel):
         # si el payment term tiene compañía y es distinta a la que elegimos, forzamos recomputo
         if self.move_id.invoice_payment_term_id.company_id and self.move_id.invoice_payment_term_id.company_id != self.company_id:
             self.move_id._compute_invoice_payment_term_id()
-        self.move_id.line_ids.with_company(self.company_id.id)._compute_account_id()
         self.move_id.invoice_line_ids.with_company(self.company_id.id)._compute_tax_ids()
         for invoice_line in self.move_id.invoice_line_ids.filtered(lambda x: not x.product_id).with_company(self.company_id.id):
             invoice_line.tax_ids = invoice_line._get_computed_taxes()
