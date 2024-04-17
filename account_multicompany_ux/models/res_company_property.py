@@ -86,7 +86,6 @@ class ResCompanyProperty(models.Model):
 
     @api.onchange('property_field', 'company_id')
     def _onchange_property_field(self):
-        #import pdb; pdb.set_trace()
         return {'domain': {'property_account_id': [('company_id', '=', False)]}}
 
     @api.model
@@ -118,11 +117,11 @@ class ResCompanyProperty(models.Model):
     @api.model
     def _get_property_comodel(self):
         property_field = self._context.get('property_field')
-        record = self._get_record()        
+        record = self._get_record()
         if record:
             field = self._get_record()._fields.get(property_field)
             return field and field.comodel_name or False
-        
+
     @api.model
     def _get_record(self):
         context = self._context
@@ -155,6 +154,7 @@ class ResCompanyProperty(models.Model):
                     _('Property for model %s not implemented yet' % comodel))
         return company_property_field
 
+    @api.depends('company_id', 'property_field')
     def _compute_display_name(self):
         """
         No llamamos a super porque tendriamos que igualmente hacer un read
@@ -163,10 +163,10 @@ class ResCompanyProperty(models.Model):
         # por ahora en campos calculados no podemos cambiar el contexto de esta
         # manera
         # for rec in self.with_context(no_company_sufix=True):
-        
+
         for rec in self:
             company_property_field = rec._get_company_property_field()
-            
+
             rec.invalidate_recordset([company_property_field])
             rec.modified([company_property_field])
 
@@ -189,8 +189,9 @@ class ResCompanyProperty(models.Model):
                 display_name = '%s%s' % (
                     company_field.display_name or _('None'),
                     rec.company_id.get_company_sufix())
-            rec.display_name = display_name 
+            rec.display_name = display_name
 
+    @api.depends_context('property_field')
     def _compute_property_field(self):
         for record in self:
             record.property_field = self._context.get('property_field', '')
@@ -205,6 +206,7 @@ class ResCompanyProperty(models.Model):
             record,
             property_field)
 
+    @api.depends('property_field')
     def _compute_property_standard_price(self):
         for record in self:
             if record.property_field == 'standard_price':
@@ -212,6 +214,7 @@ class ResCompanyProperty(models.Model):
             else:
                 record.standard_price = False
 
+    @api.depends('property_field')
     def _compute_property_account(self):
         for record in self:
             if record._get_property_comodel() == 'account.account':
@@ -219,6 +222,7 @@ class ResCompanyProperty(models.Model):
             else:
                 record.property_account_id = False
 
+    @api.depends('property_field')
     def _compute_property_position(self):
         for record in self:
             if record._get_property_comodel() == 'account.fiscal.position':
@@ -226,6 +230,7 @@ class ResCompanyProperty(models.Model):
             else:
                 record.property_position_id = False
 
+    @api.depends('property_field')
     def _compute_property_term(self):
         for record in self:
             if record._get_property_comodel() == 'account.payment.term':
@@ -233,6 +238,7 @@ class ResCompanyProperty(models.Model):
             else:
                 record.property_term_id = False
 
+    @api.depends('property_field')
     def _compute_property_pricelist(self):
         for record in self:
             if record._get_property_comodel() == 'product.pricelist':
@@ -270,4 +276,3 @@ class ResCompanyProperty(models.Model):
     def _inverse_property_standard_price(self):
         for rec in self:
             rec._set_property_value(rec.standard_price)
-
