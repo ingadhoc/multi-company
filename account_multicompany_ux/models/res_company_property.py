@@ -118,9 +118,7 @@ class ResCompanyProperty(models.Model):
     @api.model
     def _get_property_comodel(self):
         property_field = self._context.get('property_field')
-        #0self.invalidate_model(['property_account_id'])
-        record = self._get_record()
-        
+        record = self._get_record()        
         if record:
             field = self._get_record()._fields.get(property_field)
             return field and field.comodel_name or False
@@ -165,10 +163,16 @@ class ResCompanyProperty(models.Model):
         # por ahora en campos calculados no podemos cambiar el contexto de esta
         # manera
         # for rec in self.with_context(no_company_sufix=True):
+        
         for rec in self:
+            company_property_field = rec._get_company_property_field()
+            
+            rec.invalidate_recordset([company_property_field])
+            rec.modified([company_property_field])
+
             company_field = getattr(
                 rec.with_context(no_company_sufix=True),
-                rec._get_company_property_field())
+                company_property_field)
             if type(company_field) is float:
                 precision_digits = self.env['decimal.precision'].precision_get(
                     'Product Price')
@@ -185,7 +189,7 @@ class ResCompanyProperty(models.Model):
                 display_name = '%s%s' % (
                     company_field.display_name or _('None'),
                     rec.company_id.get_company_sufix())
-            rec.display_name = display_name
+            rec.display_name = display_name 
 
     def _compute_property_field(self):
         for record in self:

@@ -32,12 +32,12 @@ class ProductCategory(models.Model):
         )
 
         for rec in self:
+
             company_properties = company_property.with_context(
                 active_model=self._name,
                 active_id=rec.id)
             for newfield, oldfield in property_fields.items():
-                rec[newfield] = company_properties.with_context(
-                    property_field=oldfield)._get_companies()
+                rec[newfield] = company_properties.with_context(property_field=oldfield)._get_companies()
 
     def action_company_properties(self):
         """ Acá entra cuando hacemos click en el botón (edit) para editar cuenta de ingresos o de gastos en la vista form de una categoría de producto. """
