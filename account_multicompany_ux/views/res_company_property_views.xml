@@ -1,22 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="view_res_company_property_form" model="ir.ui.view">
+    <record id="view_res_company_account_property_form" model="ir.ui.view">
         <field name="name">res.company.property.form</field>
         <field name="model">res.company.property</field>
         <field name="arch" type="xml">
             <tree string="Company Properties" editable="top" delete="false" create="false">
                 <field name="company_id" readonly="1"/>
-                <field name="property_field" />
-                <field name="property_account_id" column_invisible="False"/>
-                <field name="property_position_id" column_invisible="False"/>
-                <field name="property_term_id" column_invisible="False"/>
-                <field name="property_pricelist_id" column_invisible="False"/>
-                <field name="standard_price" column_invisible="False"/>
+                <field name="property_field" column_invisible="1"/>
             </tree>
         </field>
     </record>
-
+    <record id="view_property_account_id_form" model="ir.ui.view">
+        <field name="name">res.company.property.form</field>
+        <field name="model">res.company.property</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="account_multicompany_ux.view_res_company_account_property_form"></field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="property_account_id"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_property_position_id_form" model="ir.ui.view">
+        <field name="name">res.company.property.form</field>
+        <field name="model">res.company.property</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="account_multicompany_ux.view_res_company_account_property_form"></field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="property_position_id" />
+            </tree>
+        </field>
+    </record>
+    <record id="view_property_term_id_form" model="ir.ui.view">
+        <field name="name">res.company.property.form</field>
+        <field name="model">res.company.property</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="account_multicompany_ux.view_res_company_account_property_form"></field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="property_term_id" />
+            </tree>
+        </field>
+    </record>
+    <record id="view_property_pricelist_id_form" model="ir.ui.view">
+        <field name="name">res.company.property.form</field>
+        <field name="model">res.company.property</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="account_multicompany_ux.view_res_company_account_property_form"></field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="property_pricelist_id" />
+            </tree>
+        </field>
+    </record>    
+    <record id="view_standard_price_form" model="ir.ui.view">
+        <field name="name">res.company.property.form</field>
+        <field name="model">res.company.property</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="account_multicompany_ux.view_res_company_account_property_form"></field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="standard_price" />
+            </tree>
+        </field>
+    </record>  
     <record id="action_res_company_property" model="ir.actions.act_window">
         <field name="name">Company Properties</field>
         <field name="res_model">res.company.property</field>

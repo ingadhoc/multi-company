@@ -8,6 +8,8 @@ from odoo import fields, models
 class ResPartner(models.Model):
 
     _inherit = 'res.partner'
+    _property_fields = {'property_account_receivable_ids', 'property_account_payable_ids', 'property_account_position_ids',
+                        'property_payment_term_ids',  'property_supplier_payment_term_ids', 'property_product_pricelist_ids'}
 
     property_account_receivable_ids = fields.Many2many(
         'res.company.property',
