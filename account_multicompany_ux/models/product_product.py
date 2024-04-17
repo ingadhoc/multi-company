@@ -9,6 +9,8 @@ class ProductProduct(models.Model):
     """Overwrite of computed fields using product_tmpl_id instead of id"""
 
     _inherit = 'product.product'
+    _property_fields = {'property_account_income_ids', 'property_account_expense_ids', 'standard_price_ids'}
+
 
     property_account_income_ids = fields.Many2many(
         'res.company.property',

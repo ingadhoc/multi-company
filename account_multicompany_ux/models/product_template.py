@@ -7,6 +7,7 @@ from odoo import api, fields, models
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
+    _property_fields = {'property_account_income_ids', 'property_account_expense_ids', 'standard_price_ids'}
 
     property_account_income_ids = fields.Many2many(
         'res.company.property',
@@ -49,3 +50,4 @@ class ProductTemplate(models.Model):
         return self.env['res.company.property'].with_context(
             active_model='product.template', active_id=self.id
         ).action_company_properties()
+
