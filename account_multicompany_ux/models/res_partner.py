@@ -4,10 +4,14 @@
 ##############################################################################
 from odoo import fields, models
 
+import logging
+
+_logger = logging.getLogger(__name__)
 
 class ResPartner(models.Model):
 
-    _inherit = 'res.partner'
+    _name = 'res.partner'
+    _inherit = ['res.partner', 'res.company.property.mixin']
     _property_fields = {'property_account_receivable_ids', 'property_account_payable_ids', 'property_account_position_ids',
                         'property_payment_term_ids',  'property_supplier_payment_term_ids', 'property_product_pricelist_ids'}
 
@@ -59,27 +63,4 @@ class ResPartner(models.Model):
             for newfield, oldfield in property_fields.items():
                 rec[newfield] = company_properties.with_context(
                     property_field=oldfield)._get_companies()
-
-
-    def action_company_properties(self):
-        self.ensure_one()
-        action = self.env['res.company.property'].with_context(
-            active_model=self._name, active_id=self.id
-        ).action_company_properties()
-        if self._context.get('property_field') == 'property_account_position_id':
-            view_id = self.env.ref('account_multicompany_ux.view_property_position_id_form').id
-        if self._context.get('property_field') == 'property_payment_term_id':
-            view_id = self.env.ref('account_multicompany_ux.view_property_term_id_form').id
-        if self._context.get('property_field') == 'property_product_pricelist':
-            view_id = self.env.ref('account_multicompany_ux.view_property_pricelist_id_form').id
-        if self._context.get('property_field') == 'property_supplier_payment_term_id':
-            view_id = self.env.ref('account_multicompany_ux.view_property_term_id_form').id                
-        elif self._context.get('property_field').startswith('property_account'):
-            view_id = self.env.ref('account_multicompany_ux.view_property_account_id_form').id
-        else:
-            view_id = self.env.ref('account_multicompany_ux.view_standard_price_form').id            
-        action['views'] = [[view_id, 'tree']]
-        return action
-
-
 

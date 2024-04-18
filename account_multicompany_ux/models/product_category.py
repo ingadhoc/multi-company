@@ -7,8 +7,10 @@ from odoo import api, fields, models
 
 class ProductCategory(models.Model):
 
-    _inherit = 'product.category'
+    _name = 'product.category'
+    _inherit = ['product.category', 'res.company.property.mixin']
     _property_fields = {'property_account_income_categ_ids', 'property_account_expense_categ_ids'}
+
 
     property_account_income_categ_ids = fields.Many2many(
         'res.company.property',
@@ -38,13 +40,3 @@ class ProductCategory(models.Model):
                 active_id=rec.id)
             for newfield, oldfield in property_fields.items():
                 rec[newfield] = company_properties.with_context(property_field=oldfield)._get_companies()
-
-    def action_company_properties(self):
-        """ Acá entra cuando hacemos click en el botón (edit) para editar cuenta de ingresos o de gastos en la vista form de una categoría de producto. """
-        self.ensure_one()
-        action = self.env['res.company.property'].with_context(
-            active_model=self._name, active_id=self.id
-        ).action_company_properties()
-        view_id = self.env.ref('account_multicompany_ux.view_property_account_id_form').id
-        action['views'] = [[view_id, 'tree']]
-        return action

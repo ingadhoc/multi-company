@@ -276,3 +276,7 @@ class ResCompanyProperty(models.Model):
     def _inverse_property_standard_price(self):
         for rec in self:
             rec._set_property_value(rec.standard_price)
+
+    def web_read(self, specification):
+        self.env['res.company.property'].invalidate_model(['display_name'])
+        return super().web_read(specification)
