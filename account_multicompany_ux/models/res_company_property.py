@@ -50,6 +50,7 @@ class ResCompanyProperty(models.Model):
     property_field = fields.Char(
         compute='_compute_property_field',
     )
+    property_domain = fields.Json(compute='_compute_property_account_domain')    
     property_account_id = fields.Many2one(
         'account.account',
         string='Account',
@@ -214,6 +215,22 @@ class ResCompanyProperty(models.Model):
             else:
                 record.standard_price = False
 
+    @api.depends('property_field', 'company_id')
+    def _compute_property_account_domain(self):
+        for record in self:
+            if record._get_property_comodel() == 'account.account':
+                domain = self._context.get('property_domain')
+                if not domain:
+                    field = record._get_record()._fields.get(record.property_field)
+                    try:
+                        domain = literal_eval(field.domain)
+                    except:
+                        domain = []
+                record.property_domain = ['|', ('company_id', '=', False), ('company_id', '=', record.company_id.id)] + domain
+            else:
+                record.property_domain = []
+        
+
     @api.depends('property_field')
     def _compute_property_account(self):
         for record in self:
@@ -278,5 +295,7 @@ class ResCompanyProperty(models.Model):
             rec._set_property_value(rec.standard_price)
 
     def web_read(self, specification):
-        self.env['res.company.property'].invalidate_model(['display_name'])
+        fields_to_read = list(specification) or {'id'}
+        if fields_to_read == ['display_name']:
+            self.env['res.company.property'].invalidate_model(['display_name'])
         return super().web_read(specification)
