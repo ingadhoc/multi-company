@@ -2,7 +2,7 @@
 # For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
-from . import ir_model
+from . import res_company_property_mixin
 from . import res_company
 from . import res_company_property
 from . import account_move

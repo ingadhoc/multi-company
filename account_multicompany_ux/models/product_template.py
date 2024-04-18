@@ -6,7 +6,9 @@ from odoo import api, fields, models
 
 
 class ProductTemplate(models.Model):
-    _inherit = 'product.template'
+
+    _name = 'product.template'
+    _inherit = ['product.template', 'res.company.property.mixin']
     _property_fields = {'property_account_income_ids', 'property_account_expense_ids', 'standard_price_ids'}
 
     property_account_income_ids = fields.Many2many(
@@ -44,15 +46,3 @@ class ProductTemplate(models.Model):
                         property_field=oldfield)._get_companies()
                 })
             rec.update(values)
-
-    def action_company_properties(self):
-        self.ensure_one()
-        action = self.env['res.company.property'].with_context(
-            active_model=self._name, active_id=self.id
-        ).action_company_properties()
-        if self._context.get('property_field').startswith('property_account'):
-            view_id = self.env.ref('account_multicompany_ux.view_property_account_id_form').id
-        else:
-            view_id = self.env.ref('account_multicompany_ux.view_standard_price_form').id            
-        action['views'] = [[view_id, 'tree']]
-        return action
