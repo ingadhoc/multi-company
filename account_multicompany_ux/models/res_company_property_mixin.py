@@ -5,6 +5,7 @@ from odoo import models
 class ResCompanyPropertyMixin(models.AbstractModel):
 
     _name = "res.company.property.mixin"
+    _description = "Company property mixin abstract"
 
 
     def web_read(self, specification):
