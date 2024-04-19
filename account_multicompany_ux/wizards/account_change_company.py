@@ -67,14 +67,21 @@ class AccountChangeCurrency(models.TransientModel):
             old_doc_type = self.move_id.l10n_latam_document_type_id
 
         self.move_id.invoice_line_ids.tax_ids = False
+        # si el payment term tiene compañía y es distinta a la que elegimos, forzamos recomputo
+        if self.move_id.invoice_payment_term_id.company_id and self.move_id.invoice_payment_term_id.company_id != self.company_id:
+            # lo tenemos que hacer antes del write sino se obtiene mensaje "Operación no válida. Empresas incompatibles con los registros"
+            self.move_id.with_company(self.move_id.company_id)._compute_invoice_payment_term_id()
+        invoice_payment_term_id = False
+        if self.move_id.is_purchase_document() and self.move_id._origin.partner_id and (not self.move_id.invoice_payment_term_id.company_id or self.move_id.invoice_payment_term_id.company_id == self.move_id.company_id):
+            # esto lo hacemos porque sino el write borra el invoice_payment_term_id en facturas de proveedor si en invoice_payment_term_id no tiene compañía
+            invoice_payment_term_id = self.move_id.invoice_payment_term_id
         self.move_id.write({
             'company_id': self.company_id.id,
             'journal_id': self.journal_id.id,
         })
+        if invoice_payment_term_id:
+            self.move_id.invoice_payment_term_id = invoice_payment_term_id
         self.move_id._compute_partner_bank_id()
-        # si el payment term tiene compañía y es distinta a la que elegimos, forzamos recomputo
-        if self.move_id.invoice_payment_term_id.company_id and self.move_id.invoice_payment_term_id.company_id != self.company_id:
-            self.move_id._compute_invoice_payment_term_id()
         self.move_id.invoice_line_ids.with_company(self.company_id.id)._compute_tax_ids()
         for invoice_line in self.move_id.invoice_line_ids.filtered(lambda x: not x.product_id).with_company(self.company_id.id):
             invoice_line.tax_ids = invoice_line._get_computed_taxes()
