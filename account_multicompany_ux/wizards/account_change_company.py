@@ -3,6 +3,7 @@
 # directory
 ##############################################################################
 from odoo import fields, models, api, _
+from odoo.fields import Command
 
 
 class AccountChangeCurrency(models.TransientModel):
@@ -75,6 +76,9 @@ class AccountChangeCurrency(models.TransientModel):
         if self.move_id.is_purchase_document() and self.move_id._origin.partner_id and (not self.move_id.invoice_payment_term_id.company_id or self.move_id.invoice_payment_term_id.company_id == self.move_id.company_id):
             # esto lo hacemos porque sino el write borra el invoice_payment_term_id en facturas de proveedor si en invoice_payment_term_id no tiene compañía
             invoice_payment_term_id = self.move_id.invoice_payment_term_id
+        invoice_line_ids = self.move_id.invoice_line_ids.read()
+        # Primero eliminamos las líneas de factura, luego cambiamos de compañía a la factura y posteriormente volvemos a crear las líneas que fueron eliminadas
+        self.move_id.invoice_line_ids.unlink()
         self.move_id.write({
             'company_id': self.company_id.id,
             'journal_id': self.journal_id.id,
@@ -82,6 +86,15 @@ class AccountChangeCurrency(models.TransientModel):
         if invoice_payment_term_id:
             self.move_id.invoice_payment_term_id = invoice_payment_term_id
         self.move_id._compute_partner_bank_id()
+        # Volvemos a crear las líneas de factura.
+        for invoice_line in invoice_line_ids:
+            self.move_id.invoice_line_ids = [Command.create({'product_id': invoice_line.get('product_id')[0] if invoice_line.get('product_id') else None,
+                                                             'name': invoice_line.get('name'),
+                                                             'quantity': invoice_line.get('quantity'),
+                                                             'price_unit': invoice_line.get('price_unit'),
+                                                             'discount': invoice_line.get('discount'),
+                                                             'deferred_start_date': invoice_line.get('deferred_start_date'),
+                                                             'deferred_end_date': invoice_line.get('deferred_end_date'),} if invoice_line['display_type'] not in ['line_section', 'line_note'] else {'name': invoice_line.get('name'), 'display_type': invoice_line['display_type']})]
         self.move_id.invoice_line_ids.with_company(self.company_id.id)._compute_tax_ids()
         for invoice_line in self.move_id.invoice_line_ids.filtered(lambda x: not x.product_id).with_company(self.company_id.id):
             invoice_line.tax_ids = invoice_line._get_computed_taxes()
