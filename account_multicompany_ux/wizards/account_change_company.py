@@ -81,8 +81,13 @@ class AccountChangeCurrency(models.TransientModel):
         })
         if invoice_payment_term_id:
             self.move_id.invoice_payment_term_id = invoice_payment_term_id
+        without_product = self.move_id.line_ids.filtered(lambda line : line.display_type == 'product' and not line.product_id)
+        (self.move_id.line_ids - without_product).with_company(self.company_id.id)._compute_account_id()
+        for line in without_product:
+            line.account_id = line.move_id.journal_id.default_account_id
+        self.move_id.line_ids.with_company(self.company_id.id)._compute_tax_ids()
         self.move_id._compute_partner_bank_id()
-        self.move_id.invoice_line_ids.with_company(self.company_id.id)._compute_tax_ids()
+
         for invoice_line in self.move_id.invoice_line_ids.filtered(lambda x: not x.product_id).with_company(self.company_id.id):
             invoice_line.tax_ids = invoice_line._get_computed_taxes()
         if old_doc_type and old_doc_type in self.move_id.l10n_latam_available_document_type_ids:
