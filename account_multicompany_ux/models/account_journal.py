@@ -17,5 +17,5 @@ class AccountJournal(models.Model):
         """
         for journal in self:
             currency = journal.currency_id or journal.company_id.currency_id
-            name = f"{journal.name} ({currency.name}) ({journal.company_id.get_company_sufix()})"
+            name = f"{journal.name} ({currency.name}) {journal.company_id.get_company_sufix()}"
             journal.display_name = name
