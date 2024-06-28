@@ -20,9 +20,9 @@ class PaymentProvider(models.Model):
                     provider.code
                 )
                 existing_payment_method_line = self.env['account.payment.method.line'].search([
+                    ('journal_id.company_id', '=', provider.journal_id.company_id.id),
                     ('payment_method_id', '=', default_payment_method_id),
-                    ('journal_id', '=', provider.journal_id.id)
-                ], limit=1)
+                    ('code', '=', provider.code),], limit=1)
                 if not existing_payment_method_line:
                     self.env['account.payment.method.line'].create({
                         'payment_method_id': default_payment_method_id,
