@@ -1,8 +1,9 @@
 from odoo import models, api
 
+
 class AccountPayment(models.Model):
     _inherit = 'account.payment'
-    
+
     @api.model_create_multi
     def create(self, val_list):
         force_company = self.env.context.get('force_company_id')
