@@ -25,9 +25,14 @@ class PaymentProvider(models.Model):
     def _link_payment_method_to_journal(self, provider):
         """ Reemplazamos método original """
         code = provider._get_code()
-        default_payment_method_id = provider._get_provider_payment_method(provider._get_code())
+        default_payment_method_id = provider._get_provider_payment_method(provider._get_code()).id
         # cambio el dominio de búsqueda sino no me detecta el existing_payment_method_line y me lo duplica
-        existing_payment_method_line = self.env['account.payment.method.line'].search([('journal_id.company_id', '=', provider.company_id.id),('code', '=', provider.code),('payment_method_id', '=', default_payment_method_id),('code', '=', code),], limit=1)
+        existing_payment_method_line = self.env['account.payment.method.line'].search([
+            ('journal_id.company_id', '=', provider.company_id.id),
+            ('code', '=', provider.code),
+            ('payment_method_id', '=', default_payment_method_id),
+            ('code', '=', code),], limit=1
+        )
         if not existing_payment_method_line:
             self.env['account.payment.method.line'].create({
                 'payment_method_id': default_payment_method_id,
