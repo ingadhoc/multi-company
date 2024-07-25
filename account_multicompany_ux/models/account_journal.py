@@ -12,10 +12,15 @@ class AccountJournal(models.Model):
     @api.depends('name', 'currency_id', 'company_id', 'company_id.currency_id')
     def _compute_display_name(self):
         """
-        No llamamos a super porque tendriamos que igualmente hacer un read
-        para obtener la compania y no queremos disminuir la performance. Este método lo que haría es agregar el nombre de la compañía entre paréntesis al final del nombre del diario cuando uno ingresa a la vista form esto lo hace en el nombre que está en el menú hamburguesa.
+        Este método lo que haría es agregar el nombre de la compañía entre paréntesis al final del nombre del diario 
+        cuando uno ingresa a la vista form esto lo hace en el nombre que está en el menú hamburguesa.
+        en caso de que {journal.company_id.get_company_sufix()} sea False llamamos a super para mantener el comportamiento
+        nativo de odoo
         """
         for journal in self:
             currency = journal.currency_id or journal.company_id.currency_id
-            name = f"{journal.name} ({currency.name}) {journal.company_id.get_company_sufix()}"
-            journal.display_name = name
+            if journal.company_id.get_company_sufix():
+                name = f"{journal.name} ({currency.name}) {journal.company_id.get_company_sufix()}"
+                journal.display_name = name
+            else:
+                super()._compute_display_name()
