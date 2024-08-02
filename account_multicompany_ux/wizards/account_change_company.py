@@ -51,7 +51,9 @@ class AccountChangeCurrency(models.TransientModel):
         """
         for rec in self:
             journal_type = rec.move_id.invoice_filter_type_domain or 'general'
-            domain = [('company_id', '=', rec.company_id._origin.id), ('type', '=', journal_type)]
+            # If the company has a parent_id, search the journals of the parent company
+            company = rec.company_id.parent_id._origin.id or rec.company_id._origin.id
+            domain = [('company_id', '=', company), ('type', '=', journal_type)]
             rec.suitable_journal_ids = self.env['account.journal'].search(domain)
 
     def change_company(self):
