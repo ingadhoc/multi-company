@@ -57,6 +57,7 @@ class AccountChangeCurrency(models.TransientModel):
     def change_company(self):
         self.ensure_one()
         old_name = False
+        original_payment_term = False
         # odoo no permite modificar diario si hay name, esto no es del todo correcto para facturas de proveedor con manual number y de hecho deberiamos
         # ver de cambiarlo en el codigo original, por ahora lo permitimos desde aca haciendo backup del nro y restaurando si corresponde
         if self.move_id._fields.get('l10n_latam_manual_document_number') and self.move_id.l10n_latam_manual_document_number and self.move_id.name:
@@ -71,6 +72,9 @@ class AccountChangeCurrency(models.TransientModel):
         if self.move_id.invoice_payment_term_id.company_id and self.move_id.invoice_payment_term_id.company_id != self.company_id:
             # lo tenemos que hacer antes del write sino se obtiene mensaje "Operación no válida. Empresas incompatibles con los registros"
             self.move_id.with_company(self.move_id.company_id)._compute_invoice_payment_term_id()
+        elif not self.move_id.invoice_payment_term_id.company_id:
+            original_payment_term = self.move_id.invoice_payment_term_id
+            self.move_id.invoice_payment_term_id = False
         invoice_payment_term_id = False
         if self.move_id.is_purchase_document() and self.move_id._origin.partner_id and (not self.move_id.invoice_payment_term_id.company_id or self.move_id.invoice_payment_term_id.company_id == self.move_id.company_id):
             # esto lo hacemos porque sino el write borra el invoice_payment_term_id en facturas de proveedor si en invoice_payment_term_id no tiene compañía
@@ -85,6 +89,8 @@ class AccountChangeCurrency(models.TransientModel):
         (self.move_id.line_ids - without_product).with_company(self.company_id.id)._compute_account_id()
         for line in without_product:
             line.account_id = line.move_id.journal_id.default_account_id
+        if original_payment_term:
+            self.move_id.invoice_payment_term_id = original_payment_term.id
         self.move_id.line_ids.with_company(self.company_id.id)._compute_tax_ids()
         self.move_id._compute_partner_bank_id()
 
