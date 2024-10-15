@@ -19,7 +19,7 @@
 ##############################################################################
 {
     'name': 'Payment Multicompany Usability',
-    'version': "17.0.2.0.0",
+    'version': "18.0.1.0.0",
     'author': 'ADHOC SA',
     'website': 'www.adhoc.com.ar',
     'license': 'AGPL-3',
@@ -28,6 +28,6 @@
     ],
     'data': [],
     'demo': [],
-    'installable': False,
+    'installable': True,
     'auto_install': False,
 }
