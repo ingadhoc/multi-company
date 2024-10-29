@@ -3,16 +3,16 @@
 # 	* account_multicompany_ux
 # 
 # Translators:
-# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2023
+# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-13 14:01+0000\n"
+"POT-Creation-Date: 2024-04-19 01:55+0000\n"
 "PO-Revision-Date: 2023-01-13 14:01+0000\n"
-"Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2023\n"
-"Language-Team: Spanish (https://www.transifex.com/adhoc/teams/46451/es/)\n"
+"Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2024\n"
+"Language-Team: Spanish (https://app.transifex.com/adhoc/teams/46451/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -52,28 +52,32 @@ msgid "Accounts Receivable"
 msgstr "Cuentas por Cobrar"
 
 #. module: account_multicompany_ux
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_account__algolia_search
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_journal__algolia_search
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_move__algolia_search
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_tax__algolia_search
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_product_category__algolia_search
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_product_product__algolia_search
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_product_template__algolia_search
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company__algolia_search
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__algolia_search
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__algolia_search
-msgid "Algolia Search"
+#: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_account_change_company
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: account_multicompany_ux
+#: model:ir.actions.act_window,name:account_multicompany_ux.action_account_change_company
+#: model:ir.model,name:account_multicompany_ux.model_account_change_company
+#: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_account_change_company
+#: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_move_form
+msgid "Change Company"
 msgstr ""
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_res_company
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__company_ids
 msgid "Companies"
-msgstr "Empresas"
+msgstr "Compañías"
 
 #. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_bank_statement_line__company_id
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__company_id
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_move__company_id
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_payment__company_id
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__company_id
 msgid "Company"
-msgstr "Companía"
+msgstr "Compañía"
 
 #. module: account_multicompany_ux
 #: model:ir.actions.act_window,name:account_multicompany_ux.action_res_company_property
@@ -97,12 +101,23 @@ msgid "Contact"
 msgstr "Contacto"
 
 #. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__create_date
+msgid "Created on"
+msgstr "Creado en"
+
+#. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_payment_term_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_payment_term_ids
 msgid "Customer Payment Term"
 msgstr ""
 
 #. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__display_name
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__display_name
 msgid "Display Name"
 msgstr "Nombre Mostrado"
@@ -126,6 +141,7 @@ msgid "Fiscal Positions"
 msgstr "Posiciones Fiscales"
 
 #. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__id
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__id
 msgid "ID"
 msgstr "ID (identificación)"
@@ -139,6 +155,7 @@ msgstr "Cuenta de Ingresos"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_account_journal
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__journal_id
 msgid "Journal"
 msgstr "Diario"
 
@@ -157,9 +174,25 @@ msgstr ""
 "consolidación. (tampoco facturas, pagos, etc)"
 
 #. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company____last_update
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property____last_update
 msgid "Last Modified on"
 msgstr "Ultima modificación el"
+
+#. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__write_uid
+msgid "Last Updated by"
+msgstr "Última modificación por"
+
+#. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__write_date
+msgid "Last Updated on"
+msgstr "Última actualización en"
+
+#. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__move_id
+msgid "Move"
+msgstr "Asiento"
 
 #. module: account_multicompany_ux
 #. odoo-python
@@ -207,6 +240,13 @@ msgid "Property for model %s not implemented yet"
 msgstr "Propiedad para el modelo %s no implementada todavía"
 
 #. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_bank_statement_line__reversed_entry_id
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_move__reversed_entry_id
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_payment__reversed_entry_id
+msgid "Reversal of"
+msgstr "Reversión de"
+
+#. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_product_pricelist_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_product_pricelist_ids
 msgid "Sale Pricelists"
@@ -228,6 +268,11 @@ msgid "Short name used to identify this company"
 msgstr ""
 
 #. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__suitable_journal_ids
+msgid "Suitable Journal"
+msgstr ""
+
+#. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_supplier_payment_term_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_supplier_payment_term_ids
 msgid "Supplier Payment Terms"
@@ -244,6 +289,11 @@ msgstr "Impuesto"
 #, python-format
 msgid "You can not create entries on a consolidation company"
 msgstr "Ud. no puede crear asientos en una compañía de consolidación"
+
+#. module: account_multicompany_ux
+#: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_account_change_company
+msgid "or"
+msgstr "o"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__standard_price
