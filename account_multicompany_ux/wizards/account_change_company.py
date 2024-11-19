@@ -80,6 +80,7 @@ class AccountChangeCurrency(models.TransientModel):
             # esto lo hacemos porque sino el write borra el invoice_payment_term_id en facturas de proveedor si en invoice_payment_term_id no tiene compañía
             invoice_payment_term_id = self.move_id.invoice_payment_term_id
         self.move_id.write({
+            'partner_bank_id': False,
             'company_id': self.company_id.id,
             'journal_id': self.journal_id.id,
         })
