@@ -42,7 +42,7 @@ class TestAccountMulticompanyUxUnitTest(common.TransactionCase):
             })
         
         self.bank_1 = self.env['res.partner.bank'].search([('company_id','=', False)], limit=1)
-        self.bank_1.write({'partner_id': self.first_company.id})
+        self.bank_1.write({'partner_id': self.first_company.partner_id.id})
         self.bank_1.company_id = self.first_company.id
         self.env.company = self.first_company
 
@@ -54,6 +54,7 @@ class TestAccountMulticompanyUxUnitTest(common.TransactionCase):
             'move_type': 'out_invoice',
             'journal_id': self.first_company_journal.id,
             'company_id': self.first_company.id,
+            'partner_bank_id': self.bank_1.id,
             'invoice_line_ids': [
                 Command.create({
                     'product_id': self.env.ref('product.product_product_16').id,
@@ -79,6 +80,7 @@ class TestAccountMulticompanyUxUnitTest(common.TransactionCase):
         })
 
         acc.change_company()
+        invoice._compute_bank_partner_id()
         invoice._compute_partner_bank_id()
         self.assertEqual(invoice.partner_bank_id.id,  self.bank_1.id , "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia")
         invoice.action_post()
