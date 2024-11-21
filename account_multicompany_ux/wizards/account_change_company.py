@@ -79,7 +79,7 @@ class AccountChangeCurrency(models.TransientModel):
         if self.move_id.is_purchase_document() and self.move_id._origin.partner_id and (not self.move_id.invoice_payment_term_id.company_id or self.move_id.invoice_payment_term_id.company_id == self.move_id.company_id):
             # esto lo hacemos porque sino el write borra el invoice_payment_term_id en facturas de proveedor si en invoice_payment_term_id no tiene compañía
             invoice_payment_term_id = self.move_id.invoice_payment_term_id
-        self.move_id.write({
+        self.move_id.with_context(skip_invoice_sync=True).write({
             'partner_bank_id': False,
             'company_id': self.company_id.id,
             'journal_id': self.journal_id.id,
