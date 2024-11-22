@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from odoo import models
 
 
@@ -34,7 +33,7 @@ class ResCompanyPropertyMixin(models.AbstractModel):
             view_id = self.env.ref('account_multicompany_ux.view_property_account_id_form').id
         else:
             view_id = self.env.ref('account_multicompany_ux.view_standard_price_form').id            
-        action['views'] = [[view_id, 'tree']]
+        action['views'] = [[view_id, 'list']]
         return action
 
 
