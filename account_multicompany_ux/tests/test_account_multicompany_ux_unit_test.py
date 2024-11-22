@@ -1,9 +1,9 @@
-import odoo.tests.common as common
+from odoo.tests.common import TransactionCase
 from odoo import Command, fields
 from datetime import timedelta
 
 
-class TestAccountMulticompanyUxUnitTest(common.TransactionCase):
+class TestAccountMulticompanyUxUnitTest(TransactionCase):
 
     def setUp(self):
         super().setUp()
@@ -23,14 +23,14 @@ class TestAccountMulticompanyUxUnitTest(common.TransactionCase):
                 'code': 'X2020',
                 'name': 'Product Sales - (test)',
                 'account_type': 'income',
-                'company_id': self.second_company.id,
+                'company_ids': [self.second_company.id],
             })
 
             a_receivable = self.env['account.account'].create({
                 'code': 'X2021',
                 'name': 'Product Sales Receivable - (test)',
                 'account_type': 'asset_receivable',
-                'company_id': self.second_company.id,
+                'company_ids': [self.second_company.id],
             })
 
             self.second_company_journal = self.env['account.journal'].create({
