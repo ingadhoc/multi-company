@@ -4,10 +4,9 @@ from odoo.addons.website_sale.controllers.main import WebsiteSale
 
 class WebsiteSale(WebsiteSale):
 
-    def values_postprocess(self, order, mode, values, errors, error_msg):     
-        new_values, errors, error_msg = super().values_postprocess(order, mode, values, errors, error_msg)
-        
-        if mode[0] == 'new':
-            new_values['company_id'] = False
-        return new_values, errors, error_msg
-        
+    def _complete_address_values(
+        self, address_values, address_type, use_delivery_as_billing, order_sudo
+    ):
+        super()._complete_address_values(address_values, address_type, use_delivery_as_billing, order_sudo)
+        if not address_values['user_id']:
+            address_values['company_id'] = False
