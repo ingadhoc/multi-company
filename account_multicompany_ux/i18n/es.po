@@ -3,16 +3,16 @@
 # 	* account_multicompany_ux
 # 
 # Translators:
-# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2024
 # Gonzalo, 2024
+# Juan José Scarafía <scarafia.juanjose@gmail.com>, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-13 20:46+0000\n"
+"POT-Creation-Date: 2024-11-22 12:10+0000\n"
 "PO-Revision-Date: 2024-04-18 15:05+0000\n"
-"Last-Translator: Gonzalo, 2024\n"
+"Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2024\n"
 "Language-Team: Spanish (https://app.transifex.com/adhoc/teams/46451/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -230,7 +230,7 @@ msgstr "Categoría de producto"
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_product_product
 msgid "Product Variant"
-msgstr "Producto"
+msgstr "Variante de producto"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__property_domain
