@@ -1,16 +1,13 @@
 
 import urllib.parse
 
-import werkzeug
-
 from odoo import _, http
-from odoo.exceptions import AccessError, ValidationError
 from odoo.http import request
 
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment.controllers.post_processing import PaymentPostProcessing
 from odoo.addons.payment.controllers import portal
-from odoo.exceptions import AccessError, MissingError, ValidationError
+from odoo.exceptions import AccessError, MissingError
 
 class PaymentPortal(portal.PaymentPortal):
 
@@ -30,6 +27,7 @@ class PaymentPortal(portal.PaymentPortal):
 
         else:
             company_id = request.env.user.company_id
+        availability_report = {}
         # Select all the payment methods and tokens that match the payment context.
         providers_sudo = request.env['payment.provider'].sudo()._get_compatible_providers(
             company_id.id,
@@ -37,12 +35,14 @@ class PaymentPortal(portal.PaymentPortal):
             0.,  # There is no amount to pay with validation transactions.
             force_tokenization=True,
             is_validation=True,
+            report=availability_report,
             **kwargs,
         )  # In sudo mode to read the fields of providers and partner (if logged out).
         payment_methods_sudo = request.env['payment.method'].sudo()._get_compatible_payment_methods(
             providers_sudo.ids,
             partner_sudo.id,
             force_tokenization=True,
+            report=availability_report,
         )  # In sudo mode to read the fields of providers.
         tokens_sudo = request.env['payment.token'].sudo()._get_available_tokens(
             None, partner_sudo.id, is_validation=True
@@ -61,6 +61,7 @@ class PaymentPortal(portal.PaymentPortal):
             'providers_sudo': providers_sudo,
             'payment_methods_sudo': payment_methods_sudo,
             'tokens_sudo': tokens_sudo,
+            'availability_report': availability_report,
             'transaction_route': '/payment/transaction',
             'landing_route': '/my/payment_method',
             'access_token': access_token,
