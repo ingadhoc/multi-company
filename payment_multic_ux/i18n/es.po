@@ -4,21 +4,27 @@
 # 
 # Translators:
 # Juan José Scarafía <scarafia.juanjose@gmail.com>, 2024
-# augusto-weiss, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0+e\n"
+"Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-11 20:45+0000\n"
-"PO-Revision-Date: 2024-01-15 12:37+0000\n"
-"Last-Translator: augusto-weiss, 2024\n"
+"POT-Creation-Date: 2024-11-14 20:27+0000\n"
+"PO-Revision-Date: 2024-11-14 20:27+0000\n"
+"Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2024\n"
 "Language-Team: Spanish (https://app.transifex.com/adhoc/teams/46451/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: es\n"
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+
+#. module: payment_multic_ux
+#: model:ir.model.fields,field_description:payment_multic_ux.field_account_payment__algolia_search
+#: model:ir.model.fields,field_description:payment_multic_ux.field_payment_provider__algolia_search
+#: model:ir.model.fields,field_description:payment_multic_ux.field_payment_transaction__algolia_search
+msgid "Algolia Search"
+msgstr ""
 
 #. module: payment_multic_ux
 #: model:ir.model.fields,field_description:payment_multic_ux.field_payment_provider__journal_id
@@ -43,4 +49,4 @@ msgstr "Pagos"
 #. module: payment_multic_ux
 #: model:ir.model.fields,help:payment_multic_ux.field_payment_provider__journal_id
 msgid "The journal in which the successful transactions are posted."
-msgstr "Diario en el cual las transacciones exitosas son publicadas"
+msgstr "El diario donde se publican las transacciones exitosas."
