@@ -14,10 +14,6 @@ class ResCompany(models.Model):
         help='Short name used to identify this company',
     )
 
-    consolidation_company = fields.Boolean(
-        help='Journal entries are not allowed on consolidation companies. (so'
-        ' invoices, payments, etc neither)'
-    )
 
     # TODO habria que terminar de ver si esta bien este cache o en realidad para
     # ser mas performante no hay que usar nada de self

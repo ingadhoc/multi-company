@@ -9,9 +9,6 @@
             <div class="oe_title">
                 <field name="short_name" placeholder="Short Name..."/>
             </div>
-            <field name="partner_id" position="after">
-                <field name="consolidation_company"/>
-            </field>
         </field>
     </record>
 

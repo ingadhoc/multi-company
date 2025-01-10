@@ -94,7 +94,7 @@ class ResCompanyProperty(models.Model):
         domain = []
         comodel = self._get_property_comodel()
         self.invalidate_model(['property_account_id'])
-        if comodel in ['account.account']:
+        if comodel in ['account.account'] and hasattr(self.env['res.company'], 'consolidation_company'):
             domain = [('company_id.consolidation_company', '=', False)]
         return self.search(domain)
 

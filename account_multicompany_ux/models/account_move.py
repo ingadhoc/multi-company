@@ -11,10 +11,3 @@ class AccountMove(models.Model):
 
     reversed_entry_id = fields.Many2one(check_company=False)
     company_id = fields.Many2one(tracking=True)
-
-    @api.constrains('company_id')
-    def check_company(self):
-        for move in self:
-            if move.company_id.consolidation_company:
-                raise ValidationError(_(
-                    'You can not create entries on a consolidation company'))
