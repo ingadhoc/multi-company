@@ -161,7 +161,7 @@ class ResCompanyProperty(models.Model):
                 company_property_field = 'standard_price'
             else:
                 raise UserError(
-                    _('Property for model %s not implemented yet' % comodel))
+                    _('Property for model %s not implemented yet', comodel))
         return company_property_field
 
     @api.depends('company_id', 'property_field')
