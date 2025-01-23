@@ -2,7 +2,11 @@
 # For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
-from odoo import api, fields, models, _
+import logging
+from ast import literal_eval
+from psycopg2 import sql
+
+from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError
 from odoo import tools
 from lxml import etree
@@ -44,8 +48,13 @@ class ResCompanyProperty(models.Model):
             FROM
                 res_company c
         """
-        cr.execute("""CREATE or REPLACE VIEW %s as (%s
-        )""" % (self._table, query))
+
+        cr.execute(
+            sql.SQL("CREATE OR REPLACE VIEW {} AS ({})").format(
+                sql.Identifier(self._table),
+                sql.SQL(query)
+            )
+        )
 
     property_field = fields.Char(
         compute='_compute_property_field',
