@@ -26,7 +26,7 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
                 'company_ids': [self.second_company.id],
             })
 
-            a_receivable = self.env['account.account'].create({
+            self.env['account.account'].create({
                 'code': 'X2021',
                 'name': 'Product Sales Receivable - (test)',
                 'account_type': 'asset_receivable',
