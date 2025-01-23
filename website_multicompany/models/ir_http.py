@@ -24,4 +24,4 @@ class Http(models.AbstractModel):
             request.update_context(
                 allowed_company_ids=users_company_ids,
             )
-        request.website = website.with_context(request.context)
+        request.website = website.with_context(**request.context)
