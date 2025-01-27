@@ -18,17 +18,17 @@
 #
 ##############################################################################
 {
-    'name': 'Website Sale stock multicompany',
-    'version': "18.0.1.0.0",
-    'author': 'ADHOC SA',
-    'website': 'www.adhoc.com.ar',
-    'license': 'AGPL-3',
-    'depends': [
-        'website_sale_stock',
-        'website_sale_multicompany',
+    "name": "Website Sale stock multicompany",
+    "version": "18.0.1.0.0",
+    "author": "ADHOC SA",
+    "website": "www.adhoc.com.ar",
+    "license": "AGPL-3",
+    "depends": [
+        "website_sale_stock",
+        "website_sale_multicompany",
     ],
-    'data': [],
-    'demo': [],
-    'installable': True,
-    'auto_install': True,
+    "data": [],
+    "demo": [],
+    "installable": True,
+    "auto_install": True,
 }

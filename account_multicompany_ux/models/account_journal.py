@@ -6,13 +6,12 @@ from odoo import api, models
 
 
 class AccountJournal(models.Model):
+    _inherit = "account.journal"
 
-    _inherit = 'account.journal'
-
-    @api.depends('name', 'currency_id', 'company_id', 'company_id.currency_id')
+    @api.depends("name", "currency_id", "company_id", "company_id.currency_id")
     def _compute_display_name(self):
         """
-        Este método lo que haría es agregar el nombre de la compañía entre paréntesis al final del nombre del diario 
+        Este método lo que haría es agregar el nombre de la compañía entre paréntesis al final del nombre del diario
         cuando uno ingresa a la vista form esto lo hace en el nombre que está en el menú hamburguesa.
         en caso de que {journal.company_id.get_company_sufix()} sea False llamamos a super para mantener el comportamiento
         nativo de odoo
