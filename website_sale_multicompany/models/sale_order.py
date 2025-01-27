@@ -3,15 +3,14 @@
 # directory
 ##############################################################################
 
-from odoo import models, fields
+from odoo import models
 
 
 class SaleOrder(models.Model):
-
-    _inherit = 'sale.order'
+    _inherit = "sale.order"
 
     def _sale_get_order_company_fix(self):
         vals = {}
         if self.company_id != self.env.user.company_id:
-            vals['company_id'] = self.env.user.company_id.id
+            vals["company_id"] = self.env.user.company_id.id
         return vals

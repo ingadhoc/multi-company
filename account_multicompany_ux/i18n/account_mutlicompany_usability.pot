@@ -240,4 +240,3 @@ msgstr ""
 #: model:ir.model,name:account_mutlicompany_usability.model_account_tax_code
 msgid "Tax Code"
 msgstr ""
-

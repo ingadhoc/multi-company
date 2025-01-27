@@ -3,14 +3,11 @@
 # directory
 ##############################################################################
 
-import logging
-from odoo import models, tools
-from odoo.http import request
+from odoo import models
 
 
 class Website(models.Model):
-
-    _inherit = 'website'
+    _inherit = "website"
 
     def sale_get_order(self, force_create=False):
         sale_order_sudo = super().sale_get_order(force_create)

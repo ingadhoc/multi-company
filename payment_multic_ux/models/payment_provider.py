@@ -4,10 +4,8 @@ from odoo import fields, models
 
 
 class PaymentProvider(models.Model):
-    _inherit = 'payment.provider'
+    _inherit = "payment.provider"
 
     journal_id = fields.Many2one(
-        compute=False,
-        inverse='_inverse_journal_id',
-        domain="[('type', 'in', ('bank', 'cash'))]",
-        check_company=False)
+        compute=False, inverse="_inverse_journal_id", domain="[('type', 'in', ('bank', 'cash'))]", check_company=False
+    )
