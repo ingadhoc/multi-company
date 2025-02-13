@@ -88,7 +88,7 @@ class ResCompanyProperty(models.Model):
 
     @api.onchange("property_field", "company_id")
     def _onchange_property_field(self):
-        return {"domain": {"property_account_id": [("company_id", "=", False)]}}
+        return {"domain": {"property_account_id": [("company_ids", "=", False)]}}
 
     @api.model
     def _get_companies(self):
@@ -216,8 +216,8 @@ class ResCompanyProperty(models.Model):
                         domain = []
                 record.property_domain = [
                     "|",
-                    ("company_id", "=", False),
-                    ("company_id", "=", record.company_id.id),
+                    ("company_ids", "=", False),
+                    ("company_ids", "in", record.company_id.id),
                 ] + domain
             else:
                 record.property_domain = []
