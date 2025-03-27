@@ -24,7 +24,7 @@ class ProductProduct(models.Model):
     )
     standard_price_ids = fields.Many2many(
         "res.company.property",
-        string="Accounting Costs",
+        string="Costs",
         compute="_compute_properties",
     )
 
