@@ -67,7 +67,23 @@ class AccountChangeCurrency(models.TransientModel):
         if self.move_id._fields.get('l10n_latam_document_type_id') and self.move_id.l10n_latam_manual_document_number:
             old_doc_type = self.move_id.l10n_latam_document_type_id
 
+        # Make a copy to avoid modifying the original recordset after
+        original_discount_lines = self.move_id.line_ids.filtered(
+            lambda x: x.product_id and x.product_id.name == _('Discount')
+        )
+
+        if original_discount_lines:
+            # if discount product has a company associated, we need to remove it before changing the company
+            if original_discount_lines.product_id.company_id:
+                original_discount_lines.product_id.write({'company_id': False})
+
+        original_discount_taxes = {
+            line.id: line.tax_ids.ids[:] for line in original_discount_lines
+        }
+
+        # Remove taxes from invoice lines to allow changing account
         self.move_id.invoice_line_ids.tax_ids = False
+
         # si el payment term tiene compañía y es distinta a la que elegimos, forzamos recomputo
         if self.move_id.invoice_payment_term_id.company_id and self.move_id.invoice_payment_term_id.company_id != self.company_id:
             # lo tenemos que hacer antes del write sino se obtiene mensaje "Operación no válida. Empresas incompatibles con los registros"
@@ -84,6 +100,7 @@ class AccountChangeCurrency(models.TransientModel):
             'company_id': self.company_id.id,
             'journal_id': self.journal_id.id,
         })
+
         if invoice_payment_term_id:
             self.move_id.invoice_payment_term_id = invoice_payment_term_id
         without_product = self.move_id.line_ids.filtered(lambda line : line.display_type == 'product' and not line.product_id)
@@ -92,7 +109,14 @@ class AccountChangeCurrency(models.TransientModel):
             line.account_id = line.move_id.journal_id.default_account_id
         if original_payment_term:
             self.move_id.invoice_payment_term_id = original_payment_term.id
-        self.move_id.line_ids.with_company(self.company_id.id)._compute_tax_ids()
+
+        # Recompute taxes for product lines (excluding discount lines)
+        (self.move_id.line_ids - original_discount_lines).with_company(self.company_id.id)._compute_tax_ids()
+
+        # Recompute taxes for discount lines
+        if original_discount_lines:
+            self._get_change_company_discount_tax(original_discount_lines, original_discount_taxes)
+
         self.move_id._compute_partner_bank_id()
 
         for invoice_line in self.move_id.invoice_line_ids.filtered(lambda x: not x.product_id).with_company(self.company_id.id):
@@ -101,3 +125,21 @@ class AccountChangeCurrency(models.TransientModel):
             self.move_id.l10n_latam_document_type_id = old_doc_type
             if self.move_id.l10n_latam_manual_document_number:
                 self.move_id.name = old_name
+
+    def _get_change_company_discount_tax(self, discount_lines, discount_taxes):
+        for line in discount_lines:
+            tax_ids = self.env['account.tax'].browse(discount_taxes[line.id])
+            for tax in tax_ids:
+                new_tax = self.env['account.tax'].search([
+                    ('type_tax_use', '=', tax.type_tax_use),
+                    ('amount', '=', tax.amount),
+                    ('active', '=', True),
+                    ('company_id', '=', self.company_id.id),
+                ], limit=1)
+                if new_tax:
+                    line.tax_ids = [(4, new_tax.id)]
+                else:
+                    message = _(
+                        "The selected company (%s) does not have a discount tax with the same type and amount as '%s'. The discount tax has been removed from the line."
+                    ) % (self.company_id.name, tax.name)
+                    self.move_id.message_post(body=message)
