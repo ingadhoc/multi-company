@@ -11,6 +11,7 @@ class ResCompanyPropertyMixin(models.AbstractModel):
         if hasattr(self, "_property_fields"):
             fields_to_add_context = self._property_fields.intersection(fields_to_read)
             for field in fields_to_add_context:
+                specification[field].setdefault("context", {})
                 specification[field]["context"].update({"active_id": self._ids})
         return super().web_read(specification)
 
