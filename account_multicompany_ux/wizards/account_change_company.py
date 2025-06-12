@@ -69,7 +69,7 @@ class AccountChangeCurrency(models.TransientModel):
 
         # Make a copy to avoid modifying the original recordset after
         original_discount_lines = self.move_id.line_ids.filtered(
-            lambda x: x.product_id and x.product_id.name == _('Discount')
+            lambda x: x.product_id == self.company_id.sale_discount_product_id
         )
 
         if original_discount_lines:
