@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="product_category_form_view" model="ir.ui.view">
+        <field name="name">product.category.property.form.inherit.sale</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_form_view"/>
+        <field name="arch" type="xml">
+            <!-- downpayment -->
+            <field name="property_account_downpayment_categ_id" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+
+            <!-- respetamos mismos grupos que vista original -->
+            <field name="property_account_downpayment_categ_id" position="after">
+                <label for="property_account_downpayment_categ_ids"/>
+                <div class="oe_inline" groups="account.group_account_readonly">
+                    <field name="property_account_downpayment_categ_ids" widget="many2many_tags" class="oe_inline" context="{'active_model': 'product.category', 'active_id': id, 'property_field': 'property_account_downpayment_categ_id'}"/>
+                    <!-- pasamos property_domain igual al definido en vista -->
+                    <button name="action_company_properties" string="(edit)" class="oe_link" type="object" context="{'property_field': 'property_account_downpayment_categ_id', 'property_domain': []}"/>
+                </div>
+            </field>
+        </field>
+    </record>
+
+</odoo>
