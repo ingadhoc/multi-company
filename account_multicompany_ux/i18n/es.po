@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-22 12:10+0000\n"
+"POT-Creation-Date: 2025-07-03 21:36+0000\n"
 "PO-Revision-Date: 2024-04-18 15:05+0000\n"
 "Last-Translator: Juan José Scarafía <scarafia.juanjose@gmail.com>, 2024\n"
 "Language-Team: Spanish (https://app.transifex.com/adhoc/teams/46451/es/)\n"
@@ -287,6 +287,15 @@ msgstr "Diario Adecuado"
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_supplier_payment_term_ids
 msgid "Supplier Payment Terms"
 msgstr "Condiciones de Pago del Proveedor"
+
+#. module: account_multicompany_ux
+#. odoo-python
+#: code:addons/account_multicompany_ux/wizards/account_change_company.py:0
+#, python-format
+msgid ""
+"The selected company (%s) does not have a discount tax with the same type "
+"and amount as '%s'. The discount tax has been removed from the line."
+msgstr ""
 
 #. module: account_multicompany_ux
 #. odoo-python
