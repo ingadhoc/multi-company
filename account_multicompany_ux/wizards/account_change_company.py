@@ -3,6 +3,7 @@
 # directory
 ##############################################################################
 from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class AccountChangeCurrency(models.TransientModel):
@@ -77,16 +78,32 @@ class AccountChangeCurrency(models.TransientModel):
             old_doc_type = self.move_id.l10n_latam_document_type_id
 
         # Make a copy to avoid modifying the original recordset after
-        original_discount_lines = self.move_id.line_ids.filtered(
-            lambda x: x.product_id == self.company_id.sale_discount_product_id
+        # por más que podemos agarrar líneas de más (líneas de descuento que usuari creó a mano eligiendo producto
+        # y no através del wizard), esto no es grave porque estamos haciendo hasta un mejor mapping de taxes
+        original_discount_lines = self.move_id.invoice_line_ids.filtered(
+            lambda x: x.product_id and x.product_id == self.move_id.company_id.sale_discount_product_id
         )
+        downpayment_lines = self.env["account.move.line"]
+        if self.move_id.invoice_line_ids._fields.get("is_downpayment"):
+            downpayment_lines = self.move_id.invoice_line_ids.filtered("is_downpayment")
 
         if original_discount_lines:
             # if discount product has a company associated, we need to remove it before changing the company
             if original_discount_lines.product_id.company_id:
                 original_discount_lines.product_id.write({"company_id": False})
 
-        original_discount_taxes = {line.id: line.tax_ids.ids[:] for line in original_discount_lines}
+        original_discount_downpayment_lines = original_discount_lines + downpayment_lines
+        if self.move_id.fiscal_position_id._fields.get("l10n_ar_tax_ids"):
+            fp_tax_groups = self.move_id.fiscal_position_id.l10n_ar_tax_ids.filtered(
+                lambda x: x.tax_type == "perception"
+            ).mapped("default_tax_id.tax_group_id")
+        else:
+            fp_tax_groups = self.env["account.tax.group"]
+
+        original_discount_downpayment_taxes = {
+            line.id: line.tax_ids.filtered(lambda x: x.tax_group_id not in fp_tax_groups).ids[:]
+            for line in original_discount_downpayment_lines
+        }
 
         # Remove taxes from invoice lines to allow changing account
         self.move_id.invoice_line_ids.tax_ids = False
@@ -124,47 +141,97 @@ class AccountChangeCurrency(models.TransientModel):
         without_product = self.move_id.line_ids.filtered(
             lambda line: line.display_type == "product" and not line.product_id
         )
-        (self.move_id.line_ids - without_product).with_company(self.company_id.id)._compute_account_id()
-        for line in without_product:
+        (self.move_id.line_ids - without_product - downpayment_lines).with_company(
+            self.company_id.id
+        )._compute_account_id()
+        for line in without_product - downpayment_lines:
             line.account_id = line.move_id.journal_id.default_account_id
+
+        for line in downpayment_lines:
+            line.account_id = self._get_change_downpayment_account(
+                self.company_id, line, self.move_id.fiscal_position_id
+            )
+
         if original_payment_term:
             self.move_id.invoice_payment_term_id = original_payment_term.id
-
         # Recompute taxes for product lines (excluding discount lines)
         (self.move_id.line_ids - original_discount_lines).with_company(self.company_id.id)._compute_tax_ids()
 
         # Recompute taxes for discount lines
-        if original_discount_lines:
-            self._get_change_company_discount_tax(original_discount_lines, original_discount_taxes)
-
+        # sabemos que esto solo funciona bien si el usuario no manipula los impuestos por defecto de los productos
+        # eventualmente podríamos hacer cambio de impuestos para todas las lineas (no solo downpayment y discount)
+        # pero como queremos deprecar todo esto e ir branches mantenemos el cambio por ahora en lo más chico posible
+        if original_discount_downpayment_lines:
+            self._get_change_company_line_taxes(
+                original_discount_downpayment_lines, original_discount_downpayment_taxes
+            )
         self.move_id._compute_partner_bank_id()
-
         for invoice_line in self.move_id.invoice_line_ids.filtered(lambda x: not x.product_id).with_company(
             self.company_id.id
         ):
-            invoice_line.tax_ids = invoice_line._get_computed_taxes()
+            (invoice_line - original_discount_downpayment_lines).tax_ids = invoice_line._get_computed_taxes()
         if old_doc_type and old_doc_type in self.move_id.l10n_latam_available_document_type_ids:
             self.move_id.l10n_latam_document_type_id = old_doc_type
             if self.move_id.l10n_latam_manual_document_number:
                 self.move_id.name = old_name
 
-    def _get_change_company_discount_tax(self, discount_lines, discount_taxes):
-        for line in discount_lines:
-            tax_ids = self.env["account.tax"].browse(discount_taxes[line.id])
+    def _get_change_company_line_taxes(self, lines, taxes):
+        """Por ahora a nivel taxes solo usamos el mapping para líneas de descuento y downpayment
+        Si duele y todo va bien podemos extenderlo a todas las líneas
+        """
+        for line in lines:
+            tax_ids = self.env["account.tax"].browse(taxes[line.id])
+            new_tax_ids = []
             for tax in tax_ids:
                 new_tax = self.env["account.tax"].search(
                     [
                         ("type_tax_use", "=", tax.type_tax_use),
+                        ("tax_group_id.name", "=", tax.tax_group_id.name),
                         ("amount", "=", tax.amount),
                         ("active", "=", True),
                         ("company_id", "=", self.company_id.id),
                     ],
                     limit=1,
                 )
-                if new_tax:
-                    line.tax_ids = [(4, new_tax.id)]
-                else:
+                if not new_tax:
+                    # TODO adaptar mensaje
                     message = _(
-                        "The selected company (%s) does not have a discount tax with the same type and amount as '%s'. The discount tax has been removed from the line."
+                        "The selected company (%s) does not have an equivalent tax to '%s' "
+                        "(same type, group and amount)."
                     ) % (self.company_id.name, tax.name)
-                    self.move_id.message_post(body=message)
+                    # a validar si raise o no. El raise nos protege más de no hacer error.
+                    raise UserError(message)
+                    # self.move_id.message_post(body=message)
+                    # continue
+                new_tax_ids.append(new_tax.id)
+            line.tax_ids = [(6, 0, new_tax_ids)]
+
+    @api.model
+    def _get_change_downpayment_account(self, to_company, line, fiscal_pos):
+        """Update account_id on lines with the correct downpayment or income account."""
+        account = False
+        products = line.sale_line_ids.mapped("order_id.order_line.product_id")
+        if not products:
+            account = line.with_company(to_company.id)._compute_account_id()
+
+        product_accounts = []
+        for product in products:
+            accounts = product.product_tmpl_id.with_company(line.account_id.company_ids[0]).get_product_accounts(
+                fiscal_pos=fiscal_pos
+            )
+            account = accounts.get("downpayment") or accounts.get("income")
+            if account:
+                product_accounts.append((product, account))
+        if product_accounts:
+            matching = [(product, acc) for product, acc in product_accounts if acc == line.account_id]
+
+            if matching:
+                matched_product = matching[0][0]
+                matched_account = matched_product.product_tmpl_id.with_company(to_company).get_product_accounts(
+                    fiscal_pos=fiscal_pos
+                )
+                account = matched_account.get("downpayment") or matched_account.get("income")
+
+        else:
+            account = line.with_company(to_company.id)._compute_account_id()
+        return account
