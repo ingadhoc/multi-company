@@ -56,6 +56,18 @@
             </list>
         </field>
     </record>
+    <record id="view_property_credit_form" model="ir.ui.view">
+        <field name="name">res.company.property.form</field>
+        <field name="model">res.company.property</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="account_multicompany_ux.view_res_company_account_property_form"></field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="property_credit_currency_id" />
+                <field name="property_credit_id" />
+            </list>
+        </field>
+    </record>
     <record id="view_standard_price_form" model="ir.ui.view">
         <field name="name">res.company.property.form</field>
         <field name="model">res.company.property</field>
