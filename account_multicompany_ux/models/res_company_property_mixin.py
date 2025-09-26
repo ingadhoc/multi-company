@@ -28,6 +28,8 @@ class ResCompanyPropertyMixin(models.AbstractModel):
             view_id = self.env.ref("account_multicompany_ux.view_property_term_id_form").id
         elif self._context.get("property_field") == "property_product_pricelist":
             view_id = self.env.ref("account_multicompany_ux.view_property_pricelist_id_form").id
+        elif self._context.get("property_field") == "credit":
+            view_id = self.env.ref("account_multicompany_ux.view_property_credit_id_form").id
         elif self._context.get("property_field") == "property_supplier_payment_term_id":
             view_id = self.env.ref("account_multicompany_ux.view_property_term_id_form").id
         elif self._context.get("property_field").startswith("property_account"):

@@ -76,6 +76,11 @@ class ResCompanyProperty(models.Model):
         compute="_compute_property_pricelist",
         inverse="_inverse_property_pricelist",
     )
+    property_credit_id = fields.Float(
+        string="Credit",
+        compute="_compute_property_credit",
+        inverse="_inverse_property_credit",
+    )
     standard_price = fields.Float(
         string="standard_price",
         compute="_compute_property_standard_price",
@@ -149,6 +154,8 @@ class ResCompanyProperty(models.Model):
             property_field = self._context.get("property_field")
             if property_field == "standard_price":
                 company_property_field = "standard_price"
+            elif property_field == "credit":
+                company_property_field = "property_credit_id"
             else:
                 raise UserError(_("Property for model %s not implemented yet", comodel))
         return company_property_field
@@ -254,6 +261,14 @@ class ResCompanyProperty(models.Model):
             else:
                 record.property_pricelist_id = False
 
+    @api.depends("property_field")
+    def _compute_property_credit(self):
+        for record in self:
+            if record.property_field == "credit":
+                record.property_credit_id = record.with_context(rochi=True)._get_property_value()
+            else:
+                record.property_credit_id = 0
+
     def _set_property_value(self, value):
         self.ensure_one()
         record = self._get_record()
@@ -277,6 +292,10 @@ class ResCompanyProperty(models.Model):
     def _inverse_property_pricelist(self):
         for rec in self:
             rec._set_property_value(rec.property_pricelist_id.id)
+
+    def _inverse_property_credit(self):
+        for rec in self:
+            rec._set_property_value(rec.property_credit_id.id)
 
     def _inverse_property_standard_price(self):
         for rec in self:
