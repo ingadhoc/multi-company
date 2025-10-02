@@ -11,7 +11,7 @@ _logger = logging.getLogger(__name__)
 
 
 class PaymentPostProcessingInherit(PaymentPostProcessing):
-    @http.route("/payment/status/poll", type="json", auth="public")
+    @http.route("/payment/status/poll", type="jsonrpc", auth="public")
     def poll_status(self, **_kwargs):
         """Fetch the transaction and trigger its post-processing.
 
