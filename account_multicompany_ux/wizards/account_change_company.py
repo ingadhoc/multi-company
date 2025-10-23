@@ -62,6 +62,8 @@ class AccountChangeCurrency(models.TransientModel):
 
     def change_company(self):
         self.ensure_one()
+
+        # BACK UP DE DATOS ANTES DE CHANGE DE COMPANY
         old_name = False
         original_payment_term = False
         # odoo no permite modificar diario si hay name, esto no es del todo correcto para facturas de proveedor con manual number y de hecho deberiamos
@@ -77,32 +79,16 @@ class AccountChangeCurrency(models.TransientModel):
         if self.move_id._fields.get("l10n_latam_document_type_id") and self.move_id.l10n_latam_manual_document_number:
             old_doc_type = self.move_id.l10n_latam_document_type_id
 
-        # Make a copy to avoid modifying the original recordset after
-        # por más que podemos agarrar líneas de más (líneas de descuento que usuari creó a mano eligiendo producto
-        # y no através del wizard), esto no es grave porque estamos haciendo hasta un mejor mapping de taxes
-        original_discount_lines = self.move_id.invoice_line_ids.filtered(
-            lambda x: x.product_id and x.product_id == self.move_id.company_id.sale_discount_product_id
-        )
-        downpayment_lines = self.env["account.move.line"]
-        if self.move_id.invoice_line_ids._fields.get("is_downpayment"):
-            downpayment_lines = self.move_id.invoice_line_ids.filtered("is_downpayment")
-
-        if original_discount_lines:
-            # if discount product has a company associated, we need to remove it before changing the company
-            if original_discount_lines.product_id.company_id:
-                original_discount_lines.product_id.write({"company_id": False})
-
-        original_discount_downpayment_lines = original_discount_lines + downpayment_lines
+        # backup de original taxes
         if self.move_id.fiscal_position_id._fields.get("l10n_ar_tax_ids"):
             fp_tax_groups = self.move_id.fiscal_position_id.l10n_ar_tax_ids.filtered(
                 lambda x: x.tax_type == "perception"
             ).mapped("default_tax_id.tax_group_id")
         else:
             fp_tax_groups = self.env["account.tax.group"]
-
-        original_discount_downpayment_taxes = {
+        original_taxes = {
             line.id: line.tax_ids.filtered(lambda x: x.tax_group_id not in fp_tax_groups).ids[:]
-            for line in original_discount_downpayment_lines
+            for line in self.move_id.invoice_line_ids
         }
 
         # Remove taxes from invoice lines to allow changing account
@@ -129,6 +115,9 @@ class AccountChangeCurrency(models.TransientModel):
         ):
             # esto lo hacemos porque sino el write borra el invoice_payment_term_id en facturas de proveedor si en invoice_payment_term_id no tiene compañía
             invoice_payment_term_id = self.move_id.invoice_payment_term_id
+
+        # EMPEZAMOS CON CAMBIOS
+        # COMPANY, JOURNAL, DOC TYPE and PAYMENT TERM
         self.move_id.with_context(skip_invoice_sync=True).write(
             {
                 "partner_bank_id": False,
@@ -136,11 +125,15 @@ class AccountChangeCurrency(models.TransientModel):
                 "journal_id": self.journal_id.id,
             }
         )
-        if invoice_payment_term_id:
-            self.move_id.invoice_payment_term_id = invoice_payment_term_id
+
+        # LINES ACCOUNTS.
+        # tomamos la del producto, o del diario sin no hay producto (salvo para downpamyent que se usan una especificas)
         without_product = self.move_id.line_ids.filtered(
             lambda line: line.display_type == "product" and not line.product_id
         )
+        downpayment_lines = self.env["account.move.line"]
+        if self.move_id.invoice_line_ids._fields.get("is_downpayment"):
+            downpayment_lines = self.move_id.invoice_line_ids.filtered("is_downpayment")
         (self.move_id.line_ids - without_product - downpayment_lines).with_company(
             self.company_id.id
         )._compute_account_id()
@@ -148,32 +141,31 @@ class AccountChangeCurrency(models.TransientModel):
             line.account_id = line.move_id.journal_id.default_account_id
 
         for line in downpayment_lines:
+            # TODO podria darse que tengo distintas cuentas para distantas categorias y distintos impuestos
+            # tome la cuenta del ultimo producto que encontro.
+            # la unica form de correguirlo borrar y calcular las lineas de anticipo pero no sabria igualmente sobre que lineas
+            # de la venta calcular el anticipo, ya que la sale order ya podria previamente asociado otro anticipo.
             line.account_id = self._get_change_downpayment_account(
                 self.company_id, line, self.move_id.fiscal_position_id
             )
 
+        # PAYMENT TERM
+        if invoice_payment_term_id:
+            self.move_id.invoice_payment_term_id = invoice_payment_term_id
         if original_payment_term:
             self.move_id.invoice_payment_term_id = original_payment_term.id
-        # Recompute taxes for product lines (excluding discount lines)
-        (self.move_id.line_ids - original_discount_lines).with_company(self.company_id.id)._compute_tax_ids()
 
-        # Recompute taxes for discount lines
-        # sabemos que esto solo funciona bien si el usuario no manipula los impuestos por defecto de los productos
-        # eventualmente podríamos hacer cambio de impuestos para todas las lineas (no solo downpayment y discount)
-        # pero como queremos deprecar todo esto e ir branches mantenemos el cambio por ahora en lo más chico posible
-        if original_discount_downpayment_lines:
-            self._get_change_company_line_taxes(
-                original_discount_downpayment_lines, original_discount_downpayment_taxes
-            )
-        self.move_id._compute_partner_bank_id()
-        for invoice_line in self.move_id.invoice_line_ids.filtered(lambda x: not x.product_id).with_company(
-            self.company_id.id
-        ):
-            (invoice_line - original_discount_downpayment_lines).tax_ids = invoice_line._get_computed_taxes()
+        # Corregir name
         if old_doc_type and old_doc_type in self.move_id.l10n_latam_available_document_type_ids:
             self.move_id.l10n_latam_document_type_id = old_doc_type
             if self.move_id.l10n_latam_manual_document_number:
                 self.move_id.name = old_name
+
+        # TAXES
+        self._get_change_company_line_taxes(self.move_id.invoice_line_ids, original_taxes)
+        # para percepciones argentinas re-computamos con su propio método
+        if self.move_id.fiscal_position_id._fields.get("l10n_ar_tax_ids"):
+            self.move_id._l10n_ar_recompute_fiscal_position_taxes()
 
     def _get_change_company_line_taxes(self, lines, taxes):
         """Por ahora a nivel taxes solo usamos el mapping para líneas de descuento y downpayment
@@ -211,12 +203,9 @@ class AccountChangeCurrency(models.TransientModel):
         """Update account_id on lines with the correct downpayment or income account."""
         account = False
         products = line.sale_line_ids.mapped("order_id.order_line.product_id")
-        if not products:
-            account = line.with_company(to_company.id)._compute_account_id()
-
         product_accounts = []
         for product in products:
-            accounts = product.product_tmpl_id.with_company(line.account_id.company_ids[0]).get_product_accounts(
+            accounts = product.product_tmpl_id.with_company(line.move_id.company_id).get_product_accounts(
                 fiscal_pos=fiscal_pos
             )
             account = accounts.get("downpayment") or accounts.get("income")
@@ -232,6 +221,7 @@ class AccountChangeCurrency(models.TransientModel):
                 )
                 account = matched_account.get("downpayment") or matched_account.get("income")
 
-        else:
-            account = line.with_company(to_company.id)._compute_account_id()
+        if not account:
+            line.with_company(to_company.id)._compute_account_id()
+            account = line.account_id
         return account
