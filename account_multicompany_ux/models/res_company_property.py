@@ -36,7 +36,7 @@ class ResCompanyProperty(models.Model):
     )
 
     def init(self):
-        cr = self._cr
+        cr = self.env.cr
         tools.drop_view_if_exists(cr, self._table)
         query = """
             SELECT
@@ -101,7 +101,7 @@ class ResCompanyProperty(models.Model):
 
     @api.model
     def action_company_properties(self):
-        property_field = self._context.get("property_field", False)
+        property_field = self.env.context.get("property_field", False)
         if not property_field:
             return True
 
@@ -109,7 +109,7 @@ class ResCompanyProperty(models.Model):
         action_read = self.env["ir.actions.actions"]._for_xml_id("account_multicompany_ux.action_res_company_property")
         # do this because raise an error if came from a view
         #  with group_by activated
-        ctx = self._context.copy()
+        ctx = self.env.context.copy()
         ctx.pop("group_by", None)
         action_read["context"] = ctx
         action_read["domain"] = [("id", "in", company_properties.ids)]
@@ -117,7 +117,7 @@ class ResCompanyProperty(models.Model):
 
     @api.model
     def _get_property_comodel(self):
-        property_field = self._context.get("property_field")
+        property_field = self.env.context.get("property_field")
         record = self._get_record()
         if record:
             field = self._get_record()._fields.get(property_field)
@@ -125,7 +125,7 @@ class ResCompanyProperty(models.Model):
 
     @api.model
     def _get_record(self):
-        context = self._context
+        context = self.env.context
         active_model = context.get("active_model")
         active_id = context.get("active_id")
         property_field = context.get("property_field")
@@ -146,7 +146,7 @@ class ResCompanyProperty(models.Model):
         elif comodel == "product.pricelist":
             company_property_field = "property_pricelist_id"
         else:
-            property_field = self._context.get("property_field")
+            property_field = self.env.context.get("property_field")
             if property_field == "standard_price":
                 company_property_field = "standard_price"
             else:
@@ -185,7 +185,7 @@ class ResCompanyProperty(models.Model):
     @api.depends_context("property_field")
     def _compute_property_field(self):
         for record in self:
-            record.property_field = self._context.get("property_field", "")
+            record.property_field = self.env.context.get("property_field", "")
 
     def _get_property_value(self):
         self.ensure_one()
@@ -207,7 +207,7 @@ class ResCompanyProperty(models.Model):
     def _compute_property_account_domain(self):
         for record in self:
             if record._get_property_comodel() == "account.account":
-                domain = self._context.get("property_domain")
+                domain = self.env.context.get("property_domain")
                 if not domain:
                     field = record._get_record()._fields.get(record.property_field)
                     try:
