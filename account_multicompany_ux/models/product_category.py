@@ -11,7 +11,6 @@ class ProductCategory(models.Model):
     _property_fields = {
         "property_account_income_categ_ids",
         "property_account_expense_categ_ids",
-        "property_account_downpayment_categ_ids",
     }
 
     property_account_income_categ_ids = fields.Many2many(
@@ -24,11 +23,6 @@ class ProductCategory(models.Model):
         string="Expense Accounts",
         compute="_compute_properties",
     )
-    property_account_downpayment_categ_ids = fields.Many2many(
-        "res.company.property",
-        string="Downpayment Accounts",
-        compute="_compute_properties",
-    )
 
     @api.depends()
     def _compute_properties(self):
@@ -36,7 +30,6 @@ class ProductCategory(models.Model):
         property_fields = dict(
             property_account_income_categ_ids=("property_account_income_categ_id"),
             property_account_expense_categ_ids=("property_account_expense_categ_id"),
-            property_account_downpayment_categ_ids=("property_account_downpayment_categ_id"),
         )
 
         for rec in self:
