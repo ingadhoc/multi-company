@@ -9,7 +9,6 @@ from odoo.exceptions import ValidationError
 class AccountMove(models.Model):
     _inherit = "account.move"
 
-    reversed_entry_id = fields.Many2one(check_company=False)
     company_id = fields.Many2one(tracking=True)
 
     @api.constrains("company_id")
