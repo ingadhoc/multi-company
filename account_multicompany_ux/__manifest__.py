@@ -35,7 +35,6 @@
         "views/product_template_views.xml",
         "views/product_product_views.xml",
         "views/account_journal_dashboard_views.xml",
-        "wizards/account_change_company_views.xml",
         "views/account_move_views.xml",
         "security/account_multicompany_ux_security.xml",
         "security/ir.model.access.csv",

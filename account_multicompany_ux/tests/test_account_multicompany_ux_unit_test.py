@@ -22,6 +22,47 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         self.first_company_purchase_journal = self.env["account.journal"].search(
             [("company_id", "=", self.first_company.id), ("type", "=", "purchase")], limit=1
         )
+
+        # Create first company sale journal if not exists
+        if not self.first_company_journal:
+            a_sale_first = self.env["account.account"].create(
+                {
+                    "code": "X2024",
+                    "name": "Product Sales First - (test)",
+                    "account_type": "income",
+                    "company_ids": [self.first_company.id],
+                }
+            )
+            self.first_company_journal = self.env["account.journal"].create(
+                {
+                    "name": "First Customer Invoices - Test",
+                    "code": "FINV",
+                    "type": "sale",
+                    "default_account_id": a_sale_first.id,
+                    "company_id": self.first_company.id,
+                }
+            )
+
+        # Create first company purchase journal if not exists
+        if not self.first_company_purchase_journal:
+            a_purchase_first = self.env["account.account"].create(
+                {
+                    "code": "X2025",
+                    "name": "Product Purchase First - (test)",
+                    "account_type": "expense",
+                    "company_ids": [self.first_company.id],
+                }
+            )
+            self.first_company_purchase_journal = self.env["account.journal"].create(
+                {
+                    "name": "First Vendor Bills - Test",
+                    "code": "FBILL",
+                    "type": "purchase",
+                    "default_account_id": a_purchase_first.id,
+                    "company_id": self.first_company.id,
+                }
+            )
+
         if not self.second_company_journal:
             a_sale = self.env["account.account"].create(
                 {
@@ -54,7 +95,9 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         self.bank_1 = self.env["res.partner.bank"].search([("company_id", "=", False)], limit=1)
         self.bank_1.write({"partner_id": self.first_company.partner_id.id})
         self.bank_1.company_id = self.first_company.id
-        self.env.company = self.first_company
+
+        # Switch to first company context
+        self.env = self.env(context=dict(self.env.context, allowed_company_ids=self.first_company.ids))
 
         self.account_receivable = self.env["account.account"].create(
             {"code": "X2022", "name": "Account Receivable Test", "account_type": "asset_receivable", "reconcile": True}
@@ -63,61 +106,6 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         self.account_payable = self.env["account.account"].create(
             {"code": "X2023", "name": "Account Payable Test", "account_type": "liability_payable", "reconcile": True}
         )
-
-    def test_multicompany_sale_order(self):
-        """Cambio de compañía de una factura que cuenta con res partner bank seteado para la compañia original"""
-        invoice = self.env["account.move"].create(
-            {
-                "partner_id": self.partner_ri.id,
-                "invoice_date": self.today,
-                "move_type": "out_invoice",
-                "journal_id": self.first_company_journal.id,
-                "company_id": self.first_company.id,
-                "partner_bank_id": self.bank_1.id,
-                "invoice_line_ids": [
-                    Command.create(
-                        {
-                            "product_id": self.env.ref("product.product_product_16").id,
-                            "quantity": 1,
-                            "price_unit": 100,
-                        }
-                    ),
-                ],
-            }
-        )
-
-        acc = self.env["account.change.company"].create(
-            {
-                "move_id": invoice.id,
-                "company_ids": [self.first_company.id, self.second_company.id],
-                "company_id": self.second_company.id,
-                "journal_id": self.second_company_journal.id,
-            }
-        )
-        acc.change_company()
-        self.assertEqual(
-            invoice.partner_bank_id.id,
-            False,
-            "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia",
-        )
-        acc = self.env["account.change.company"].create(
-            {
-                "move_id": invoice.id,
-                "company_ids": [self.first_company.id, self.second_company.id],
-                "company_id": self.first_company.id,
-                "journal_id": self.first_company_journal.id,
-            }
-        )
-
-        acc.change_company()
-        invoice._compute_bank_partner_id()
-        invoice._compute_partner_bank_id()
-        self.assertEqual(
-            invoice.partner_bank_id.id,
-            self.bank_1.id,
-            "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia",
-        )
-        invoice.action_post()
 
     def test_account_receivable(self):
         """Cambiamos las cuentas por cobrar/pagar y verificamos que impacten correctamente en la factura."""
