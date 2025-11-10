@@ -1,0 +1,78 @@
+from odoo import api, fields, models
+
+
+class AccountChangeCompany(models.TransientModel):
+    _name = "account.change.company"
+    _description = "Change Company"
+
+    @api.model
+    def get_move(self):
+        move = self.env["account.move"].browse(self.env.context.get("active_id", False))
+        return move
+
+    move_id = fields.Many2one("account.move", default=get_move)
+    company_ids = fields.Many2many(
+        "res.company",
+        string="Companies",
+        compute="_compute_company_ids",
+    )
+    company_id = fields.Many2one(
+        "res.company", required=True, ondelete="cascade", compute="_compute_company", store=True, readonly=False
+    )
+    journal_id = fields.Many2one(
+        "account.journal",
+        required=True,
+        ondelete="cascade",
+        domain="[('id', 'in', suitable_journal_ids)]",
+        store=True,
+        compute="_compute_journal",
+        readonly=False,
+        check_company=True,
+    )
+    suitable_journal_ids = fields.Many2many(
+        "account.journal",
+        compute="_compute_suitable_journal_ids",
+    )
+
+    @api.depends("move_id")
+    @api.depends_context("allowed_company_ids")
+    def _compute_company_ids(self):
+        self.company_ids = self.env["res.company"].search(
+            [
+                "&",
+                ("id", "!=", self.move_id.company_id.id),
+                "|",
+                ("id", "parent_of", self.move_id.company_id.ids),
+                ("id", "child_of", self.move_id.company_id.ids),
+            ]
+        )
+
+    @api.depends("company_ids")
+    def _compute_company(self):
+        for rec in self:
+            rec.company_id = self.company_ids[:1]
+
+    @api.depends("suitable_journal_ids")
+    def _compute_journal(self):
+        for rec in self:
+            rec.journal_id = rec.suitable_journal_ids[:1]
+
+    @api.depends("move_id", "company_id")
+    def _compute_suitable_journal_ids(self):
+        """
+        We override this method to add filter by companies in the env instead of the company of the user
+        For this to work the pr is needed https://github.com/odoo/odoo/pull
+        """
+        for rec in self:
+            journal_type = rec.move_id.invoice_filter_type_domain or "general"
+            domain = [("company_id", "=", rec.company_id._origin.id), ("type", "=", journal_type)]
+            rec.suitable_journal_ids = self.env["account.journal"].search(domain)
+
+    def change_company(self):
+        self.ensure_one()
+        self.move_id.with_context(skip_invoice_sync=True).write(
+            {
+                "company_id": self.company_id.id,
+                "journal_id": self.journal_id.id,
+            }
+        )
