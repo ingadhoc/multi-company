@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_res_company_property,access_res_company_property,model_res_company_property,base.group_user,1,1,1,1
+account_multicompany_ux.access_account_change_company,access_account_change_company,account_multicompany_ux.model_account_change_company,base.group_user,1,1,1,0
