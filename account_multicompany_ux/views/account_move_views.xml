@@ -12,7 +12,9 @@
                     <button name="%(action_account_change_company)d" type="action" invisible="state != 'draft' or posted_before" icon="fa-pencil" class="btn-link" title="Change Company"  />
                 </div>
             </label>
-
+            <xpath expr="//page[@name='other_info']//group[@name='accounting_info_group']//field[@name='company_id']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
         </field>
     </record>
 
