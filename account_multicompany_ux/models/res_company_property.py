@@ -90,12 +90,23 @@ class ResCompanyProperty(models.Model):
         compute="_compute_property_credit_limit",
         inverse="_inverse_property_credit_limit",
     )
-    company_currency_id = fields.Many2one(
-        related="company_id.currency_id",
+    record_currency_id = fields.Many2one(
+        "res.currency",
+        compute="_compute_record_currency",
     )
     # display_name = fields.Char(
     #     compute='_compute_display_name'
     # )
+
+    @api.depends("property_field")
+    def _compute_record_currency(self):
+        for rec in self:
+            if rec.property_field in ["credit", "credit_limit"]:
+                rec.record_currency_id = rec.company_id.currency_id
+            elif rec.property_field == "standard_price":
+                rec.record_currency_id = rec._get_record().cost_currency_id
+            else:
+                rec.record_currency_id = False
 
     @api.onchange("property_field", "company_id")
     def _onchange_property_field(self):
@@ -194,9 +205,9 @@ class ResCompanyProperty(models.Model):
                 #     company_field, precision_digits=precision_digits)
 
                 # Si es el campo credit, incluir la moneda
-                if rec.property_field in ["credit", "credit_limit"] and rec.company_currency_id:
+                if rec.property_field in ["credit", "credit_limit", "standard_price"] and rec.record_currency_id:
                     display_name = "%s %s%s" % (
-                        rec.company_currency_id.symbol or rec.company_currency_id.name,
+                        rec.record_currency_id.symbol or rec.record_currency_id.name,
                         company_field or 0,
                         rec.company_id.get_company_sufix(),
                     )
