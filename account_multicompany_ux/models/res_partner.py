@@ -61,7 +61,7 @@ class ResPartner(models.Model):
     )
     property_credit_limit_ids = fields.Many2many(
         "res.company.property",
-        string="Credit Limit",
+        string="Credit Limits",
         compute="_compute_properties",
     )
 
