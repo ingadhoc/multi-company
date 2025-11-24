@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-21 19:05+0000\n"
-"PO-Revision-Date: 2025-11-21 19:05+0000\n"
+"POT-Creation-Date: 2025-11-24 15:16+0000\n"
+"PO-Revision-Date: 2025-11-24 15:16+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -47,12 +47,27 @@ msgid "Accounts Receivable"
 msgstr ""
 
 #. module: account_multicompany_ux
+#: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_account_change_company
+msgid "Cancel"
+msgstr ""
+
+#. module: account_multicompany_ux
+#: model:ir.actions.act_window,name:account_multicompany_ux.action_account_change_company
+#: model:ir.model,name:account_multicompany_ux.model_account_change_company
+#: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_account_change_company
+#: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_move_form
+msgid "Change Company"
+msgstr ""
+
+#. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_res_company
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__company_ids
 msgid "Companies"
 msgstr ""
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_bank_statement_line__company_id
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__company_id
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_move__company_id
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__company_id
 msgid "Company"
@@ -92,6 +107,16 @@ msgid "Costs"
 msgstr ""
 
 #. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__property_credit_id
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_credit_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_credit_ids
@@ -111,6 +136,7 @@ msgstr ""
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_account__display_name
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__display_name
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_journal__display_name
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_move__display_name
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_report__display_name
@@ -144,6 +170,7 @@ msgstr ""
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_account__id
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__id
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_journal__id
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_move__id
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_report__id
@@ -166,6 +193,7 @@ msgstr ""
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_account_journal
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__journal_id
 msgid "Journal"
 msgstr ""
 
@@ -179,6 +207,21 @@ msgstr ""
 msgid ""
 "Journal entries are not allowed on consolidation companies. (so invoices, "
 "payments, etc neither)"
+msgstr ""
+
+#. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__move_id
+msgid "Move"
 msgstr ""
 
 #. module: account_multicompany_ux
@@ -250,6 +293,11 @@ msgid "Short name used to identify this company"
 msgstr ""
 
 #. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__suitable_journal_ids
+msgid "Suitable Journal"
+msgstr ""
+
+#. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_supplier_payment_term_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_supplier_payment_term_ids
 msgid "Supplier Payment Terms"
@@ -259,6 +307,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_multicompany_ux/models/account_move.py:0
 msgid "You can not create entries on a consolidation company"
+msgstr ""
+
+#. module: account_multicompany_ux
+#: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_account_change_company
+msgid "or"
 msgstr ""
 
 #. module: account_multicompany_ux
