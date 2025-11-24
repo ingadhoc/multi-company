@@ -6,6 +6,16 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="account.view_partner_property_form"/>
         <field name="arch" type="xml">
+            <!-- al ocultar use_partner_credit_limit el label for pierde el string, ponemos uno nuevo -->
+            <label for="use_partner_credit_limit" position="replace">
+                <label for="property_credit_limit_ids" string="Partner Limit"/>
+            </label>
+            <field name="use_partner_credit_limit" position="replace"/>
+            <field name="credit_limit" position="replace">
+                <field name="property_credit_limit_ids" widget="many2many_tags" class="oe_inline" context="{'active_model': 'res.partner', 'active_id': id, 'property_field': 'credit_limit'}"/>
+                <button name="action_company_properties" string="(edit)" class="oe_link" type="object" context="{'property_field': 'credit_limit'}"/>
+            </field>
+
             <!-- receivables -->
             <field name="property_account_receivable_id" position="attributes">
                 <attribute name="invisible">1</attribute>

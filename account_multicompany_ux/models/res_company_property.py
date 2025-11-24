@@ -81,17 +81,17 @@ class ResCompanyProperty(models.Model):
         compute="_compute_property_credit",
         inverse="_inverse_property_credit",
     )
-    # Nuevo campo para credit con moneda
-    property_credit_currency_id = fields.Many2one(
-        "res.currency",
-        string="Credit Currency",
-        compute="_compute_property_credit_currency",
-    )
     standard_price = fields.Float(
-        string="standard_price",
         compute="_compute_property_standard_price",
         inverse="_inverse_property_standard_price",
         digits="Product Price",
+    )
+    credit_limit = fields.Float(
+        compute="_compute_property_credit_limit",
+        inverse="_inverse_property_credit_limit",
+    )
+    company_currency_id = fields.Many2one(
+        related="company_id.currency_id",
     )
     # display_name = fields.Char(
     #     compute='_compute_display_name'
@@ -162,6 +162,8 @@ class ResCompanyProperty(models.Model):
                 company_property_field = "standard_price"
             elif property_field == "credit":
                 company_property_field = "property_credit_id"
+            elif property_field == "credit_limit":
+                company_property_field = "credit_limit"
             else:
                 raise UserError(_("Property for model %s not implemented yet", comodel))
         return company_property_field
@@ -192,9 +194,9 @@ class ResCompanyProperty(models.Model):
                 #     company_field, precision_digits=precision_digits)
 
                 # Si es el campo credit, incluir la moneda
-                if rec.property_field == "credit" and rec.property_credit_currency_id:
+                if rec.property_field in ["credit", "credit_limit"] and rec.company_currency_id:
                     display_name = "%s %s%s" % (
-                        rec.property_credit_currency_id.symbol or rec.property_credit_currency_id.name,
+                        rec.company_currency_id.symbol or rec.company_currency_id.name,
                         company_field or 0,
                         rec.company_id.get_company_sufix(),
                     )
@@ -216,6 +218,14 @@ class ResCompanyProperty(models.Model):
         if not record or not property_field:
             return False
         return getattr(record, property_field)
+
+    @api.depends("property_field")
+    def _compute_property_credit_limit(self):
+        for record in self:
+            if record.property_field == "credit_limit":
+                record.credit_limit = record._get_property_value()
+            else:
+                record.credit_limit = False
 
     @api.depends("property_field")
     def _compute_property_standard_price(self):
@@ -284,15 +294,6 @@ class ResCompanyProperty(models.Model):
             else:
                 record.property_credit_id = 0
 
-    @api.depends("property_field")
-    def _compute_property_credit_currency(self):
-        for record in self:
-            if record.property_field == "credit":
-                # Obtener la moneda de la compañía
-                record.property_credit_currency_id = record.company_id.currency_id
-            else:
-                record.property_credit_currency_id = False
-
     def _set_property_value(self, value):
         self.ensure_one()
         record = self._get_record()
@@ -324,6 +325,10 @@ class ResCompanyProperty(models.Model):
     def _inverse_property_standard_price(self):
         for rec in self:
             rec._set_property_value(rec.standard_price)
+
+    def _inverse_property_credit_limit(self):
+        for rec in self:
+            rec._set_property_value(rec.credit_limit)
 
     def web_read(self, specification):
         fields_to_read = list(specification) or {"id"}

@@ -20,6 +20,7 @@ class ResPartner(models.Model):
         "property_supplier_payment_term_ids",
         "property_product_pricelist_ids",
         "property_credit_ids",
+        "property_credit_limit_ids",
     }
 
     property_account_receivable_ids = fields.Many2many(
@@ -58,6 +59,11 @@ class ResPartner(models.Model):
         string="Credit",
         compute="_compute_properties",
     )
+    property_credit_limit_ids = fields.Many2many(
+        "res.company.property",
+        string="Credit Limit",
+        compute="_compute_properties",
+    )
 
     def _compute_properties(self):
         property_fields = dict(
@@ -65,9 +71,10 @@ class ResPartner(models.Model):
             property_account_payable_ids="property_account_payable_id",
             property_account_position_ids="property_account_position_id",
             property_payment_term_ids="property_payment_term_id",
-            property_supplier_payment_term_ids=("property_supplier_payment_term_id"),
+            property_supplier_payment_term_ids="property_supplier_payment_term_id",
             property_product_pricelist_ids="property_product_pricelist",
             property_credit_ids="credit",
+            property_credit_limit_ids="credit_limit",
         )
         for rec in self:
             company_properties = self.env["res.company.property"].with_context(

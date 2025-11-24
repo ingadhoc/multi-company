@@ -34,6 +34,8 @@ class ResCompanyPropertyMixin(models.AbstractModel):
             view_id = self.env.ref("account_multicompany_ux.view_property_term_id_form").id
         elif self._context.get("property_field").startswith("property_account"):
             view_id = self.env.ref("account_multicompany_ux.view_property_account_id_form").id
+        elif self._context.get("property_field").startswith("credit_limit"):
+            view_id = self.env.ref("account_multicompany_ux.view_property_credit_limit_form").id
         else:
             view_id = self.env.ref("account_multicompany_ux.view_standard_price_form").id
         action["views"] = [[view_id, "list"]]
