@@ -17,10 +17,12 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
             [("company_id", "=", self.first_company.id), ("type", "=", "sale")], limit=1
         )
         self.second_company_journal = self.env["account.journal"].search(
-            [("company_id", "=", self.second_company.id), ("type", "=", "sale")], limit=1
+            [("company_id", "=", self.second_company.id), ("type", "=", "sale")],
+            limit=1,
         )
         self.first_company_purchase_journal = self.env["account.journal"].search(
-            [("company_id", "=", self.first_company.id), ("type", "=", "purchase")], limit=1
+            [("company_id", "=", self.first_company.id), ("type", "=", "purchase")],
+            limit=1,
         )
 
         # Create first company sale journal if not exists
@@ -99,13 +101,42 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         # Switch to first company context
         self.env = self.env(context=dict(self.env.context, allowed_company_ids=self.first_company.ids))
 
-        self.account_receivable = self.env["account.account"].create(
-            {"code": "X2022", "name": "Account Receivable Test", "account_type": "asset_receivable", "reconcile": True}
+        self.account_receivable = self.env["account.account"].search(
+            [
+                ("account_type", "=", "asset_receivable"),
+                ("company_ids", "=", self.first_company.id),
+            ],
+            limit=1,
         )
 
-        self.account_payable = self.env["account.account"].create(
-            {"code": "X2023", "name": "Account Payable Test", "account_type": "liability_payable", "reconcile": True}
+        self.account_payable = self.env["account.account"].search(
+            [
+                ("account_type", "=", "liability_payable"),
+                ("company_ids", "=", self.first_company.id),
+            ],
+            limit=1,
         )
+
+        # Create accounts if they don't exist
+        if not self.account_receivable:
+            self.account_receivable = self.env["account.account"].create(
+                {
+                    "code": "X1100",
+                    "name": "Account Receivable Test",
+                    "account_type": "asset_receivable",
+                    "company_ids": [self.first_company.id],
+                }
+            )
+
+        if not self.account_payable:
+            self.account_payable = self.env["account.account"].create(
+                {
+                    "code": "X2100",
+                    "name": "Account Payable Test",
+                    "account_type": "liability_payable",
+                    "company_ids": [self.first_company.id],
+                }
+            )
 
     def test_account_receivable(self):
         """Cambiamos las cuentas por cobrar/pagar y verificamos que impacten correctamente en la factura."""
@@ -113,15 +144,21 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         # Las cuentas por cobrar y pagar por contacto se encuentran en property_account_receivable_ids y property_account_payable_ids
         # ambas contienen el mismo arreglo con las mismas res.company.property pero solo se puede acceder a ellas mediante el contexto property_field
         # por eso recorremos el arreglo buscando con el contexto respectivo de las account_payable y account_receivable
-
-        for payable in self.partner_ri.property_account_payable_ids:
+        # Filtramos solo las propiedades de la primera compañía
+        for payable in self.partner_ri.property_account_payable_ids.filtered(
+            lambda x: x.company_id == self.first_company
+        ):
             payable_ctx = payable.with_context(
-                active_model="res.partner", property_field="property_account_payable_id", active_id=self.partner_ri.id
+                active_model="res.partner",
+                property_field="property_account_payable_id",
+                active_id=self.partner_ri.id,
             )
             if payable_ctx.property_account_id:  # Ahora sí evalúa con el contexto correcto
                 payable_ctx.property_account_id = self.account_payable
 
-        for receivable in self.partner_ri.property_account_receivable_ids:
+        for receivable in self.partner_ri.property_account_receivable_ids.filtered(
+            lambda x: x.company_id == self.first_company
+        ):
             receivable_ctx = receivable.with_context(
                 active_model="res.partner",
                 property_field="property_account_receivable_id",
@@ -171,6 +208,7 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         )
         self.assertTrue(self.account_receivable.id in customer_invoice.line_ids.mapped("account_id.id"))
         self.assertTrue(self.account_payable.id in vendor_bill.line_ids.mapped("account_id.id"))
-
         customer_invoice.action_post()
+        if "l10n_latam_document_number" in self.env["account.move"]._fields:
+            vendor_bill.write({"l10n_latam_document_number": "1-1"})
         vendor_bill.action_post()
