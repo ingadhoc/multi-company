@@ -181,6 +181,7 @@ class AccountChangeCurrency(models.TransientModel):
                         ("tax_group_id.name", "=", tax.tax_group_id.name),
                         ("amount", "=", tax.amount),
                         ("active", "=", True),
+                        ("price_include_override", "=", tax.price_include_override),
                         ("company_id", "=", self.company_id.id),
                     ],
                     limit=1,
