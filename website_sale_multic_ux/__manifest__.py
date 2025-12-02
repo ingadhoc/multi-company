@@ -25,7 +25,6 @@
     "license": "AGPL-3",
     "depends": [
         "website_sale",
-        "payment_multic_ux",
     ],
     "data": [],
     "demo": [],
