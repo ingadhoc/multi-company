@@ -197,6 +197,12 @@ class AccountChangeCurrency(models.TransientModel):
                     # self.move_id.message_post(body=message)
                     # continue
                 new_tax_ids.append(new_tax.id)
+            if (
+                not tax_ids
+                and line.product_id
+                or (line.display_type != "discount" and (line.account_id.tax_ids or not line.tax_ids))
+            ):
+                new_tax_ids = line.with_company(self.company_id.id)._get_computed_taxes().ids
             line.tax_ids = [(6, 0, new_tax_ids)]
 
     @api.model
