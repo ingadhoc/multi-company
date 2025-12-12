@@ -133,7 +133,9 @@ class AccountChangeCurrency(models.TransientModel):
         )
         downpayment_lines = self.env["account.move.line"]
         if self.move_id.invoice_line_ids._fields.get("is_downpayment"):
-            downpayment_lines = self.move_id.invoice_line_ids.filtered("is_downpayment")
+            downpayment_lines = self.move_id.invoice_line_ids.filtered(
+                lambda x: x.is_downpayment and x.display_type not in ("line_section", "line_note")
+            )
         (self.move_id.line_ids - without_product - downpayment_lines).with_company(
             self.company_id.id
         )._compute_account_id()
