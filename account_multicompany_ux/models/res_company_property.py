@@ -148,6 +148,12 @@ class ResCompanyProperty(models.Model):
     @api.model
     def _get_company_property_field(self):
         comodel = self._get_property_comodel()
+        property_field = self.env.context.get("property_field")
+
+        # Si no hay comodel o property_field, retornar None para evitar el error
+        if not comodel and not property_field:
+            return None
+
         if comodel == "account.account":
             company_property_field = "property_account_id"
         elif comodel == "account.fiscal.position":
@@ -157,7 +163,6 @@ class ResCompanyProperty(models.Model):
         elif comodel == "product.pricelist":
             company_property_field = "property_pricelist_id"
         else:
-            property_field = self.env.context.get("property_field")
             if property_field == "standard_price":
                 company_property_field = "standard_price"
             elif property_field == "credit":
@@ -178,6 +183,11 @@ class ResCompanyProperty(models.Model):
 
         for rec in self:
             company_property_field = rec._get_company_property_field()
+
+            # Si no hay company_property_field, usar display_name por defecto
+            if not company_property_field:
+                rec.display_name = rec.company_id.get_company_sufix() or rec.company_id.name
+                continue
 
             rec.invalidate_recordset([company_property_field])
             rec.modified([company_property_field])
