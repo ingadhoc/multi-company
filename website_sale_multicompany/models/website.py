@@ -9,8 +9,8 @@ from odoo import models
 class Website(models.Model):
     _inherit = "website"
 
-    def sale_get_order(self, force_create=False):
-        sale_order_sudo = super().sale_get_order(force_create)
+    def _create_cart(self):
+        sale_order_sudo = super()._create_cart()
         # _sale_get_order_company_fix modifica los valores company related de la orden
         # Durante la creacion de la orden en el website la company siempre debe ser
         # la del website por un Raise en el create(https://github.com/odoo/odoo/blob/18.0/addons/website_sale/models/sale_order.py#L155)
