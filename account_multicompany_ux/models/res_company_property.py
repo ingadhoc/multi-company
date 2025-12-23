@@ -151,7 +151,7 @@ class ResCompanyProperty(models.Model):
         property_field = self.env.context.get("property_field")
 
         # Si no hay comodel o property_field, retornar None para evitar el error
-        if not comodel and not property_field:
+        if not comodel or not property_field:
             return None
 
         if comodel == "account.account":
