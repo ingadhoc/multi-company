@@ -56,7 +56,8 @@ class ResPartner(models.Model):
 
     property_credit_ids = fields.Many2many(
         "res.company.property",
-        string="Credit",
+        string="Total Receivables",
+        help="Total amount this customer owes you on each company.",
         compute="_compute_properties",
     )
     property_credit_limit_ids = fields.Many2many(

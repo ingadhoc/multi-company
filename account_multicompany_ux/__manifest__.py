@@ -19,13 +19,14 @@
 ##############################################################################
 {
     "name": "Account Multicompany Usability",
-    "version": "18.0.1.4.0",
+    "version": "18.0.1.5.0",
     "author": "ADHOC SA",
     "website": "www.adhoc.com.ar",
     "license": "AGPL-3",
     "depends": [
         "account",
         "account_reports",
+        "sale",  # solo por property_account_downpayment_categ_id, ideal en proximas versiones evitar esta dependencia
     ],
     "data": [
         "views/res_company_property_views.xml",
@@ -37,7 +38,6 @@
         "views/account_journal_dashboard_views.xml",
         "wizards/account_change_company_views.xml",
         "views/account_move_views.xml",
-        "views/product_views.xml",
         "security/account_multicompany_ux_security.xml",
         "security/ir.model.access.csv",
     ],
