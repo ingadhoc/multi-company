@@ -63,7 +63,7 @@
         <field name="inherit_id" ref="account_multicompany_ux.view_res_company_account_property_form"></field>
         <field name="arch" type="xml">
             <list>
-                <field name="property_credit_currency_id" />
+                <field name="record_currency_id" column_invisible="True"/>
                 <field name="property_credit_id" />
             </list>
         </field>
@@ -75,7 +75,20 @@
         <field name="inherit_id" ref="account_multicompany_ux.view_res_company_account_property_form"></field>
         <field name="arch" type="xml">
             <list>
-                <field name="standard_price" />
+                <field name="record_currency_id" column_invisible="True"/>
+                <field name="standard_price" widget="monetary" options="{'currency_field': 'record_currency_id'}"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_property_credit_limit_form" model="ir.ui.view">
+        <field name="name">res.company.property.form</field>
+        <field name="model">res.company.property</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="account_multicompany_ux.view_res_company_account_property_form"></field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="record_currency_id" column_invisible="True"/>
+                <field name="credit_limit" widget="monetary" options="{'currency_field': 'record_currency_id'}"/>
             </list>
         </field>
     </record>
