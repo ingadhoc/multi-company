@@ -193,6 +193,7 @@ class AccountChangeCurrency(models.TransientModel):
 
         Compatible with both account.move.line and sale.order.line.
         """
+        by_pass_exception = self.env.context.get("by_pass_exception", False)
         # Ensure lines is a recordset
         if not lines:
             return
@@ -216,7 +217,7 @@ class AccountChangeCurrency(models.TransientModel):
                 ],
                 limit=1,
             )
-            if not new_tax:
+            if not new_tax and not by_pass_exception:
                 message = _(
                     "The selected company (%s) does not have an equivalent tax to '%s' (same type, group and amount)."
                 ) % (self.company_id.name, tax.name)
