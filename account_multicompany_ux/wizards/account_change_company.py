@@ -174,7 +174,7 @@ class AccountChangeCurrency(models.TransientModel):
         if original_partner_bank_id and original_partner_bank_id.company_id.id in [False, self.company_id.id]:
             self.move_id.partner_bank_id = original_partner_bank_id
 
-    def _get_change_company_line_taxes(self, lines, taxes, fiscal_pos=None):
+    def _get_change_company_line_taxes(self, lines, taxes):
         """Por ahora a nivel taxes solo usamos el mapping para líneas de descuento y downpayment
         Si duele y todo va bien podemos extenderlo a todas las líneas
         """
@@ -204,7 +204,14 @@ class AccountChangeCurrency(models.TransientModel):
                     # self.move_id.message_post(body=message)
                     # continue
                 new_tax_ids.append(new_tax.id)
-            line.tax_ids = [(6, 0, new_tax_ids)]
+            # Could be use with sale lines and invoice lines
+            tax_field = None
+            if "tax_ids" in line._fields:
+                tax_field = "tax_ids"
+            elif "tax_id" in line._fields:
+                tax_field = "tax_id"
+            if tax_field:
+                line[tax_field] = [(6, 0, new_tax_ids)]
 
     @api.model
     def _get_change_downpayment_account(self, to_company, line, fiscal_pos):
