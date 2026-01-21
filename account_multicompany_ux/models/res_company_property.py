@@ -6,6 +6,7 @@ import logging
 from ast import literal_eval
 
 from odoo import _, api, fields, models, tools
+from odoo.api import NewId
 from odoo.exceptions import UserError
 from psycopg2 import sql
 
@@ -140,10 +141,13 @@ class ResCompanyProperty(models.Model):
     @api.model
     def _get_property_comodel(self):
         property_field = self.env.context.get("property_field")
+        if not property_field:
+            return False
         record = self._get_record()
         if record:
-            field = self._get_record()._fields.get(property_field)
+            field = record._fields.get(property_field)
             return field and field.comodel_name or False
+        return False
 
     @api.model
     def _get_record(self):
@@ -152,18 +156,20 @@ class ResCompanyProperty(models.Model):
         active_id = context.get("active_id")
         property_field = context.get("property_field")
         if not property_field or not active_id or not active_model:
-            _logger.warning("Could not get property record from context %s" % context)
             return False
-        return self.with_company(self.id).env[active_model].browse(active_id)
+        if isinstance(active_id, NewId):
+            return False
+        record = self.with_company(self.id).env[active_model].browse(active_id)
+        if not record.exists():
+            return False
+        return record
 
     @api.model
     def _get_company_property_field(self):
         comodel = self._get_property_comodel()
         property_field = self.env.context.get("property_field")
-
-        # Si no hay comodel o property_field, retornar None para evitar el error
-        if not comodel or not property_field:
-            return None
+        if not property_field:
+            return False
 
         if comodel == "account.account":
             company_property_field = "property_account_id"
@@ -174,14 +180,22 @@ class ResCompanyProperty(models.Model):
         elif comodel == "product.pricelist":
             company_property_field = "property_pricelist_id"
         else:
-            if property_field == "standard_price":
+            if property_field in ["property_account_receivable_id", "property_account_payable_id"]:
+                company_property_field = "property_account_id"
+            elif property_field == "property_account_position_id":
+                company_property_field = "property_position_id"
+            elif property_field in ["property_payment_term_id", "property_supplier_payment_term_id"]:
+                company_property_field = "property_term_id"
+            elif property_field == "property_product_pricelist":
+                company_property_field = "property_pricelist_id"
+            elif property_field == "standard_price":
                 company_property_field = "standard_price"
             elif property_field == "credit":
                 company_property_field = "property_credit_id"
             elif property_field == "credit_limit":
                 company_property_field = "credit_limit"
             else:
-                raise UserError(_("Property for model %s not implemented yet", comodel))
+                raise UserError(_("Property for field %s not implemented yet", property_field))
         return company_property_field
 
     @api.depends("company_id", "property_field")
@@ -196,8 +210,6 @@ class ResCompanyProperty(models.Model):
 
         for rec in self:
             company_property_field = rec._get_company_property_field()
-
-            # Si no hay company_property_field, usar display_name por defecto
             if not company_property_field:
                 rec.display_name = rec.company_id.get_company_sufix() or rec.company_id.name
                 continue
