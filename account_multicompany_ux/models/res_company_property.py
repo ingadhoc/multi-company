@@ -3,7 +3,6 @@
 # directory
 ##############################################################################
 import logging
-from ast import literal_eval
 
 from odoo import _, api, fields, models, tools
 from odoo.api import NewId
@@ -52,30 +51,39 @@ class ResCompanyProperty(models.Model):
     property_field = fields.Char(
         compute="_compute_property_field",
     )
-    property_domain = fields.Json(compute="_compute_property_account_domain")
     property_account_id = fields.Many2one(
         "account.account",
         string="Account",
         compute="_compute_property_account",
         inverse="_inverse_property_account",
+        check_company=True,
+        domain="account_domain",
     )
+    account_domain = fields.Binary(compute="_compute_account_domain")
     property_term_id = fields.Many2one(
         "account.payment.term",
         string="Payment Term",
         compute="_compute_property_term",
         inverse="_inverse_property_term",
+        check_company=True,
     )
     property_position_id = fields.Many2one(
         "account.fiscal.position",
         string="Fiscal Position",
         compute="_compute_property_position",
         inverse="_inverse_property_position",
+        check_company=True,
     )
     property_pricelist_id = fields.Many2one(
         "product.pricelist",
         string="Pricelist",
         compute="_compute_property_pricelist",
         inverse="_inverse_property_pricelist",
+        check_company=True,
+        # en odoo se hace asi pero por ahora lo dejamos con check_company, en odoo pareciera haber un bug porque
+        # no considera pricelist del parent
+        # company_dependent=False,  # behave like company dependent field but is not company_dependent
+        # domain=lambda self: [('company_id', 'in', (self.env.company.id, False))],
     )
     property_credit_id = fields.Float(
         string="Credit",
@@ -95,9 +103,24 @@ class ResCompanyProperty(models.Model):
         "res.currency",
         compute="_compute_record_currency",
     )
-    # display_name = fields.Char(
-    #     compute='_compute_display_name'
-    # )
+
+    @api.depends("property_field")
+    def _compute_account_domain(self):
+        for rec in self:
+            if rec.property_field == "property_account_receivable_id":
+                domain = [("account_type", "=", "asset_receivable")]
+            elif rec.property_field == "property_account_payable_id":
+                domain = [("account_type", "=", "liability_payable")]
+            # para las income / expense accounts de productos y categorías
+            else:
+                domain = [
+                    (
+                        "account_type",
+                        "not in",
+                        ("asset_receivable", "liability_payable", "asset_cash", "liability_credit_card", "off_balance"),
+                    )
+                ]
+            rec.account_domain = domain
 
     @api.depends("property_field")
     def _compute_record_currency(self):
@@ -108,10 +131,6 @@ class ResCompanyProperty(models.Model):
                 rec.record_currency_id = rec._get_record().cost_currency_id
             else:
                 rec.record_currency_id = False
-
-    @api.onchange("property_field", "company_id")
-    def _onchange_property_field(self):
-        return {"domain": {"property_account_id": [("company_ids", "=", False)]}}
 
     @api.model
     def _get_companies(self):
@@ -267,25 +286,6 @@ class ResCompanyProperty(models.Model):
                 record.standard_price = record._get_property_value()
             else:
                 record.standard_price = False
-
-    @api.depends("property_field", "company_id")
-    def _compute_property_account_domain(self):
-        for record in self:
-            if record._get_property_comodel() == "account.account":
-                domain = self.env.context.get("property_domain")
-                if not domain:
-                    field = record._get_record()._fields.get(record.property_field)
-                    try:
-                        domain = literal_eval(field.domain)
-                    except:
-                        domain = []
-                record.property_domain = [
-                    "|",
-                    ("company_ids", "=", False),
-                    ("company_ids", "in", record.company_id.id),
-                ] + domain
-            else:
-                record.property_domain = []
 
     @api.depends("property_field")
     def _compute_property_account(self):
