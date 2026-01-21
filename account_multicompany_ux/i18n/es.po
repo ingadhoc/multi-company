@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-21 13:36+0000\n"
+"POT-Creation-Date: 2026-01-21 18:15+0000\n"
 "PO-Revision-Date: 2025-11-05 17:05+0000\n"
 "Last-Translator: ADHOC - Bot <transbot@adhoc.com.ar>, 2025\n"
 "Language-Team: Spanish (https://app.transifex.com/adhoc/teams/46451/es/)\n"
@@ -34,6 +34,11 @@ msgid "Account"
 msgstr "Cuenta"
 
 #. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__account_domain
+msgid "Account Domain"
+msgstr ""
+
+#. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_account_report
 msgid "Accounting Report"
 msgstr "Informe contable"
@@ -49,6 +54,12 @@ msgstr "Cuentas por Pagar"
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_account_receivable_ids
 msgid "Accounts Receivable"
 msgstr "Cuentas por Cobrar"
+
+#. module: account_multicompany_ux
+#. odoo-python
+#: code:addons/account_multicompany_ux/models/res_company_property.py:0
+msgid "Active_model or propert_field missing on context: %s"
+msgstr ""
 
 #. module: account_multicompany_ux
 #: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_account_change_company
@@ -274,11 +285,6 @@ msgid "Product Variant"
 msgstr "Variante de producto"
 
 #. module: account_multicompany_ux
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__property_domain
-msgid "Property Domain"
-msgstr "Dominio de propiedad"
-
-#. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__property_field
 msgid "Property Field"
 msgstr "Campo de propiedad"
@@ -361,6 +367,9 @@ msgstr "Ud. no puede crear asientos en una compañía de consolidación"
 #: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_account_change_company
 msgid "or"
 msgstr ""
+
+#~ msgid "Property Domain"
+#~ msgstr "Dominio de propiedad"
 
 #~ msgid "Property for model %s not implemented yet"
 #~ msgstr "Propiedad para el modelo %s no implementada todavía"
