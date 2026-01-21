@@ -57,11 +57,23 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         self.env.company = self.first_company
 
         self.account_receivable = self.env["account.account"].create(
-            {"code": "X2022", "name": "Account Receivable Test", "account_type": "asset_receivable", "reconcile": True}
+            {
+                "code": "X2022",
+                "name": "Account Receivable Test",
+                "account_type": "asset_receivable",
+                "reconcile": True,
+                "company_ids": [self.first_company.id],
+            }
         )
 
         self.account_payable = self.env["account.account"].create(
-            {"code": "X2023", "name": "Account Payable Test", "account_type": "liability_payable", "reconcile": True}
+            {
+                "code": "X2023",
+                "name": "Account Payable Test",
+                "account_type": "liability_payable",
+                "reconcile": True,
+                "company_ids": [self.first_company.id],
+            }
         )
 
     def test_multicompany_sale_order(self):
@@ -124,12 +136,12 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         # Las cuentas por cobrar y pagar por contacto se encuentran en property_account_receivable_ids y property_account_payable_ids
         # ambas contienen el mismo arreglo con las mismas res.company.property pero solo se puede acceder a ellas mediante el contexto property_field
         # por eso recorremos el arreglo buscando con el contexto respectivo de las account_payable y account_receivable
-
         for payable in self.partner_ri.property_account_payable_ids:
             payable_ctx = payable.with_context(
                 active_model="res.partner", property_field="property_account_payable_id", active_id=self.partner_ri.id
             )
-            if payable_ctx.property_account_id:  # Ahora sí evalúa con el contexto correcto
+            # Only update if the property belongs to the same company as the account
+            if payable_ctx.property_account_id and payable_ctx.company_id == self.first_company:
                 payable_ctx.property_account_id = self.account_payable
 
         for receivable in self.partner_ri.property_account_receivable_ids:
@@ -138,7 +150,8 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
                 property_field="property_account_receivable_id",
                 active_id=self.partner_ri.id,
             )
-            if receivable_ctx.property_account_id:  # Ahora sí evalúa con el contexto correcto
+            # Only update if the property belongs to the same company as the account
+            if receivable_ctx.property_account_id and receivable_ctx.company_id == self.first_company:
                 receivable_ctx.property_account_id = self.account_receivable
 
         customer_invoice = self.env["account.move"].create(
