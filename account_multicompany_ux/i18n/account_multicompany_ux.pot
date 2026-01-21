@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-19 13:16+0000\n"
-"PO-Revision-Date: 2025-12-19 13:16+0000\n"
+"POT-Creation-Date: 2026-01-21 13:36+0000\n"
+"PO-Revision-Date: 2026-01-21 13:36+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -19,7 +19,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_multicompany_ux.product_template_form_view
 #: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_category_property_form
 #: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_partner_property_form
-#: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_partner_property_form_pricelist
 msgid "(edit)"
 msgstr ""
 
@@ -124,14 +123,18 @@ msgstr ""
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__property_credit_id
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_credit_ids
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_credit_ids
 msgid "Credit"
 msgstr ""
 
 #. module: account_multicompany_ux
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__property_credit_currency_id
-msgid "Credit Currency"
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__credit_limit
+msgid "Credit Limit"
+msgstr ""
+
+#. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_credit_limit_ids
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_credit_limit_ids
+msgid "Credit Limits"
 msgstr ""
 
 #. module: account_multicompany_ux
@@ -274,7 +277,12 @@ msgstr ""
 #. module: account_multicompany_ux
 #. odoo-python
 #: code:addons/account_multicompany_ux/models/res_company_property.py:0
-msgid "Property for model %s not implemented yet"
+msgid "Property for field %s not implemented yet"
+msgstr ""
+
+#. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__record_currency_id
+msgid "Record Currency"
 msgstr ""
 
 #. module: account_multicompany_ux
@@ -299,6 +307,11 @@ msgid "Short name used to identify this company"
 msgstr ""
 
 #. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__standard_price
+msgid "Standard Price"
+msgstr ""
+
+#. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__suitable_journal_ids
 msgid "Suitable Journal"
 msgstr ""
@@ -307,6 +320,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_supplier_payment_term_ids
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_supplier_payment_term_ids
 msgid "Supplier Payment Terms"
+msgstr ""
+
+#. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_credit_ids
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_credit_ids
+msgid "Total Receivables"
+msgstr ""
+
+#. module: account_multicompany_ux
+#: model:ir.model.fields,help:account_multicompany_ux.field_res_partner__property_credit_ids
+#: model:ir.model.fields,help:account_multicompany_ux.field_res_users__property_credit_ids
+msgid "Total amount this customer owes you on each company."
 msgstr ""
 
 #. module: account_multicompany_ux
@@ -324,9 +349,4 @@ msgstr ""
 #. module: account_multicompany_ux
 #: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_account_change_company
 msgid "or"
-msgstr ""
-
-#. module: account_multicompany_ux
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__standard_price
-msgid "standard_price"
 msgstr ""
