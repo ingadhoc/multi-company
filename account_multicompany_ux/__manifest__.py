@@ -19,7 +19,13 @@
 ##############################################################################
 {
     "name": "Account Multicompany Usability",
+<<<<<<< ae2689b7f721dff155fc033a5fd125d990b5630c
     "version": "19.0.1.4.0",
+||||||| 21073da9cd8a35f46f45fa1d0684375fe2250233
+    "version": "18.0.1.5.0",
+=======
+    "version": "18.0.1.6.0",
+>>>>>>> 8bcc42e060b97e8b6bfb724f5981df02961b5804
     "author": "ADHOC SA",
     "website": "www.adhoc.com.ar",
     "license": "AGPL-3",
