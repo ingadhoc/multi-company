@@ -68,9 +68,11 @@ class AccountChangeCurrency(models.TransientModel):
             old_doc_type = self.move_id.l10n_latam_document_type_id
 
         # Make a copy to avoid modifying the original recordset after
-        original_discount_lines = self.move_id.line_ids.filtered(
-            lambda x: x.product_id == self.company_id.sale_discount_product_id
-        )
+        original_discount_lines = self.env['account.move.line']
+        if self.company_id._fields.get('sale_discount_product_id'):
+            original_discount_lines = self.move_id.line_ids.filtered(
+                lambda x: x.product_id == self.company_id.sale_discount_product_id
+            )
 
         if original_discount_lines:
             # if discount product has a company associated, we need to remove it before changing the company
