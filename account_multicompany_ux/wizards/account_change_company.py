@@ -79,6 +79,9 @@ class AccountChangeCurrency(models.TransientModel):
         if self.move_id._fields.get("l10n_latam_document_type_id") and self.move_id.l10n_latam_manual_document_number:
             old_doc_type = self.move_id.l10n_latam_document_type_id
 
+        # BACKUP PARTNER BANK ID
+        original_partner_bank_id = self.move_id.partner_bank_id or False
+
         # backup original fiscal position
         original_fiscal_position = self.move_id.fiscal_position_id or False
 
@@ -154,11 +157,10 @@ class AccountChangeCurrency(models.TransientModel):
             )
 
         # PAYMENT TERM
-        if invoice_payment_term_id:
-            self.move_id.invoice_payment_term_id = invoice_payment_term_id
-        if original_payment_term:
-            self.move_id.invoice_payment_term_id = original_payment_term.id
-
+        payment_term = original_payment_term or invoice_payment_term_id
+        self.move_id._compute_invoice_payment_term_id()
+        if not self.move_id.invoice_payment_term_id and payment_term:
+            self.move_id.invoice_payment_term_id = payment_term
         # Corregir name
         if old_doc_type and old_doc_type in self.move_id.l10n_latam_available_document_type_ids:
             self.move_id.l10n_latam_document_type_id = old_doc_type
@@ -171,6 +173,10 @@ class AccountChangeCurrency(models.TransientModel):
         # para percepciones argentinas re-computamos con su propio método
         if self.move_id.fiscal_position_id._fields.get("l10n_ar_tax_ids"):
             self.move_id._l10n_ar_recompute_fiscal_position_taxes()
+
+        # PARTNER BANK
+        if original_partner_bank_id and original_partner_bank_id.company_id.id in [False, self.company_id.id]:
+            self.move_id.partner_bank_id = original_partner_bank_id
 
     def _get_change_company_line_taxes(self, lines, taxes, fiscal_pos=None):
         """Por ahora a nivel taxes solo usamos el mapping para líneas de descuento y downpayment
