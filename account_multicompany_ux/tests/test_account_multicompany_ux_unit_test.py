@@ -108,10 +108,9 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
                 "journal_id": self.first_company_journal.id,
             }
         )
-
+        self.bank_1.company_id = False
+        invoice.write({"partner_bank_id": self.bank_1.id})
         acc.change_company()
-        invoice._compute_bank_partner_id()
-        invoice._compute_partner_bank_id()
         self.assertEqual(
             invoice.partner_bank_id.id,
             self.bank_1.id,
