@@ -128,6 +128,7 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
                 }
             )
 
+<<<<<<< ae2689b7f721dff155fc033a5fd125d990b5630c
         if not self.account_payable:
             self.account_payable = self.env["account.account"].create(
                 {
@@ -137,6 +138,72 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
                     "company_ids": [self.first_company.id],
                 }
             )
+||||||| b1836387b9936e1bb7482896b1d6761db7d77dd0
+        acc = self.env["account.change.company"].create(
+            {
+                "move_id": invoice.id,
+                "company_ids": [self.first_company.id, self.second_company.id],
+                "company_id": self.second_company.id,
+                "journal_id": self.second_company_journal.id,
+            }
+        )
+        acc.change_company()
+        self.assertEqual(
+            invoice.partner_bank_id.id,
+            False,
+            "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia",
+        )
+        acc = self.env["account.change.company"].create(
+            {
+                "move_id": invoice.id,
+                "company_ids": [self.first_company.id, self.second_company.id],
+                "company_id": self.first_company.id,
+                "journal_id": self.first_company_journal.id,
+            }
+        )
+
+        acc.change_company()
+        invoice._compute_bank_partner_id()
+        invoice._compute_partner_bank_id()
+        self.assertEqual(
+            invoice.partner_bank_id.id,
+            self.bank_1.id,
+            "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia",
+        )
+        invoice.action_post()
+=======
+        acc = self.env["account.change.company"].create(
+            {
+                "move_id": invoice.id,
+                "company_ids": [self.first_company.id, self.second_company.id],
+                "company_id": self.second_company.id,
+                "journal_id": self.second_company_journal.id,
+            }
+        )
+        acc.change_company()
+        self.assertEqual(
+            invoice.partner_bank_id.id,
+            False,
+            "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia",
+        )
+        acc = self.env["account.change.company"].create(
+            {
+                "move_id": invoice.id,
+                "company_ids": [self.first_company.id, self.second_company.id],
+                "company_id": self.first_company.id,
+                "journal_id": self.first_company_journal.id,
+            }
+        )
+        self.bank_1.company_id = False
+        invoice.write({"partner_bank_id": self.bank_1.id})
+        acc.change_company()
+        self.assertEqual(
+            invoice.partner_bank_id.id,
+            self.bank_1.id,
+            "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia",
+        )
+        invoice.action_post()
+>>>>>>> b35de8a0424ccd4f4634fc22f68ce208ff208829
 
     def test_account_receivable(self):
         """Cambiamos las cuentas por cobrar/pagar y verificamos que impacten correctamente en la factura."""
