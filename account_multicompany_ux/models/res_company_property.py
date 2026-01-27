@@ -160,8 +160,10 @@ class ResCompanyProperty(models.Model):
     def _get_property_comodel(self):
         property_field = self.env.context.get("property_field")
         record = self._get_record()
-        field = record._fields.get(property_field)
-        return field and field.comodel_name or False
+        field = None
+        if record:
+            field = record._fields.get(property_field)
+        return (field and field.comodel_name) if field else False
 
     @api.model
     def _get_record(self):
@@ -172,7 +174,7 @@ class ResCompanyProperty(models.Model):
         # no verificamos tener active_id para que cuando estamos en "create" y viene False o NewId se compute igual
         # recordset vacio y luego se pueda obtener el comodel
         if not property_field or not active_model:
-            raise UserError(_("Active_model or propert_field missing on context: %s", self._context))
+            return
         return self.with_company(self.id).env[active_model].browse(active_id)
 
     @api.model
@@ -188,7 +190,25 @@ class ResCompanyProperty(models.Model):
             company_property_field = "property_pricelist_id"
         else:
             property_field = self._context.get("property_field")
-            if property_field == "standard_price":
+            if not property_field:
+                # Si no hay property_field en el contexto, retornar None
+                return None
+            elif property_field in (
+                "property_account_receivable_id",
+                "property_account_payable_id",
+                "property_account_expense_id",
+                "property_account_income_id",
+                "property_account_expense_categ_id",
+                "property_account_income_categ_id",
+            ):
+                company_property_field = "property_account_id"
+            elif property_field in ("property_payment_term_id", "property_supplier_payment_term_id"):
+                company_property_field = "property_term_id"
+            elif property_field == "property_account_position_id":
+                company_property_field = "property_position_id"
+            elif property_field == "property_product_pricelist":
+                company_property_field = "property_pricelist_id"
+            elif property_field == "standard_price":
                 company_property_field = "standard_price"
             elif property_field == "credit":
                 company_property_field = "property_credit_id"
@@ -210,6 +230,11 @@ class ResCompanyProperty(models.Model):
 
         for rec in self:
             company_property_field = rec._get_company_property_field()
+
+            # Si no hay company_property_field, usar display_name por defecto
+            if not company_property_field:
+                rec.display_name = rec.company_id.get_company_sufix() or rec.company_id.name
+                continue
 
             rec.invalidate_recordset([company_property_field])
             rec.modified([company_property_field])
