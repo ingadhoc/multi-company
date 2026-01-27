@@ -79,6 +79,9 @@ class AccountChangeCurrency(models.TransientModel):
         if self.move_id._fields.get("l10n_latam_document_type_id") and self.move_id.l10n_latam_manual_document_number:
             old_doc_type = self.move_id.l10n_latam_document_type_id
 
+        # backup original fiscal position
+        original_fiscal_position = self.move_id.fiscal_position_id or False
+
         # BACKUP PARTNER BANK ID
         original_partner_bank_id = self.move_id.partner_bank_id or False
 
@@ -165,7 +168,9 @@ class AccountChangeCurrency(models.TransientModel):
                 self.move_id.name = old_name
 
         # TAXES
-        self._get_change_company_line_taxes(self.move_id.invoice_line_ids, original_taxes)
+        self._get_change_company_line_taxes(
+            self.move_id.invoice_line_ids, original_taxes, fiscal_pos=original_fiscal_position
+        )
         # para percepciones argentinas re-computamos con su propio método
         if self.move_id.fiscal_position_id._fields.get("l10n_ar_tax_ids"):
             self.move_id._l10n_ar_recompute_fiscal_position_taxes()
@@ -205,6 +210,17 @@ class AccountChangeCurrency(models.TransientModel):
                     # continue
                 new_tax_ids.append(new_tax.id)
             line.tax_ids = [(6, 0, new_tax_ids)]
+        if fiscal_pos:
+            new_fps = self.env["account.fiscal.position"].search(
+                [
+                    ("name", "=", fiscal_pos.name),
+                    ("auto_apply", "=", fiscal_pos.auto_apply),
+                    ("company_id", "=", self.company_id.id),
+                ],
+                limit=1,
+            )
+            if new_fps:
+                self.move_id.fiscal_position_id = new_fps
 
     @api.model
     def _get_change_downpayment_account(self, to_company, line, fiscal_pos):
