@@ -17,10 +17,21 @@
         <field name="mode">primary</field>
         <field name="inherit_id" ref="account_multicompany_ux.view_res_company_account_property_form"></field>
         <field name="arch" type="xml">
+<<<<<<< 861f5350a721c76e6d824a0bea4e48cfb1ece7b5
             <list>
                 <field name="property_domain" column_invisible="True"/>
                 <field name="property_account_id" domain="property_domain"/>
             </list>
+||||||| 3108260719dca7d5562b5c95904a0780afea3527
+            <tree>
+                <field name="property_account_id"/>
+            </tree>
+=======
+            <tree>
+                <field name="account_domain" column_invisible="1"/>
+                <field name="property_account_id"/>
+            </tree>
+>>>>>>> 7b631c70e8018910d5bcd970916702cb5580cc1a
         </field>
     </record>
     <record id="view_property_position_id_form" model="ir.ui.view">

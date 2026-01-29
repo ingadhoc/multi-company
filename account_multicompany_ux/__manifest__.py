@@ -18,6 +18,7 @@
 #
 ##############################################################################
 {
+<<<<<<< 861f5350a721c76e6d824a0bea4e48cfb1ece7b5
     "name": "Account Multicompany Usability",
     "version": "18.0.1.6.0",
     "author": "ADHOC SA",
@@ -27,6 +28,25 @@
         "account",
         "account_reports",
         "sale",  # solo por property_account_downpayment_categ_id, ideal en proximas versiones evitar esta dependencia
+||||||| 3108260719dca7d5562b5c95904a0780afea3527
+    'name': 'Account Multicompany Usability',
+    'version': "17.0.1.1.0",
+    'author': 'ADHOC SA',
+    'website': 'www.adhoc.com.ar',
+    'license': 'AGPL-3',
+    'depends': [
+        'account',
+        'account_reports',
+=======
+    'name': 'Account Multicompany Usability',
+    'version': "17.0.1.2.0",
+    'author': 'ADHOC SA',
+    'website': 'www.adhoc.com.ar',
+    'license': 'AGPL-3',
+    'depends': [
+        'account',
+        'account_reports',
+>>>>>>> 7b631c70e8018910d5bcd970916702cb5580cc1a
     ],
     "data": [
         "views/res_company_property_views.xml",
