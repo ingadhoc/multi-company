@@ -18,6 +18,7 @@
         <field name="inherit_id" ref="account_multicompany_ux.view_res_company_account_property_form"></field>
         <field name="arch" type="xml">
             <tree>
+                <field name="account_domain" column_invisible="1"/>
                 <field name="property_account_id"/>
             </tree>
         </field>
