@@ -19,3 +19,31 @@ class Website(models.Model):
         if vals:
             sale_order_sudo.write(vals)
         return sale_order_sudo
+
+    def _get_and_cache_current_fiscal_position(self):
+        """Retrieve and cache the current fiscal position, validating company consistency.
+
+        In multi-company scenarios, when a user switches between websites with different
+        companies, the cached fiscal position may belong to a different company. This method
+        validates that the fiscal position is applicable to the current website sale's company.
+
+        If a fiscal position is cached but belongs to a different company, it is recalculated
+        based on the user's partner information and the website sale company context.
+
+        :return: A sudoed fiscal position record valid for the correct company
+        :rtype: account.fiscal.position
+        """
+        fpos = super()._get_and_cache_current_fiscal_position()
+        account_fiscal_position_sudo = self.env["account.fiscal.position"].sudo()
+        partner = self.env.user.partner_id
+        self.ensure_one()
+
+        # Validate that the cached fiscal position belongs to the current website sale's company
+        # If it belongs to a different company, recalculate it for the correct company
+        if fpos.exists() and fpos.company_id and fpos.company_id != self.company_id:
+            fpos = (
+                account_fiscal_position_sudo.with_company(self.company_id)._get_fiscal_position(partner)
+                or account_fiscal_position_sudo
+            )
+
+        return fpos
