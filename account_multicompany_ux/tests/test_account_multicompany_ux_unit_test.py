@@ -95,7 +95,7 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
             )
 
         self.bank_1 = self.env["res.partner.bank"].search([("company_id", "=", False)], limit=1)
-        self.bank_1.write({"partner_id": self.first_company.partner_id.id})
+        self.bank_1.write({"partner_id": self.first_company.partner_id.id, "allow_out_payment": True})
         self.bank_1.company_id = self.first_company.id
 
         # Switch to first company context
