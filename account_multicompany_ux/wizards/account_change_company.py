@@ -70,9 +70,11 @@ class AccountChangeCompany(models.TransientModel):
 
     def change_company(self):
         self.ensure_one()
-        self.move_id.with_context(skip_invoice_sync=True).write(
-            {
-                "company_id": self.company_id.id,
-                "journal_id": self.journal_id.id,
-            }
-        )
+        old_payment_term = self.move_id.invoice_payment_term_id
+        vals = {
+            "company_id": self.company_id.id,
+            "journal_id": self.journal_id.id,
+        }
+        if old_payment_term and (not old_payment_term.company_id or old_payment_term.company_id == self.company_id):
+            vals["invoice_payment_term_id"] = old_payment_term.id
+        self.move_id.with_context(skip_invoice_sync=True).write(vals)
