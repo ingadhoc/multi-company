@@ -169,6 +169,9 @@ class AccountChangeCurrency(models.TransientModel):
         # para percepciones argentinas re-computamos con su propio método
         if self.move_id.fiscal_position_id._fields.get("l10n_ar_tax_ids"):
             self.move_id._l10n_ar_recompute_fiscal_position_taxes()
+            # necesitamos que recompute los impuestos al cambiar la posición fiscal
+            # cuando hay cambio de compañía
+            self.move_id._onchange_fiscal_position_id()
 
         # PARTNER BANK
         if original_partner_bank_id and original_partner_bank_id.company_id.id in [False, self.company_id.id]:
