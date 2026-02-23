@@ -66,6 +66,9 @@ class AccountChangeCurrency(models.TransientModel):
         old_doc_type = False
         if self.move_id._fields.get('l10n_latam_document_type_id') and self.move_id.l10n_latam_manual_document_number:
             old_doc_type = self.move_id.l10n_latam_document_type_id
+        
+        # BACKUP PARTNER BANK ID
+        original_partner_bank_id = self.move_id.partner_bank_id or False
 
         # Make a copy to avoid modifying the original recordset after
         original_discount_lines = self.env['account.move.line']
@@ -120,6 +123,9 @@ class AccountChangeCurrency(models.TransientModel):
             self._get_change_company_discount_tax(original_discount_lines, original_discount_taxes)
 
         self.move_id._compute_partner_bank_id()
+        # PARTNER BANK
+        if not self.move_id.partner_bank_id and original_partner_bank_id and original_partner_bank_id.company_id.id in [False, self.company_id.id]:
+            self.move_id.partner_bank_id = original_partner_bank_id
 
         for invoice_line in self.move_id.invoice_line_ids.filtered(lambda x: not x.product_id).with_company(self.company_id.id):
             invoice_line.tax_ids = invoice_line._get_computed_taxes()
