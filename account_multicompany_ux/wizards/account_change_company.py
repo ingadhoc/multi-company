@@ -78,6 +78,9 @@ class AccountChangeCurrency(models.TransientModel):
         old_doc_type = False
         if self.move_id._fields.get("l10n_latam_document_type_id") and self.move_id.l10n_latam_manual_document_number:
             old_doc_type = self.move_id.l10n_latam_document_type_id
+        
+        # BACKUP PARTNER BANK ID
+        original_partner_bank_id = self.move_id.partner_bank_id or False
 
         # BACKUP PARTNER BANK ID
         original_partner_bank_id = self.move_id.partner_bank_id or False
@@ -153,12 +156,35 @@ class AccountChangeCurrency(models.TransientModel):
                 self.company_id, line, self.move_id.fiscal_position_id
             )
 
+<<<<<<< 832699f4e52ad814da752079041ede71f4a98ff4
         # PAYMENT TERM
         payment_term = original_payment_term or invoice_payment_term_id
         self.move_id._compute_invoice_payment_term_id()
         if not self.move_id.invoice_payment_term_id and payment_term:
             self.move_id.invoice_payment_term_id = payment_term
         # Corregir name
+||||||| 96dedf1dde64ed13bcb18a182902b4a5a9fe879e
+        # Recompute taxes for discount lines
+        if original_discount_lines:
+            self._get_change_company_discount_tax(original_discount_lines, original_discount_taxes)
+
+        self.move_id._compute_partner_bank_id()
+
+        for invoice_line in self.move_id.invoice_line_ids.filtered(lambda x: not x.product_id).with_company(self.company_id.id):
+            invoice_line.tax_ids = invoice_line._get_computed_taxes()
+=======
+        # Recompute taxes for discount lines
+        if original_discount_lines:
+            self._get_change_company_discount_tax(original_discount_lines, original_discount_taxes)
+
+        self.move_id._compute_partner_bank_id()
+        # PARTNER BANK
+        if not self.move_id.partner_bank_id and original_partner_bank_id and original_partner_bank_id.company_id.id in [False, self.company_id.id]:
+            self.move_id.partner_bank_id = original_partner_bank_id
+
+        for invoice_line in self.move_id.invoice_line_ids.filtered(lambda x: not x.product_id).with_company(self.company_id.id):
+            invoice_line.tax_ids = invoice_line._get_computed_taxes()
+>>>>>>> a9c397bc8210bcd0d720c34f6e69d7eeb1a3c7e3
         if old_doc_type and old_doc_type in self.move_id.l10n_latam_available_document_type_ids:
             self.move_id.l10n_latam_document_type_id = old_doc_type
             if self.move_id.l10n_latam_manual_document_number:

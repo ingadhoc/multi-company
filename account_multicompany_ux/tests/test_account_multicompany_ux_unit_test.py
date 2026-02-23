@@ -54,6 +54,7 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         self.bank_1 = self.env["res.partner.bank"].search([("company_id", "=", False)], limit=1)
         self.bank_1.write({"partner_id": self.first_company.partner_id.id})
         self.bank_1.company_id = self.first_company.id
+        self.bank_1.allow_out_payment = True
         self.env.company = self.first_company
 
         self.account_receivable = self.env["account.account"].create(
@@ -107,6 +108,7 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
             }
         )
         acc.change_company()
+<<<<<<< 832699f4e52ad814da752079041ede71f4a98ff4
         self.assertEqual(
             invoice.partner_bank_id.id,
             False,
@@ -122,12 +124,41 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         )
         self.bank_1.company_id = False
         invoice.write({"partner_bank_id": self.bank_1.id})
+||||||| 96dedf1dde64ed13bcb18a182902b4a5a9fe879e
+        self.assertEqual(invoice.partner_bank_id.id,  False , "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia")
+        acc = self.env['account.change.company'].create({
+            'move_id': invoice.id,
+            'company_ids': [self.first_company.id, self.second_company.id],
+            'company_id': self.first_company.id,
+            'journal_id': self.first_company_journal.id
+        })
+
+=======
+        self.assertEqual(invoice.partner_bank_id.id,  False , "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia")
+        acc = self.env['account.change.company'].create({
+            'move_id': invoice.id,
+            'company_ids': [self.first_company.id, self.second_company.id],
+            'company_id': self.first_company.id,
+            'journal_id': self.first_company_journal.id
+        })
+        self.bank_1.company_id = False
+        invoice.write({"partner_bank_id": self.bank_1.id})
+
+>>>>>>> a9c397bc8210bcd0d720c34f6e69d7eeb1a3c7e3
         acc.change_company()
+<<<<<<< 832699f4e52ad814da752079041ede71f4a98ff4
         self.assertEqual(
             invoice.partner_bank_id.id,
             self.bank_1.id,
             "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia",
         )
+||||||| 96dedf1dde64ed13bcb18a182902b4a5a9fe879e
+        invoice._compute_bank_partner_id()
+        invoice._compute_partner_bank_id()
+        self.assertEqual(invoice.partner_bank_id.id,  self.bank_1.id , "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia")
+=======
+        self.assertEqual(invoice.partner_bank_id.id,  self.bank_1.id , "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia")
+>>>>>>> a9c397bc8210bcd0d720c34f6e69d7eeb1a3c7e3
         invoice.action_post()
 
     def test_account_receivable(self):
