@@ -97,6 +97,13 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         self.bank_1 = self.env["res.partner.bank"].search([("company_id", "=", False)], limit=1)
         self.bank_1.write({"partner_id": self.first_company.partner_id.id, "allow_out_payment": True})
         self.bank_1.company_id = self.first_company.id
+<<<<<<< 16b1a353c6a35b0d752a98586d6001bb878de2c9
+||||||| 832699f4e52ad814da752079041ede71f4a98ff4
+        self.env.company = self.first_company
+=======
+        self.bank_1.allow_out_payment = True
+        self.env.company = self.first_company
+>>>>>>> 91ec13e802eb98a06ad3347e7c8535aafb6adbb0
 
         # Switch to first company context
         self.env = self.env(context=dict(self.env.context, allowed_company_ids=self.first_company.ids))
