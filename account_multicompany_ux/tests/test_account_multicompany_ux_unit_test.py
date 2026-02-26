@@ -54,6 +54,7 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         self.bank_1 = self.env["res.partner.bank"].search([("company_id", "=", False)], limit=1)
         self.bank_1.write({"partner_id": self.first_company.partner_id.id})
         self.bank_1.company_id = self.first_company.id
+        self.bank_1.allow_out_payment = True
         self.env.company = self.first_company
 
         self.account_receivable = self.env["account.account"].create(
