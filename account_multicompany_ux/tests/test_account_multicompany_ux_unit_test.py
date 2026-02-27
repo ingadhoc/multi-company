@@ -95,7 +95,14 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
             )
 
         self.bank_1 = self.env["res.partner.bank"].search([("company_id", "=", False)], limit=1)
+<<<<<<< 16b1a353c6a35b0d752a98586d6001bb878de2c9
         self.bank_1.write({"partner_id": self.first_company.partner_id.id, "allow_out_payment": True})
+||||||| 994f6130d463c7fede7f8dc74f42999c3a28251f
+        self.bank_1.write({"partner_id": self.first_company.partner_id.id})
+=======
+        self.bank_1.allow_out_payment = False
+        self.bank_1.write({"partner_id": self.first_company.partner_id.id})
+>>>>>>> bbeda8abbb8c16c3a16a7fc03ab26b672d7d29a2
         self.bank_1.company_id = self.first_company.id
 
         # Switch to first company context
@@ -128,6 +135,7 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
                 }
             )
 
+<<<<<<< 16b1a353c6a35b0d752a98586d6001bb878de2c9
         if not self.account_payable:
             self.account_payable = self.env["account.account"].create(
                 {
@@ -137,6 +145,73 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
                     "company_ids": [self.first_company.id],
                 }
             )
+||||||| 994f6130d463c7fede7f8dc74f42999c3a28251f
+        acc = self.env["account.change.company"].create(
+            {
+                "move_id": invoice.id,
+                "company_ids": [self.first_company.id, self.second_company.id],
+                "company_id": self.second_company.id,
+                "journal_id": self.second_company_journal.id,
+            }
+        )
+        acc.change_company()
+        self.assertEqual(
+            invoice.partner_bank_id.id,
+            False,
+            "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia",
+        )
+        acc = self.env["account.change.company"].create(
+            {
+                "move_id": invoice.id,
+                "company_ids": [self.first_company.id, self.second_company.id],
+                "company_id": self.first_company.id,
+                "journal_id": self.first_company_journal.id,
+            }
+        )
+        self.bank_1.company_id = False
+        invoice.write({"partner_bank_id": self.bank_1.id})
+        acc.change_company()
+        self.assertEqual(
+            invoice.partner_bank_id.id,
+            self.bank_1.id,
+            "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia",
+        )
+        invoice.action_post()
+=======
+        acc = self.env["account.change.company"].create(
+            {
+                "move_id": invoice.id,
+                "company_ids": [self.first_company.id, self.second_company.id],
+                "company_id": self.second_company.id,
+                "journal_id": self.second_company_journal.id,
+            }
+        )
+        acc.change_company()
+        self.assertEqual(
+            invoice.partner_bank_id.id,
+            False,
+            "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia",
+        )
+        acc = self.env["account.change.company"].create(
+            {
+                "move_id": invoice.id,
+                "company_ids": [self.first_company.id, self.second_company.id],
+                "company_id": self.first_company.id,
+                "journal_id": self.first_company_journal.id,
+            }
+        )
+        self.bank_1.allow_out_payment = False
+        self.bank_1.company_id = False
+        self.bank_1.allow_out_payment = True
+        invoice.write({"partner_bank_id": self.bank_1.id})
+        acc.change_company()
+        self.assertEqual(
+            invoice.partner_bank_id.id,
+            self.bank_1.id,
+            "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia",
+        )
+        invoice.action_post()
+>>>>>>> bbeda8abbb8c16c3a16a7fc03ab26b672d7d29a2
 
     def test_account_receivable(self):
         """Cambiamos las cuentas por cobrar/pagar y verificamos que impacten correctamente en la factura."""
