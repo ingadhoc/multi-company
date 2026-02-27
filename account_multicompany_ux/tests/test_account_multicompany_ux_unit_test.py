@@ -52,6 +52,7 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
             )
 
         self.bank_1 = self.env["res.partner.bank"].search([("company_id", "=", False)], limit=1)
+        self.bank_1.allow_out_payment = False
         self.bank_1.write({"partner_id": self.first_company.partner_id.id})
         self.bank_1.company_id = self.first_company.id
         self.bank_1.allow_out_payment = True
@@ -121,7 +122,9 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
                 "journal_id": self.first_company_journal.id,
             }
         )
+        self.bank_1.allow_out_payment = False
         self.bank_1.company_id = False
+        self.bank_1.allow_out_payment = True
         invoice.write({"partner_bank_id": self.bank_1.id})
         acc.change_company()
         self.assertEqual(
