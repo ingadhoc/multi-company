@@ -156,7 +156,7 @@ class AccountChangeCurrency(models.TransientModel):
         # PAYMENT TERM
         payment_term = original_payment_term or invoice_payment_term_id
         self.move_id._compute_invoice_payment_term_id()
-        if not self.move_id.invoice_payment_term_id and payment_term:
+        if payment_term:
             self.move_id.invoice_payment_term_id = payment_term
         # Corregir name
         if old_doc_type and old_doc_type in self.move_id.l10n_latam_available_document_type_ids:
