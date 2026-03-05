@@ -2,6 +2,8 @@
 # For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
+from collections import defaultdict
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
@@ -37,7 +39,9 @@ class AccountChangeCurrency(models.TransientModel):
     @api.depends("move_id")
     @api.depends_context("allowed_company_ids")
     def _compute_company_ids(self):
-        self.company_ids = self.env.companies - self.move_id.company_id
+        self.company_ids = (
+            self.env.companies.filtered(lambda x: x.consolidation_company == False) - self.move_id.company_id
+        )
 
     @api.depends("company_ids")
     def _compute_company(self):
@@ -57,7 +61,11 @@ class AccountChangeCurrency(models.TransientModel):
         """
         for rec in self:
             journal_type = rec.move_id.invoice_filter_type_domain or "general"
-            domain = [("company_id", "=", rec.company_id._origin.id), ("type", "=", journal_type)]
+            domain = [
+                ("company_id", "=", rec.company_id._origin.id),
+                ("type", "=", journal_type),
+                ("company_id.consolidation_company", "=", False),
+            ]
             rec.suitable_journal_ids = self.env["account.journal"].search(domain)
 
     def change_company(self):
@@ -83,44 +91,47 @@ class AccountChangeCurrency(models.TransientModel):
         original_partner_bank_id = self.move_id.partner_bank_id or False
 
         if self.move_id.fiscal_position_id._fields.get("l10n_ar_tax_ids"):
-            fp_tax_groups = self.move_id.fiscal_position_id.l10n_ar_tax_ids.filtered(
-                lambda x: x.tax_type == "perception"
-            ).mapped("default_tax_id.tax_group_id")
+            fp_tax_group_ids = set(
+                self.move_id.fiscal_position_id.l10n_ar_tax_ids.filtered(lambda x: x.tax_type == "perception")
+                .mapped("default_tax_id.tax_group_id")
+                .ids
+            )
         else:
-            fp_tax_groups = self.env["account.tax.group"]
+            fp_tax_group_ids = set()
         original_taxes = {
-            line.id: line.tax_ids.filtered(lambda x: x.tax_group_id not in fp_tax_groups).ids[:]
+            line.id: [tax.id for tax in line.tax_ids if tax.tax_group_id.id not in fp_tax_group_ids]
             for line in self.move_id.invoice_line_ids
         }
 
         # Remove taxes from invoice lines to allow changing account
-        self.move_id.invoice_line_ids.tax_ids = False
+        # Usamos skip_invoice_sync en TODAS las operaciones sobre líneas para evitar que cada
+        # asignación individual (account_id, tax_ids, etc.) dispare _sync_dynamic_lines del move.
+        # La sincronización ocurre una sola vez al final, fuera de este contexto.
+        move = self.move_id
+        move.invoice_line_ids.tax_ids = False
 
         # si el payment term tiene compañía y es distinta a la que elegimos, forzamos recomputo
-        if (
-            self.move_id.invoice_payment_term_id.company_id
-            and self.move_id.invoice_payment_term_id.company_id != self.company_id
-        ):
+        if move.invoice_payment_term_id.company_id and move.invoice_payment_term_id.company_id != self.company_id:
             # lo tenemos que hacer antes del write sino se obtiene mensaje "Operación no válida. Empresas incompatibles con los registros"
-            self.move_id.with_company(self.move_id.company_id)._compute_invoice_payment_term_id()
-        elif not self.move_id.invoice_payment_term_id.company_id:
-            original_payment_term = self.move_id.invoice_payment_term_id
-            self.move_id.invoice_payment_term_id = False
+            move.with_company(move.company_id)._compute_invoice_payment_term_id()
+        elif not move.invoice_payment_term_id.company_id:
+            original_payment_term = move.invoice_payment_term_id
+            move.invoice_payment_term_id = False
         invoice_payment_term_id = False
         if (
-            self.move_id.is_purchase_document()
-            and self.move_id._origin.partner_id
+            move.is_purchase_document()
+            and move._origin.partner_id
             and (
-                not self.move_id.invoice_payment_term_id.company_id
-                or self.move_id.invoice_payment_term_id.company_id == self.move_id.company_id
+                not move.invoice_payment_term_id.company_id
+                or move.invoice_payment_term_id.company_id == move.company_id
             )
         ):
             # esto lo hacemos porque sino el write borra el invoice_payment_term_id en facturas de proveedor si en invoice_payment_term_id no tiene compañía
-            invoice_payment_term_id = self.move_id.invoice_payment_term_id
+            invoice_payment_term_id = move.invoice_payment_term_id
 
         # EMPEZAMOS CON CAMBIOS
         # COMPANY, JOURNAL, DOC TYPE and PAYMENT TERM
-        self.move_id.with_context(skip_invoice_sync=True).write(
+        move.with_context(skip_invoice_sync=True).write(
             {
                 "partner_bank_id": False,
                 "company_id": self.company_id.id,
@@ -130,88 +141,119 @@ class AccountChangeCurrency(models.TransientModel):
 
         # LINES ACCOUNTS.
         # tomamos la del producto, o del diario sin no hay producto (salvo para downpamyent que se usan una especificas)
-        without_product = self.move_id.line_ids.filtered(
-            lambda line: line.display_type == "product" and not line.product_id
-        )
+        without_product = move.line_ids.filtered(lambda line: line.display_type == "product" and not line.product_id)
         downpayment_lines = self.env["account.move.line"]
-        if self.move_id.invoice_line_ids._fields.get("is_downpayment"):
-            downpayment_lines = self.move_id.invoice_line_ids.filtered(
+        if move.invoice_line_ids._fields.get("is_downpayment"):
+            downpayment_lines = move.invoice_line_ids.filtered(
                 lambda x: x.is_downpayment and x.display_type not in ("line_section", "line_note")
             )
-        (self.move_id.line_ids - without_product - downpayment_lines).with_company(
-            self.company_id.id
+        (move.line_ids - without_product - downpayment_lines).with_company(self.company_id.id).with_context(
+            skip_invoice_sync=True
         )._compute_account_id()
-        for line in without_product - downpayment_lines:
-            line.account_id = line.move_id.journal_id.default_account_id
+        default_account = move.journal_id.default_account_id
+        (without_product - downpayment_lines).account_id = default_account
 
         for line in downpayment_lines:
             # TODO podria darse que tengo distintas cuentas para distantas categorias y distintos impuestos
             # tome la cuenta del ultimo producto que encontro.
             # la unica form de correguirlo borrar y calcular las lineas de anticipo pero no sabria igualmente sobre que lineas
             # de la venta calcular el anticipo, ya que la sale order ya podria previamente asociado otro anticipo.
-            line.account_id = self._get_change_downpayment_account(
-                self.company_id, line, self.move_id.fiscal_position_id
-            )
+            line.account_id = self._get_change_downpayment_account(self.company_id, line, move.fiscal_position_id)
 
         # PAYMENT TERM
         payment_term = original_payment_term or invoice_payment_term_id
-        self.move_id._compute_invoice_payment_term_id()
+        move._compute_invoice_payment_term_id()
         if payment_term:
-            self.move_id.invoice_payment_term_id = payment_term
+            move.invoice_payment_term_id = payment_term
         # Corregir name
-        if old_doc_type and old_doc_type in self.move_id.l10n_latam_available_document_type_ids:
-            self.move_id.l10n_latam_document_type_id = old_doc_type
-            if self.move_id.l10n_latam_manual_document_number:
-                self.move_id.name = old_name
+        if old_doc_type and old_doc_type in move.l10n_latam_available_document_type_ids:
+            move.l10n_latam_document_type_id = old_doc_type
+            if move.l10n_latam_manual_document_number:
+                move.name = old_name
 
         # TAXES
-        self._get_change_company_line_taxes(self.move_id.invoice_line_ids, original_taxes)
+        self._get_change_company_line_taxes(move.invoice_line_ids, original_taxes)
         # para percepciones argentinas re-computamos con su propio método
-        if self.move_id.fiscal_position_id._fields.get("l10n_ar_tax_ids"):
-            self.move_id._l10n_ar_recompute_fiscal_position_taxes()
+        if move.fiscal_position_id._fields.get("l10n_ar_tax_ids"):
+            move._l10n_ar_recompute_fiscal_position_taxes()
 
         # PARTNER BANK
         if original_partner_bank_id and original_partner_bank_id.company_id.id in [False, self.company_id.id]:
-            self.move_id.partner_bank_id = original_partner_bank_id
+            move.partner_bank_id = original_partner_bank_id
+
+        # Forzar sincronización final del move una sola vez (sin skip_invoice_sync).
+        # self.move_id NO tiene skip_invoice_sync en su contexto, por lo que _sync_dynamic_lines
+        # ejecutará la sincronización completa (impuestos, payment terms, balanceo, etc.) al salir.
+        container = {"records": self.move_id}
+        with self.move_id._check_balanced(container), self.move_id._sync_dynamic_lines(container):
+            pass
 
     def _get_change_company_line_taxes(self, lines, taxes):
-        """Por ahora a nivel taxes solo usamos el mapping para líneas de descuento y downpayment
-        Si duele y todo va bien podemos extenderlo a todas las líneas
+        """Map taxes from one company to another for invoice or sale order lines.
+
+        Compatible with both account.move.line and sale.order.line.
         """
+        # Ensure lines is a recordset
+        if not lines:
+            return
+        by_pass_exception = False
+        company_has_active_taxes = bool(
+            self.env["account.tax"].search(
+                [("company_id", "=", self.company_id.id), ("active", "=", True)],
+                limit=1,
+            )
+        )
+        # 1) Recolectar todos los tax IDs únicos de todas las líneas
+        all_tax_ids = set()
+        for line_tax_ids in taxes.values():
+            all_tax_ids.update(line_tax_ids)
+
+        # 2) Buscar el equivalente en la nueva compañía una sola vez por impuesto único
+        tax_mapping = {}
+        for tax in self.env["account.tax"].browse(list(all_tax_ids)):
+            new_tax = self.env["account.tax"].search(
+                [
+                    ("type_tax_use", "=", tax.type_tax_use),
+                    ("tax_group_id.name", "=", tax.tax_group_id.name),
+                    ("amount", "=", tax.amount),
+                    ("active", "=", True),
+                    ("price_include_override", "=", tax.price_include_override),
+                    ("company_id", "=", self.company_id.id),
+                ],
+                limit=1,
+            )
+            if not new_tax and not company_has_active_taxes:
+                by_pass_exception = True
+            if new_tax and not by_pass_exception:
+                tax_mapping[tax.id] = new_tax.id
+            else:
+                message = _(
+                    "The selected company (%s) does not have an equivalent tax to '%s' (same type, group and amount)."
+                ) % (self.company_id.name, tax.name)
+                raise UserError(message)
+
+        # Determine tax field based on the lines we're working with
+        # account.move.line uses 'tax_ids', sale.order.line uses 'tax_id' (Many2many in both cases)
+        tax_field = None
+        if "tax_ids" in lines._fields:
+            tax_field = "tax_ids"
+        elif "tax_id" in lines._fields:
+            tax_field = "tax_id"
+        else:
+            raise UserError(_("Lines do not have a tax field (tax_ids or tax_id)."))
+
+        # 3) Agrupar líneas por combinación de impuestos originales para hacer writes en lote
+        # Create empty recordset of the same model as lines
+        lines_by_taxes = defaultdict(lambda: lines.browse())
         for line in lines:
-            tax_ids = self.env["account.tax"].browse(taxes[line.id])
-            new_tax_ids = []
-            for tax in tax_ids:
-                new_tax = self.env["account.tax"].search(
-                    [
-                        ("type_tax_use", "=", tax.type_tax_use),
-                        ("tax_group_id.name", "=", tax.tax_group_id.name),
-                        ("amount", "=", tax.amount),
-                        ("active", "=", True),
-                        ("price_include_override", "=", tax.price_include_override),
-                        ("company_id", "=", self.company_id.id),
-                    ],
-                    limit=1,
-                )
-                if not new_tax:
-                    # TODO adaptar mensaje
-                    message = _(
-                        "The selected company (%s) does not have an equivalent tax to '%s' "
-                        "(same type, group and amount)."
-                    ) % (self.company_id.name, tax.name)
-                    # a validar si raise o no. El raise nos protege más de no hacer error.
-                    raise UserError(message)
-                    # self.move_id.message_post(body=message)
-                    # continue
-                new_tax_ids.append(new_tax.id)
-            # Could be use with sale lines and invoice lines
-            tax_field = None
-            if "tax_ids" in line._fields:
-                tax_field = "tax_ids"
-            elif "tax_id" in line._fields:
-                tax_field = "tax_id"
-            if tax_field:
-                line[tax_field] = [(6, 0, new_tax_ids)]
+            if line.id in taxes:
+                key = tuple(sorted(taxes[line.id]))
+                lines_by_taxes[key] |= line
+
+        # 4) Apply tax mapping to each group
+        for old_tax_ids, group_lines in lines_by_taxes.items():
+            new_tax_ids = [tax_mapping[tid] for tid in old_tax_ids]
+            group_lines[tax_field] = [(6, 0, new_tax_ids)]
 
     @api.model
     def _get_change_downpayment_account(self, to_company, line, fiscal_pos):
