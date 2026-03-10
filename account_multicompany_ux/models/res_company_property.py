@@ -50,40 +50,6 @@ class ResCompanyProperty(models.Model):
     property_field = fields.Char(
         compute="_compute_property_field",
     )
-    property_account_id = fields.Many2one(
-        "account.account",
-        string="Account",
-        compute="_compute_property_account",
-        inverse="_inverse_property_account",
-        check_company=True,
-        domain="account_domain",
-    )
-    account_domain = fields.Binary(compute="_compute_account_domain")
-    property_term_id = fields.Many2one(
-        "account.payment.term",
-        string="Payment Term",
-        compute="_compute_property_term",
-        inverse="_inverse_property_term",
-        check_company=True,
-    )
-    property_position_id = fields.Many2one(
-        "account.fiscal.position",
-        string="Fiscal Position",
-        compute="_compute_property_position",
-        inverse="_inverse_property_position",
-        check_company=True,
-    )
-    property_pricelist_id = fields.Many2one(
-        "product.pricelist",
-        string="Pricelist",
-        compute="_compute_property_pricelist",
-        inverse="_inverse_property_pricelist",
-        check_company=True,
-        # en odoo se hace asi pero por ahora lo dejamos con check_company, en odoo pareciera haber un bug porque
-        # no considera pricelist del parent
-        # company_dependent=False,  # behave like company dependent field but is not company_dependent
-        # domain=lambda self: [('company_id', 'in', (self.env.company.id, False))],
-    )
     property_credit_id = fields.Float(
         string="Credit",
         compute="_compute_property_credit",
@@ -104,24 +70,6 @@ class ResCompanyProperty(models.Model):
     )
 
     @api.depends("property_field")
-    def _compute_account_domain(self):
-        for rec in self:
-            if rec.property_field == "property_account_receivable_id":
-                domain = [("account_type", "=", "asset_receivable")]
-            elif rec.property_field == "property_account_payable_id":
-                domain = [("account_type", "=", "liability_payable")]
-            # para las income / expense accounts de productos y categorías
-            else:
-                domain = [
-                    (
-                        "account_type",
-                        "not in",
-                        ("asset_receivable", "liability_payable", "asset_cash", "liability_credit_card", "off_balance"),
-                    )
-                ]
-            rec.account_domain = domain
-
-    @api.depends("property_field")
     def _compute_record_currency(self):
         for rec in self:
             if rec.property_field in ["credit", "credit_limit"]:
@@ -133,12 +81,7 @@ class ResCompanyProperty(models.Model):
 
     @api.model
     def _get_companies(self):
-        domain = []
-        comodel = self._get_property_comodel()
-        self.invalidate_model(["property_account_id"])
-        if comodel in ["account.account"]:
-            domain = [("company_id.consolidation_company", "=", False)]
-        return self.search(domain)
+        return self.search([])
 
     @api.model
     def action_company_properties(self):
@@ -157,15 +100,6 @@ class ResCompanyProperty(models.Model):
         return action_read
 
     @api.model
-    def _get_property_comodel(self):
-        property_field = self.env.context.get("property_field")
-        record = self._get_record()
-        field = None
-        if record:
-            field = record._fields.get(property_field)
-        return (field and field.comodel_name) if field else False
-
-    @api.model
     def _get_record(self):
         context = self.env.context
         active_model = context.get("active_model")
@@ -179,44 +113,17 @@ class ResCompanyProperty(models.Model):
 
     @api.model
     def _get_company_property_field(self):
-        comodel = self._get_property_comodel()
-        if comodel == "account.account":
-            company_property_field = "property_account_id"
-        elif comodel == "account.fiscal.position":
-            company_property_field = "property_position_id"
-        elif comodel == "account.payment.term":
-            company_property_field = "property_term_id"
-        elif comodel == "product.pricelist":
-            company_property_field = "property_pricelist_id"
+        property_field = self._context.get("property_field")
+        if not property_field:
+            return None
+        elif property_field == "standard_price":
+            return "standard_price"
+        elif property_field == "credit":
+            return "property_credit_id"
+        elif property_field == "credit_limit":
+            return "credit_limit"
         else:
-            property_field = self._context.get("property_field")
-            if not property_field:
-                # Si no hay property_field en el contexto, retornar None
-                return None
-            elif property_field in (
-                "property_account_receivable_id",
-                "property_account_payable_id",
-                "property_account_expense_id",
-                "property_account_income_id",
-                "property_account_expense_categ_id",
-                "property_account_income_categ_id",
-            ):
-                company_property_field = "property_account_id"
-            elif property_field in ("property_payment_term_id", "property_supplier_payment_term_id"):
-                company_property_field = "property_term_id"
-            elif property_field == "property_account_position_id":
-                company_property_field = "property_position_id"
-            elif property_field == "property_product_pricelist":
-                company_property_field = "property_pricelist_id"
-            elif property_field == "standard_price":
-                company_property_field = "standard_price"
-            elif property_field == "credit":
-                company_property_field = "property_credit_id"
-            elif property_field == "credit_limit":
-                company_property_field = "credit_limit"
-            else:
-                raise UserError(_("Property for field %s not implemented yet", property_field))
-        return company_property_field
+            raise UserError(_("%s not implemented yet", property_field))
 
     @api.depends("company_id", "property_field")
     def _compute_display_name(self):
@@ -240,25 +147,16 @@ class ResCompanyProperty(models.Model):
             rec.modified([company_property_field])
 
             company_field = getattr(rec.with_context(no_company_sufix=True), company_property_field)
-            if type(company_field) is float:
-                precision_digits = self.env["decimal.precision"].precision_get("Product Price")
-                # por alguna razon el float_round no nos está funcionando
-                # y usamos round directamente (por ej. para valor 42,66)
-                company_field = company_field and round(company_field, precision_digits)
-                # company_field = company_field and float_round(
-                #     company_field, precision_digits=precision_digits)
-
-                # Si es el campo credit, incluir la moneda
-                if rec.property_field in ["credit", "credit_limit", "standard_price"] and rec.record_currency_id:
-                    display_name = "%s %s%s" % (
-                        rec.record_currency_id.symbol or rec.record_currency_id.name,
-                        company_field or 0,
-                        rec.company_id.get_company_sufix(),
-                    )
-                else:
-                    display_name = "%s%s" % (company_field or _("None"), rec.company_id.get_company_sufix())
+            precision_digits = self.env["decimal.precision"].precision_get("Product Price")
+            company_field = company_field and round(company_field, precision_digits)
+            if rec.property_field in ["credit", "credit_limit", "standard_price"] and rec.record_currency_id:
+                display_name = "%s %s%s" % (
+                    rec.record_currency_id.symbol or rec.record_currency_id.name,
+                    company_field or 0,
+                    rec.company_id.get_company_sufix(),
+                )
             else:
-                display_name = "%s%s" % (company_field.display_name or _("None"), rec.company_id.get_company_sufix())
+                display_name = "%s%s" % (company_field or _("None"), rec.company_id.get_company_sufix())
             rec.display_name = display_name
 
     @api.depends_context("property_field")
@@ -291,38 +189,6 @@ class ResCompanyProperty(models.Model):
                 record.standard_price = False
 
     @api.depends("property_field")
-    def _compute_property_account(self):
-        for record in self:
-            if record._get_property_comodel() == "account.account":
-                record.property_account_id = record._get_property_value()
-            else:
-                record.property_account_id = False
-
-    @api.depends("property_field")
-    def _compute_property_position(self):
-        for record in self:
-            if record._get_property_comodel() == "account.fiscal.position":
-                record.property_position_id = record._get_property_value()
-            else:
-                record.property_position_id = False
-
-    @api.depends("property_field")
-    def _compute_property_term(self):
-        for record in self:
-            if record._get_property_comodel() == "account.payment.term":
-                record.property_term_id = record._get_property_value()
-            else:
-                record.property_term_id = False
-
-    @api.depends("property_field")
-    def _compute_property_pricelist(self):
-        for record in self:
-            if record._get_property_comodel() == "product.pricelist":
-                record.property_pricelist_id = record._get_property_value()
-            else:
-                record.property_pricelist_id = False
-
-    @api.depends("property_field")
     def _compute_property_credit(self):
         for record in self:
             if record.property_field == "credit":
@@ -337,22 +203,6 @@ class ResCompanyProperty(models.Model):
         if not record or not property_field:
             return True
         setattr(record, property_field, value)
-
-    def _inverse_property_account(self):
-        for rec in self:
-            rec._set_property_value(rec.property_account_id.id)
-
-    def _inverse_property_position(self):
-        for rec in self:
-            rec._set_property_value(rec.property_position_id.id)
-
-    def _inverse_property_term(self):
-        for rec in self:
-            rec._set_property_value(rec.property_term_id.id)
-
-    def _inverse_property_pricelist(self):
-        for rec in self:
-            rec._set_property_value(rec.property_pricelist_id.id)
 
     def _inverse_property_credit(self):
         for rec in self:

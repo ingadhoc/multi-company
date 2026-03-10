@@ -19,13 +19,14 @@
 ##############################################################################
 {
     "name": "Account Multicompany Usability",
-    "version": "19.0.1.4.0",
+    "version": "19.0.1.5.0",
     "author": "ADHOC SA",
     "website": "www.adhoc.com.ar",
     "license": "AGPL-3",
     "depends": [
         "account",
         "account_reports",
+        "base_company_dependent",
         "sale",  # solo por property_account_downpayment_categ_id, ideal en proximas versiones evitar esta dependencia
     ],
     "data": [

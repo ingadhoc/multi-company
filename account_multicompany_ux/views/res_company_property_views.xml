@@ -11,50 +11,6 @@
             </list>
         </field>
     </record>
-    <record id="view_property_account_id_form" model="ir.ui.view">
-        <field name="name">res.company.property.form</field>
-        <field name="model">res.company.property</field>
-        <field name="mode">primary</field>
-        <field name="inherit_id" ref="account_multicompany_ux.view_res_company_account_property_form"></field>
-        <field name="arch" type="xml">
-            <list>
-                <field name="property_account_id"/>
-            </list>
-        </field>
-    </record>
-    <record id="view_property_position_id_form" model="ir.ui.view">
-        <field name="name">res.company.property.form</field>
-        <field name="model">res.company.property</field>
-        <field name="mode">primary</field>
-        <field name="inherit_id" ref="account_multicompany_ux.view_res_company_account_property_form"></field>
-        <field name="arch" type="xml">
-            <list>
-                <field name="property_position_id" />
-            </list>
-        </field>
-    </record>
-    <record id="view_property_term_id_form" model="ir.ui.view">
-        <field name="name">res.company.property.form</field>
-        <field name="model">res.company.property</field>
-        <field name="mode">primary</field>
-        <field name="inherit_id" ref="account_multicompany_ux.view_res_company_account_property_form"></field>
-        <field name="arch" type="xml">
-            <list>
-                <field name="property_term_id" />
-            </list>
-        </field>
-    </record>
-    <record id="view_property_pricelist_id_form" model="ir.ui.view">
-        <field name="name">res.company.property.form</field>
-        <field name="model">res.company.property</field>
-        <field name="mode">primary</field>
-        <field name="inherit_id" ref="account_multicompany_ux.view_res_company_account_property_form"></field>
-        <field name="arch" type="xml">
-            <list>
-                <field name="property_pricelist_id" />
-            </list>
-        </field>
-    </record>
     <record id="view_property_credit_form" model="ir.ui.view">
         <field name="name">res.company.property.form</field>
         <field name="model">res.company.property</field>
