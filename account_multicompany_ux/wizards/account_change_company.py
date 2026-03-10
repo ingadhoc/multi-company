@@ -62,10 +62,17 @@ class AccountChangeCompany(models.TransientModel):
         """
         We override this method to add filter by companies in the env instead of the company of the user
         For this to work the pr is needed https://github.com/odoo/odoo/pull
+        Use _check_company_domain (check_company_domain_parent_of) so that journals from a parent
+        company that are shared to branches are also included, not just journals owned directly by
+        the selected (branch) company.
         """
         for rec in self:
             journal_type = rec.move_id.invoice_filter_type_domain or "general"
-            domain = [("company_id", "=", rec.company_id._origin.id), ("type", "=", journal_type)]
+            company = rec.company_id._origin or self.env.company
+            domain = [
+                *self.env["account.journal"]._check_company_domain(company),
+                ("type", "=", journal_type),
+            ]
             rec.suitable_journal_ids = self.env["account.journal"].search(domain)
 
     def change_company(self):
