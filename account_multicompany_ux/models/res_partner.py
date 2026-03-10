@@ -13,46 +13,9 @@ class ResPartner(models.Model):
     _name = "res.partner"
     _inherit = ["res.partner", "res.company.property.mixin"]
     _property_fields = {
-        "property_account_receivable_ids",
-        "property_account_payable_ids",
-        "property_account_position_ids",
-        "property_payment_term_ids",
-        "property_supplier_payment_term_ids",
-        "property_product_pricelist_ids",
         "property_credit_ids",
         "property_credit_limit_ids",
     }
-
-    property_account_receivable_ids = fields.Many2many(
-        "res.company.property",
-        string="Accounts Receivable",
-        compute="_compute_properties",
-    )
-    property_account_payable_ids = fields.Many2many(
-        "res.company.property",
-        string="Accounts Payable",
-        compute="_compute_properties",
-    )
-    property_account_position_ids = fields.Many2many(
-        "res.company.property",
-        string="Fiscal Positions",
-        compute="_compute_properties",
-    )
-    property_payment_term_ids = fields.Many2many(
-        "res.company.property",
-        string="Customer Payment Term",
-        compute="_compute_properties",
-    )
-    property_supplier_payment_term_ids = fields.Many2many(
-        "res.company.property",
-        string="Supplier Payment Terms",
-        compute="_compute_properties",
-    )
-    property_product_pricelist_ids = fields.Many2many(
-        "res.company.property",
-        string="Sale Pricelists",
-        compute="_compute_properties",
-    )
 
     property_credit_ids = fields.Many2many(
         "res.company.property",
@@ -68,12 +31,6 @@ class ResPartner(models.Model):
 
     def _compute_properties(self):
         property_fields = dict(
-            property_account_receivable_ids="property_account_receivable_id",
-            property_account_payable_ids="property_account_payable_id",
-            property_account_position_ids="property_account_position_id",
-            property_payment_term_ids="property_payment_term_id",
-            property_supplier_payment_term_ids="property_supplier_payment_term_id",
-            property_product_pricelist_ids="property_product_pricelist",
             property_credit_ids="credit",
             property_credit_limit_ids="credit_limit",
         )
