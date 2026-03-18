@@ -55,7 +55,8 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         self.bank_1.allow_out_payment = False
         self.bank_1.write({"partner_id": self.first_company.partner_id.id})
         self.bank_1.company_id = self.first_company.id
-        self.bank_1.allow_out_payment = True
+        # In tests, trusting bank accounts requires install_mode/test_enable even with sudo.
+        self.bank_1.with_context(install_mode=True).sudo().allow_out_payment = True
         self.env.company = self.first_company
 
         self.account_receivable = self.env["account.account"].create(
@@ -109,6 +110,7 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
             }
         )
         acc.change_company()
+<<<<<<< ece06ea588ff786b0b699c250ecdfb02f075f19e
         self.assertEqual(
             invoice.partner_bank_id.id,
             False,
@@ -123,8 +125,31 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
             }
         )
         self.bank_1.allow_out_payment = False
+||||||| 80f5e02593d6f7dea06653bd594f4cc21aae735e
+        self.assertEqual(invoice.partner_bank_id.id,  False , "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia")
+        acc = self.env['account.change.company'].create({
+            'move_id': invoice.id,
+            'company_ids': [self.first_company.id, self.second_company.id],
+            'company_id': self.first_company.id,
+            'journal_id': self.first_company_journal.id
+        })
+=======
+        self.assertEqual(invoice.partner_bank_id.id,  False , "No se realizo de forma correcta el cambio partner_bank_id al cambiar la compañia")
+        acc = self.env['account.change.company'].create({
+            'move_id': invoice.id,
+            'company_ids': [self.first_company.id, self.second_company.id],
+            'company_id': self.first_company.id,
+            'journal_id': self.first_company_journal.id
+        })
+        self.bank_1.with_context(install_mode=True).sudo().allow_out_payment = False
+>>>>>>> db71902702c3e7c3d10268ca56cee1371f37a860
         self.bank_1.company_id = False
+<<<<<<< ece06ea588ff786b0b699c250ecdfb02f075f19e
         self.bank_1.allow_out_payment = True
+||||||| 80f5e02593d6f7dea06653bd594f4cc21aae735e
+=======
+        self.bank_1.with_context(install_mode=True).sudo().allow_out_payment = True
+>>>>>>> db71902702c3e7c3d10268ca56cee1371f37a860
         invoice.write({"partner_bank_id": self.bank_1.id})
         acc.change_company()
         self.assertEqual(
