@@ -1,7 +1,8 @@
 from odoo import fields
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import TransactionCase, tagged
 
 
+@tagged("post_install", "-at_install")
 class TestAccountMulticompanyUxUnitTest(TransactionCase):
     def setUp(self):
         super().setUp()
@@ -137,3 +138,30 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
                     "company_ids": [self.first_company.id],
                 }
             )
+
+    def test_company_suffix_uses_short_name(self):
+        self._ensure_multi_company_group()
+
+        self.first_company.write({"short_name": "FC"})
+
+        self.assertEqual(self.first_company.get_company_sufix(), " (FC)")
+        self.assertEqual(self.first_company.with_context(no_company_sufix=True).get_company_sufix(), "")
+
+    def test_journal_display_name_includes_company_suffix(self):
+        self._ensure_multi_company_group()
+
+        self.first_company.write({"short_name": "FC"})
+        self.first_company_journal._compute_display_name()
+
+        currency_name = (self.first_company_journal.currency_id or self.first_company.currency_id).name
+        expected_display_name = f"{self.first_company_journal.name} ({currency_name})  (FC)"
+
+        self.assertEqual(self.first_company_journal.display_name, expected_display_name)
+
+    def _ensure_multi_company_group(self):
+        multi_company_group = self.env.ref("base.group_multi_company")
+        if self.env.user.has_group("base.group_multi_company"):
+            return
+
+        groups_field = "group_ids" if "group_ids" in self.env.user._fields else "groups_id"
+        self.env.user.write({groups_field: [(4, multi_company_group.id)]})

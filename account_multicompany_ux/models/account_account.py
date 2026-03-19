@@ -11,7 +11,12 @@ class AccountAccount(models.Model):
         if self.env.context.get("report_id") and len(self.env.context.get("company_ids", self.env.companies.ids)) > 1:
             for account in self:
                 if account.code:
-                    company = self.env["res.company"].browse(self.env.context["allowed_company_ids"][0])
+                    if len(account.company_ids) > 1:
+                        to_show_company = self._context["allowed_company_ids"][0]
+                    else:
+                        to_show_company = account.company_ids.id
+
+                    company = self.env["res.company"].browse(to_show_company)
                     account.display_name = (
                         f"{account.with_company(company).code} {account.name}{company.get_company_sufix()}"
                     )
