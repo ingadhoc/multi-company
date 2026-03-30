@@ -85,3 +85,4 @@ class AccountChangeCompany(models.TransientModel):
         if old_payment_term and (not old_payment_term.company_id or old_payment_term.company_id == self.company_id):
             vals["invoice_payment_term_id"] = old_payment_term.id
         self.move_id.with_context(skip_invoice_sync=True).write(vals)
+        self.move_id.line_ids._compute_account_id() if self.move_id.line_ids else None
