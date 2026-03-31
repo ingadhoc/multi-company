@@ -6,26 +6,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-20 16:27+0000\n"
-"PO-Revision-Date: 2026-03-20 16:27+0000\n"
+"POT-Creation-Date: 2026-03-31 12:48+0000\n"
+"PO-Revision-Date: 2026-03-31 12:48+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
-
-#. module: account_multicompany_ux
-#. odoo-python
-#: code:addons/account_multicompany_ux/models/res_company_property.py:0
-msgid "%s not implemented yet"
-msgstr ""
-
-#. module: account_multicompany_ux
-#: model_terms:ir.ui.view,arch_db:account_multicompany_ux.product_template_form_view
-#: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_partner_property_form
-msgid "(edit)"
-msgstr ""
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_account_account
@@ -60,7 +48,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_bank_statement_line__company_id
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__company_id
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_move__company_id
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__company_id
 msgid "Company"
 msgstr ""
 
@@ -71,36 +58,8 @@ msgid "Company Can Change"
 msgstr ""
 
 #. module: account_multicompany_ux
-#: model:ir.actions.act_window,name:account_multicompany_ux.action_res_company_property
-#: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_res_company_account_property_form
-msgid "Company Properties"
-msgstr ""
-
-#. module: account_multicompany_ux
-#: model:ir.model,name:account_multicompany_ux.model_res_company_property
-msgid "Company Property"
-msgstr ""
-
-#. module: account_multicompany_ux
-#: model:ir.model,name:account_multicompany_ux.model_res_company_property_mixin
-msgid "Company property mixin abstract"
-msgstr ""
-
-#. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company__consolidation_company
 msgid "Consolidation Company"
-msgstr ""
-
-#. module: account_multicompany_ux
-#: model:ir.model,name:account_multicompany_ux.model_res_partner
-msgid "Contact"
-msgstr ""
-
-#. module: account_multicompany_ux
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_product_product__standard_price_ids
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_product_template__standard_price_ids
-#: model_terms:ir.ui.view,arch_db:account_multicompany_ux.product_template_form_view
-msgid "Costs"
 msgstr ""
 
 #. module: account_multicompany_ux
@@ -114,33 +73,12 @@ msgid "Created on"
 msgstr ""
 
 #. module: account_multicompany_ux
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__property_credit_id
-msgid "Credit"
-msgstr ""
-
-#. module: account_multicompany_ux
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__credit_limit
-msgid "Credit Limit"
-msgstr ""
-
-#. module: account_multicompany_ux
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_credit_limit_ids
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_credit_limit_ids
-msgid "Credit Limits"
-msgstr ""
-
-#. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_account__display_name
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__display_name
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_journal__display_name
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_move__display_name
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_report__display_name
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_product_product__display_name
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_product_template__display_name
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company__display_name
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__display_name
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property_mixin__display_name
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__display_name
 msgid "Display Name"
 msgstr ""
 
@@ -150,12 +88,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_journal__id
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_move__id
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_report__id
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_product_product__id
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_product_template__id
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company__id
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__id
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property_mixin__id
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__id
 msgid "ID"
 msgstr ""
 
@@ -193,32 +126,6 @@ msgid "Move"
 msgstr ""
 
 #. module: account_multicompany_ux
-#. odoo-python
-#: code:addons/account_multicompany_ux/models/res_company_property.py:0
-msgid "None"
-msgstr ""
-
-#. module: account_multicompany_ux
-#: model:ir.model,name:account_multicompany_ux.model_product_template
-msgid "Product"
-msgstr ""
-
-#. module: account_multicompany_ux
-#: model:ir.model,name:account_multicompany_ux.model_product_product
-msgid "Product Variant"
-msgstr ""
-
-#. module: account_multicompany_ux
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__property_field
-msgid "Property Field"
-msgstr ""
-
-#. module: account_multicompany_ux
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__record_currency_id
-msgid "Record Currency"
-msgstr ""
-
-#. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company__short_name
 msgid "Short Name"
 msgstr ""
@@ -234,25 +141,8 @@ msgid "Short name used to identify this company"
 msgstr ""
 
 #. module: account_multicompany_ux
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company_property__standard_price
-msgid "Standard Price"
-msgstr ""
-
-#. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_change_company__suitable_journal_ids
 msgid "Suitable Journal"
-msgstr ""
-
-#. module: account_multicompany_ux
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_partner__property_credit_ids
-#: model:ir.model.fields,field_description:account_multicompany_ux.field_res_users__property_credit_ids
-msgid "Total Receivables"
-msgstr ""
-
-#. module: account_multicompany_ux
-#: model:ir.model.fields,help:account_multicompany_ux.field_res_partner__property_credit_ids
-#: model:ir.model.fields,help:account_multicompany_ux.field_res_users__property_credit_ids
-msgid "Total amount this customer owes you on each company."
 msgstr ""
 
 #. module: account_multicompany_ux
