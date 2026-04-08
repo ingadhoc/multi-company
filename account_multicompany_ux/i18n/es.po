@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-06 20:31+0000\n"
+"POT-Creation-Date: 2026-04-08 18:14+0000\n"
 "PO-Revision-Date: 2025-11-05 17:05+0000\n"
 "Last-Translator: ADHOC - Bot <transbot@adhoc.com.ar>, 2025\n"
 "Language-Team: Spanish (https://app.transifex.com/adhoc/teams/46451/es/)\n"
@@ -142,14 +142,6 @@ msgid "Move"
 msgstr ""
 
 #. module: account_multicompany_ux
-#. odoo-python
-#: code:addons/account_multicompany_ux/models/account_move_line.py:0
-msgid ""
-"No puede eliminar lineas de factura relacionadas con ordenes de venta a las "
-"que no tiene acceso."
-msgstr ""
-
-#. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company__short_name
 msgid "Short Name"
 msgstr "Nombre corto"
@@ -182,6 +174,30 @@ msgstr ""
 #: code:addons/account_multicompany_ux/models/account_move.py:0
 msgid "You can not create entries on a consolidation company"
 msgstr "Ud. no puede crear asientos en una compañía de consolidación"
+
+#. module: account_multicompany_ux
+#. odoo-python
+#: code:addons/account_multicompany_ux/models/account_move_line.py:0
+msgid ""
+"You cannot change the quantity of invoice lines related to sale orders you "
+"do not have access to."
+msgstr ""
+
+#. module: account_multicompany_ux
+#. odoo-python
+#: code:addons/account_multicompany_ux/models/account_move.py:0
+msgid ""
+"You cannot create a credit note for invoices related to sale orders you do "
+"not have access to."
+msgstr ""
+
+#. module: account_multicompany_ux
+#. odoo-python
+#: code:addons/account_multicompany_ux/models/account_move_line.py:0
+msgid ""
+"You cannot delete invoice lines related to sale orders you do not have "
+"access to."
+msgstr ""
 
 #. module: account_multicompany_ux
 #: model_terms:ir.ui.view,arch_db:account_multicompany_ux.view_account_change_company
