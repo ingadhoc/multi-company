@@ -2,6 +2,7 @@
 # For copyright and license notices, see __manifest__.py file in module root
 # directory
 ##############################################################################
+
 from odoo import fields, models, tools
 
 
@@ -13,7 +14,7 @@ class ResCompany(models.Model):
     )
 
     consolidation_company = fields.Boolean(
-        help="Journal entries are not allowed on consolidation companies. (so" " invoices, payments, etc neither)"
+        help="Journal entries are not allowed on consolidation companies. (so invoices, payments, etc neither)"
     )
 
     # TODO habria que terminar de ver si esta bien este cache o en realidad para

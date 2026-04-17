@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_category_form_view_stock_valuation_shared" model="ir.ui.view">
+        <field name="name">product.category.form.stock.valuation.shared.branches</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="stock_account.view_category_property_form_stock"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='property_valuation']" position="after">
+                <field name="shared_to_branches" groups="base.group_multi_company" invisible="is_branch_company"/>
+                <field name="is_branch_company" invisible="True"/>
+                <div
+                    class="alert alert-info"
+                    role="alert"
+                    colspan="2"
+                    invisible="not shared_to_branches"
+                >
+                    Branches will use the costing method and standard price of the
+                    parent company for this category, ensuring a single unified
+                    cost across all branches.
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
