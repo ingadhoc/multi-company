@@ -181,12 +181,24 @@ class AccountChangeCurrency(models.TransientModel):
         if original_partner_bank_id and original_partner_bank_id.company_id.id in [False, self.company_id.id]:
             move.partner_bank_id = original_partner_bank_id
 
-        # Forzar sincronización final del move una sola vez (sin skip_invoice_sync).
-        # self.move_id NO tiene skip_invoice_sync en su contexto, por lo que _sync_dynamic_lines
-        # ejecutará la sincronización completa (impuestos, payment terms, balanceo, etc.) al salir.
+        self._sync_lines_balance_from_amount_currency(move)
+
         container = {"records": self.move_id}
         with self.move_id._check_balanced(container), self.move_id._sync_dynamic_lines(container):
             pass
+
+    def _sync_lines_balance_from_amount_currency(self, move):
+        """Alinea balance con amount_currency para soportar cambio de compañía entre monedas."""
+        for line in move.line_ids:
+            rate = abs(line.amount_currency / line.balance) if line.balance else 1
+            if line.currency_id == line.company_id.currency_id and line.balance != line.amount_currency:
+                line.balance = line.amount_currency
+            elif (
+                line.currency_id != line.company_id.currency_id
+                and not self.env.is_protected(line._fields["balance"], line)
+                and not line.currency_id.is_zero(rate - line.currency_rate)
+            ):
+                line.balance = line.company_id.currency_id.round(line.amount_currency / line.currency_rate)
 
     def _get_change_company_line_taxes(self, lines, taxes):
         """Map taxes from one company to another for invoice or sale order lines.
