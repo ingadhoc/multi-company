@@ -172,7 +172,26 @@ class AccountChangeCurrency(models.TransientModel):
                 move.name = old_name
 
         # TAXES
+        to_create = []
+        AccountTax = self.env["account.tax"]
         self._get_change_company_line_taxes(move.invoice_line_ids, original_taxes)
+        if move.invoice_line_ids.mapped("tax_ids") != move.line_ids.mapped("tax_line_id"):
+            base_lines_values, tax_lines_values = move._get_rounded_base_and_tax_lines(round_from_tax_lines=False)
+            AccountTax._add_accounting_data_in_base_lines_tax_details(
+                base_lines_values, move.company_id, include_caba_tags=move.always_tax_exigible
+            )
+            tax_results = AccountTax._prepare_tax_lines(base_lines_values, move.company_id, tax_lines=tax_lines_values)
+            for tax_line_vals in tax_results["tax_lines_to_add"]:
+                to_create.append(
+                    {
+                        **tax_line_vals,
+                        "display_type": "tax",
+                        "move_id": move.id,
+                    }
+                )
+        if to_create:
+            self.env["account.move.line"].create(to_create)
+
         # para percepciones argentinas re-computamos con su propio método
         if move.fiscal_position_id._fields.get("l10n_ar_tax_ids"):
             move._l10n_ar_recompute_fiscal_position_taxes()
