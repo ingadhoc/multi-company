@@ -7,7 +7,8 @@ def migrate(cr, version):
     (property_account_income_ids / property_account_expense_ids).
     """
     env = api.Environment(cr, SUPERUSER_ID, {})
-    views = env.ref("account_multicompany_ux.product_normal_form_view", raise_if_not_found=False)
-    views += env.ref("account_multicompany_ux.product_template_form_view", raise_if_not_found=False)
+    views_a = env.ref("account_multicompany_ux.product_normal_form_view", raise_if_not_found=False)
+    views_b = env.ref("account_multicompany_ux.product_template_form_view", raise_if_not_found=False)
+    views = [view for view in [views_a, views_b] if view]
     if views:
         views.unlink()
