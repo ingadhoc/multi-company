@@ -10,5 +10,5 @@ def migrate(cr, version):
     views_a = env.ref("account_multicompany_ux.product_normal_form_view", raise_if_not_found=False)
     views_b = env.ref("account_multicompany_ux.product_template_form_view", raise_if_not_found=False)
     views = [view for view in [views_a, views_b] if view]
-    if views:
-        views.unlink()
+    for view in views:
+        view.unlink()
