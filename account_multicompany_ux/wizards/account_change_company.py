@@ -160,6 +160,12 @@ class AccountChangeCurrency(models.TransientModel):
             # de la venta calcular el anticipo, ya que la sale order ya podria previamente asociado otro anticipo.
             line.account_id = self._get_change_downpayment_account(self.company_id, line, move.fiscal_position_id)
 
+        # Sincronizar balances con amount_currency antes de cualquier write
+        # que dispare _check_balanced (eg. invoice_payment_term_id)
+        container = {"records": move}
+        with move._disable_recursion(container, "check_move_validity", default=True, target=False):
+            self._sync_lines_balance_from_amount_currency(move)
+
         # PAYMENT TERM
         payment_term = original_payment_term or invoice_payment_term_id
         move._compute_invoice_payment_term_id()
@@ -180,8 +186,6 @@ class AccountChangeCurrency(models.TransientModel):
         # PARTNER BANK
         if original_partner_bank_id and original_partner_bank_id.company_id.id in [False, self.company_id.id]:
             move.partner_bank_id = original_partner_bank_id
-
-        self._sync_lines_balance_from_amount_currency(move)
 
         container = {"records": self.move_id}
         with self.move_id._check_balanced(container), self.move_id._sync_dynamic_lines(container):
