@@ -12,13 +12,14 @@ class TestAccountMulticompanyUxUnitTest(common.TransactionCase):
         self.second_company = self.env['res.company'].search([('id', '!=', self.first_company.id)], limit=1)
         if not self.second_company:
             self.second_company = self.env['res.company'].create({'name': 'Test Company 2'})
-            
+
         self.partner_ri = self.env['res.partner'].search([], limit=1)
+        self.partner_ri.company_id = False
 
         self.first_company_journal = self.env['account.journal'].search([('company_id', '=', self.first_company.id), ('type', '=', 'sale')], limit=1)
         self.second_company_journal = self.env['account.journal'].search([('company_id', '=', self.second_company.id), ('type', '=', 'sale')], limit=1)
         if not self.second_company_journal:
-            
+
             a_sale = self.env['account.account'].create({
                 'code': 'X2020',
                 'name': 'Product Sales - (test)',
