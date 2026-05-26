@@ -9,7 +9,18 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         self.first_company = self.env["res.company"].search([], limit=1)
         self.second_company = self.env["res.company"].search([("id", "!=", self.first_company.id)], limit=1)
         if not self.second_company:
+<<<<<<< 17026dcbb87b068b9494a7c7a98067a9f5769e56
             self.second_company = self.env["res.company"].create({"name": "Test Company 2"})
+||||||| 481b63ebe56d6070002e58fbeb4648fa9a3998d0
+            self.second_company = self.env['res.company'].create({'name': 'Test Company 2'})
+            
+        self.partner_ri = self.env['res.partner'].search([], limit=1)
+=======
+            self.second_company = self.env['res.company'].create({'name': 'Test Company 2'})
+
+        self.partner_ri = self.env['res.partner'].search([], limit=1)
+        self.partner_ri.company_id = False
+>>>>>>> 93c3b961bc74c3c1d64d752f2ac20d442c493d3a
 
         self.partner_ri = self.env["res.partner"].search([], limit=1)
 
@@ -23,6 +34,7 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
             [("company_id", "=", self.first_company.id), ("type", "=", "purchase")], limit=1
         )
         if not self.second_company_journal:
+<<<<<<< 17026dcbb87b068b9494a7c7a98067a9f5769e56
             a_sale = self.env["account.account"].create(
                 {
                     "code": "X2020",
@@ -31,6 +43,23 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
                     "company_ids": [self.second_company.id],
                 }
             )
+||||||| 481b63ebe56d6070002e58fbeb4648fa9a3998d0
+            
+            a_sale = self.env['account.account'].create({
+                'code': 'X2020',
+                'name': 'Product Sales - (test)',
+                'account_type': 'income',
+                'company_id': self.second_company.id,
+            })
+=======
+
+            a_sale = self.env['account.account'].create({
+                'code': 'X2020',
+                'name': 'Product Sales - (test)',
+                'account_type': 'income',
+                'company_id': self.second_company.id,
+            })
+>>>>>>> 93c3b961bc74c3c1d64d752f2ac20d442c493d3a
 
             self.env["account.account"].create(
                 {
