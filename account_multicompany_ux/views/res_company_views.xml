@@ -11,6 +11,7 @@
             </div>
             <field name="partner_id" position="after">
                 <field name="consolidation_company"/>
+                <field name="block_intercompany_conciliation" invisible="not child_ids"/>
             </field>
         </field>
     </record>

@@ -17,6 +17,13 @@ class ResCompany(models.Model):
         help="Journal entries are not allowed on consolidation companies. (so invoices, payments, etc neither)"
     )
 
+    block_intercompany_conciliation = fields.Boolean(
+        string="Bloquear conciliación entre diferentes compañías",
+        help="Si está activado, se bloqueará la conciliación entre movimientos "
+        "de diferentes compañías ya sean entre empresas o sucursales.",
+        default=False,
+    )
+
     # TODO habria que terminar de ver si esta bien este cache o en realidad para
     # ser mas performante no hay que usar nada de self
     @tools.ormcache(
