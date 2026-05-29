@@ -17,9 +17,10 @@ class AccountJournal(models.Model):
         nativo de odoo
         """
         for journal in self:
-            currency = journal.currency_id or journal.company_id.currency_id
-            if journal.company_id.get_company_sufix():
-                name = f"{journal.name} ({currency.name}) {journal.company_id.get_company_sufix()}"
+            company = journal.company_id.sudo()
+            currency = journal.currency_id or company.currency_id
+            if company.get_company_sufix():
+                name = f"{journal.name} ({currency.name}) {company.get_company_sufix()}"
                 journal.display_name = name
             else:
                 super()._compute_display_name()
