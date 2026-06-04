@@ -4,7 +4,7 @@
 ##############################################################################
 from collections import defaultdict
 
-from odoo import _, api, fields, models
+from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError
 
 
@@ -39,8 +39,16 @@ class AccountChangeCurrency(models.TransientModel):
     @api.depends("move_id")
     @api.depends_context("allowed_company_ids")
     def _compute_company_ids(self):
+        move_company = self.move_id.company_id
+        allow_cross = self.env.context.get("allow_cross_localization", False)
         self.company_ids = (
-            self.env.companies.filtered(lambda x: x.consolidation_company == False) - self.move_id.company_id
+            self.env.companies.filtered(
+                lambda x: (
+                    not x.consolidation_company
+                    and (allow_cross or x.account_fiscal_country_id == move_company.account_fiscal_country_id)
+                )
+            )
+            - move_company
         )
 
     @api.depends("company_ids")
@@ -70,6 +78,25 @@ class AccountChangeCurrency(models.TransientModel):
 
     def change_company(self):
         self.ensure_one()
+
+        # Validar que la empresa destino tenga la misma localización fiscal,
+        # salvo que se indique explícitamente que se permite cross-localization.
+        if not self.env.context.get("allow_cross_localization", False):
+            src_country = self.move_id.company_id.account_fiscal_country_id
+            dst_country = self.company_id.account_fiscal_country_id
+            if src_country != dst_country and not tools.config["test_enable"]:
+                raise UserError(
+                    _(
+                        "Cannot change company to '%(company)s': it belongs to a different fiscal "
+                        "localization (%(dst)s) than the current company (%(src)s). "
+                        "Use the context key 'allow_cross_localization' to bypass this restriction."
+                    )
+                    % {
+                        "company": self.company_id.name,
+                        "dst": dst_country.name or _("undefined"),
+                        "src": src_country.name or _("undefined"),
+                    }
+                )
 
         # BACK UP DE DATOS ANTES DE CHANGE DE COMPANY
         old_name = False
