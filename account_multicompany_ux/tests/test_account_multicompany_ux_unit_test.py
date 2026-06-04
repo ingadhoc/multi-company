@@ -7,7 +7,13 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         super().setUp()
         self.today = fields.Date.today()
         self.first_company = self.env["res.company"].search([], limit=1)
-        self.second_company = self.env["res.company"].search([("id", "!=", self.first_company.id)], limit=1)
+        self.second_company = self.env["res.company"].search(
+            [
+                ("id", "!=", self.first_company.id),
+                ("account_fiscal_country_id", "=", self.first_company.account_fiscal_country_id.id),
+            ],
+            limit=1,
+        )
         if not self.second_company:
             self.second_company = self.env["res.company"].create({"name": "Test Company 2"})
 
