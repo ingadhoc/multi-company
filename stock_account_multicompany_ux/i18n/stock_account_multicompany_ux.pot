@@ -1,0 +1,91 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* stock_account_multicompany_ux
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-05 15:37+0000\n"
+"PO-Revision-Date: 2026-06-05 15:37+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: stock_account_multicompany_ux
+#: model_terms:ir.ui.view,arch_db:stock_account_multicompany_ux.product_category_form_view_stock_valuation_shared
+msgid ""
+"Branches will use the costing method and standard price of the\n"
+"                    parent company for this category, ensuring a single unified\n"
+"                    cost across all branches."
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model,name:stock_account_multicompany_ux.model_res_company
+msgid "Companies"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_account_move__display_name
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_account_move_line__display_name
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_category__display_name
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_res_company__display_name
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_stock_move__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_account_move__id
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_account_move_line__id
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_category__id
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_res_company__id
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_stock_move__id
+msgid "ID"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_category__is_branch_company
+msgid "Is Branch Company"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model,name:stock_account_multicompany_ux.model_account_move
+msgid "Journal Entry"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model,name:stock_account_multicompany_ux.model_account_move_line
+msgid "Journal Item"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model,name:stock_account_multicompany_ux.model_product_category
+msgid "Product Category"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_category__shared_to_branches
+msgid "Shared Stock Valuation to Branches"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model,name:stock_account_multicompany_ux.model_stock_move
+msgid "Stock Move"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_category__is_branch_company
+msgid "True when the active company is a branch (has a parent company)."
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_category__shared_to_branches
+msgid ""
+"When enabled, all branches of the parent company will use the same costing "
+"method and standard price defined in the parent company for products in this"
+" category. This ensures a single unified cost across the parent and all its "
+"branches."
+msgstr ""
