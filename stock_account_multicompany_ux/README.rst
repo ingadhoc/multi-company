@@ -46,6 +46,14 @@ Features
   difference between the branch cost and the parent cost to the appropriate
   inventory difference account when real-time valuation is active.
 
+- **Branch-aware "Manage Multiple Warehouses" permission** (``stock.warehouse``):
+  overrides ``_check_multiwarehouse_group()`` so the warehouse count is grouped
+  by the **root company** (``company_id.root_id``) instead of by each individual
+  company. This way warehouses belonging to a parent company and its branches are
+  summed together, and the ``stock.group_stock_multi_warehouses`` permission is
+  auto-enabled/disabled based on the whole group. Companies without branches keep
+  the standard behaviour (``root_id`` is the company itself).
+
 Installation
 ============
 
