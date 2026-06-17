@@ -208,3 +208,123 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
 
         customer_invoice.action_post()
         vendor_bill.action_post()
+
+    def test_downpayment_taxes_preserved_on_company_change(self):
+        """Al cambiar la compañía de una factura de anticipo con 2 alícuotas de IVA,
+        las sale.order.line de anticipo deben conservar sus impuestos originales (21% y 10.5%)
+        y no colapsar al impuesto único del producto de anticipo (bug: #120730)."""
+        # Crear dos impuestos con distinto amount en first_company
+        tax_21 = self.env["account.tax"].search(
+            [("company_id", "=", self.first_company.id), ("type_tax_use", "=", "sale"), ("amount", "=", 21)],
+            limit=1,
+        )
+        if not tax_21:
+            tax_21 = (
+                self.env["account.tax"]
+                .with_company(self.first_company)
+                .create({"name": "IVA 21% Test", "amount": 21, "type_tax_use": "sale"})
+            )
+
+        tax_105 = self.env["account.tax"].search(
+            [("company_id", "=", self.first_company.id), ("type_tax_use", "=", "sale"), ("amount", "=", 10.5)],
+            limit=1,
+        )
+        if not tax_105:
+            tax_105 = (
+                self.env["account.tax"]
+                .with_company(self.first_company)
+                .create({"name": "IVA 10.5% Test", "amount": 10.5, "type_tax_use": "sale"})
+            )
+
+        # Impuesto equivalente en second_company (necesario para que el wizard no falle al mapear)
+        for tax in [tax_21, tax_105]:
+            equiv = self.env["account.tax"].search(
+                [
+                    ("company_id", "=", self.second_company.id),
+                    ("type_tax_use", "=", "sale"),
+                    ("amount", "=", tax.amount),
+                ],
+                limit=1,
+            )
+            if not equiv:
+                self.env["account.tax"].with_company(self.second_company).create(
+                    {"name": tax.name + " (C2)", "amount": tax.amount, "type_tax_use": "sale"}
+                )
+
+        # Dos productos con distintas alícuotas
+        product_a = self.env["product.product"].create(
+            {"name": "Producto A (21%)", "taxes_id": [Command.set(tax_21.ids)]}
+        )
+        product_b = self.env["product.product"].create(
+            {"name": "Producto B (10.5%)", "taxes_id": [Command.set(tax_105.ids)]}
+        )
+
+        # Orden de venta con ambos productos
+        sale_order = (
+            self.env["sale.order"]
+            .with_company(self.first_company)
+            .create(
+                {
+                    "partner_id": self.partner_ri.id,
+                    "company_id": self.first_company.id,
+                    "order_line": [
+                        Command.create({"product_id": product_a.id, "product_uom_qty": 1, "price_unit": 1000}),
+                        Command.create({"product_id": product_b.id, "product_uom_qty": 1, "price_unit": 500}),
+                    ],
+                }
+            )
+        )
+        sale_order.action_confirm()
+
+        # Facturar anticipo del 50%
+        advance_wizard = (
+            self.env["sale.advance.payment.inv"]
+            .with_context(active_ids=sale_order.ids, active_model="sale.order")
+            .create({"advance_payment_method": "percentage", "amount": 50})
+        )
+        advance_wizard.create_invoices()
+
+        # Verificar que se crearon líneas de anticipo con ambas alícuotas
+        dp_lines = sale_order.order_line.filtered(lambda l: l.is_downpayment and not l.display_type)
+        dp_tax_amounts = sorted(dp_lines.mapped("tax_id.amount"))
+        self.assertEqual(
+            len(dp_lines),
+            2,
+            "Deben existir 2 líneas de anticipo (una por combinación de impuesto)",
+        )
+        self.assertIn(21.0, dp_tax_amounts, "Debe haber una línea de anticipo con IVA 21%")
+        self.assertIn(10.5, dp_tax_amounts, "Debe haber una línea de anticipo con IVA 10.5%")
+
+        # Obtener la factura de anticipo
+        advance_invoice = sale_order.invoice_ids[:1]
+        self.assertTrue(advance_invoice, "Debe haberse creado la factura de anticipo")
+
+        # Cambiar compañía de la factura de anticipo
+        wizard = self.env["account.change.company"].create(
+            {
+                "move_id": advance_invoice.id,
+                "company_ids": [self.first_company.id, self.second_company.id],
+                "company_id": self.second_company.id,
+                "journal_id": self.second_company_journal.id,
+            }
+        )
+        wizard.change_company()
+
+        # Verificar que las líneas de anticipo de la VENTA conservan sus impuestos originales
+        dp_lines_after = sale_order.order_line.filtered(lambda l: l.is_downpayment and not l.display_type)
+        dp_tax_amounts_after = sorted(dp_lines_after.mapped("tax_id.amount"))
+        self.assertEqual(
+            len(dp_lines_after),
+            2,
+            "Deben seguir existiendo 2 líneas de anticipo tras el cambio de compañía",
+        )
+        self.assertIn(
+            21.0,
+            dp_tax_amounts_after,
+            "La línea de anticipo con IVA 21% debe conservar su alícuota tras el cambio de compañía",
+        )
+        self.assertIn(
+            10.5,
+            dp_tax_amounts_after,
+            "La línea de anticipo con IVA 10.5% debe conservar su alícuota (no colapsar al 21%)",
+        )

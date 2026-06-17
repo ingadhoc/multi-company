@@ -135,6 +135,15 @@ class AccountChangeCurrency(models.TransientModel):
         # asignación individual (account_id, tax_ids, etc.) dispare _sync_dynamic_lines del move.
         # La sincronización ocurre una sola vez al final, fuera de este contexto.
         move = self.move_id
+
+        # Backup del tax_id de las sale.order.line de anticipo ANTES de modificar la factura.
+        # El proceso del wizard dispara el recompute de _compute_tax_id sobre estas líneas, que
+        # colapsa todas al impuesto único del producto de anticipo (perdiendo alícuotas múltiples,
+        # p.ej. una OV con 21% + 10.5% queda con solo 21% y la factura final no puede cerrarse).
+        # La OV no cambia de compañía → los impuestos originales de cada línea siguen siendo válidos.
+        dp_sale_lines = move.invoice_line_ids.sale_line_ids.filtered(lambda l: l.is_downpayment and not l.display_type)
+        original_dp_sale_taxes = {sol.id: sol.tax_id.ids[:] for sol in dp_sale_lines}
+
         move.invoice_line_ids.tax_ids = False
 
         # si el payment term tiene compañía y es distinta a la que elegimos, forzamos recomputo
@@ -217,6 +226,15 @@ class AccountChangeCurrency(models.TransientModel):
         container = {"records": self.move_id}
         with self.move_id._check_balanced(container), self.move_id._sync_dynamic_lines(container):
             pass
+
+        # Restaurar tax_id de las sale.order.line de anticipo.
+        # El _sync_dynamic_lines de arriba (y las operaciones previas del wizard) disparan el
+        # recompute de _compute_tax_id que colapsa todas las líneas al impuesto único del producto
+        # de anticipo. Restauramos los valores originales por línea para preservar alícuotas múltiples.
+        for sol in dp_sale_lines:
+            taxes_to_restore = original_dp_sale_taxes.get(sol.id)
+            if taxes_to_restore is not None:
+                sol.tax_id = [(6, 0, taxes_to_restore)]
 
     def _sync_lines_balance_from_amount_currency(self, move):
         """Alinea balance con amount_currency para soportar cambio de compañía entre monedas."""
