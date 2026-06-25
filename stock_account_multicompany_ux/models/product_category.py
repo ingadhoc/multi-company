@@ -74,6 +74,13 @@ class ProductCategory(models.Model):
             parent_cost_method = categ.with_company(parent_company).property_cost_method
             parent_valuation = categ.with_company(parent_company).property_valuation
 
+            # Productos de la categoría cuyo costo (standard_price, campo
+            # company-dependent) se unifica con el del padre.
+            products = self.env["product.product"].with_context(active_test=False).search([("categ_id", "=", categ.id)])
+            parent_cost_by_product = {
+                product.id: product.with_company(parent_company).standard_price for product in products
+            }
+
             # Escribir la misma configuración en el contexto de cada branch
             for branch in branches:
                 categ.with_company(branch).write(
@@ -82,6 +89,60 @@ class ProductCategory(models.Model):
                         "property_valuation": parent_valuation,
                     }
                 )
+
+                # Traer el costo del padre a la branch SIN revaluar: usamos el
+                # contexto disable_auto_revaluation para no generar SVL ni asiento
+                # contable en la branch. Esto es coherente con que el módulo ya
+                # excluye estos productos de la valoración de la branch
+                # (ver res.company.stock_accounting_value); el inventario y su
+                # valoración viven en el padre, la branch solo refleja el costo.
+                for product in products:
+                    product.with_company(branch).with_context(
+                        disable_auto_revaluation=True
+                    ).standard_price = parent_cost_by_product[product.id]
+
+    @api.model
+    def activate_shared_to_branches_for_ab(self):
+        """Activa 'shared_to_branches' en las categorías cuya valoración es
+        automatizada (real_time) tanto en la compañía padre como en sus branches.
+
+        Pensado para correr post-migración en setups A/B (company merge): la
+        migración deja esas categorías sin el flag tildado, lo que impide que el
+        costo se comparta padre↔branches. Este método detecta los casos y activa
+        el flag desde el contexto del padre, disparando la propagación de
+        método de costeo, valoración y costo hacia las branches.
+
+        Método público a propósito: además del post-migration del módulo, lo
+        invoca por RPC (odooly) la UL 2379 ("Shared to branches en Valoración
+        automatica de stock con A y B"). RPC bloquea métodos con guion bajo.
+
+        Criterio: la categoría es 'real_time' leída en el contexto del padre y
+        en al menos una de sus branches.
+
+        :return: recordset de product.category activadas
+        """
+        parents = self.env["res.company"].search([("parent_id", "=", False), ("child_ids", "!=", False)])
+        categories = self.with_context(active_test=False).search([])
+        activated = self.browse()
+        for parent in parents:
+            branches = parent._accessible_branches() - parent
+            if not branches:
+                continue
+            for categ in categories:
+                if categ.shared_to_branches:
+                    continue
+                # Automatizada en el padre...
+                if categ.with_company(parent).property_valuation != "real_time":
+                    continue
+                # ...y en al menos una branch.
+                if not any(categ.with_company(branch).property_valuation == "real_time" for branch in branches):
+                    continue
+                # Activar desde el contexto del padre: el write dispara
+                # _propagate_valuation_to_branches, que copia costeo/valoración y
+                # trae el costo del padre a las branches.
+                categ.with_company(parent).shared_to_branches = True
+                activated |= categ
+        return activated
 
     @api.depends_context("company")
     def _compute_is_branch_company(self):
