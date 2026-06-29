@@ -24,7 +24,7 @@ class ProductProduct(models.Model):
         "compañía raíz del grupo, no de la branch.",
     )
     parent_standard_price = fields.Float(
-        string="Cost",
+        string="Cost (Parent Company)",
         compute="_compute_parent_standard_price",
         digits="Product Price",
         groups="base.group_user",

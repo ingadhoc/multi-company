@@ -22,17 +22,17 @@ def migrate(cr, version):
     if not cr.fetchone():
         return
 
-    cr.execute('SELECT categ_id FROM stock_account_mc_ux_shared_migr')
+    cr.execute("SELECT categ_id FROM stock_account_mc_ux_shared_migr")
     categ_ids = [row[0] for row in cr.fetchall()]
 
     if categ_ids:
         env = api.Environment(cr, SUPERUSER_ID, {})
-        categs = env['product.category'].browse(categ_ids).exists()
+        categs = env["product.category"].browse(categ_ids).exists()
         if categs:
             # Una sola fuente de verdad por grupo: la compañía raíz. La propagación
             # se encarga de sincronizar el flag a las branches.
-            root_companies = env['res.company'].search([('parent_id', '=', False)])
+            root_companies = env["res.company"].search([("parent_id", "=", False)])
             for company in root_companies:
-                categs.with_company(company).write({'shared_to_branches': True})
+                categs.with_company(company).write({"shared_to_branches": True})
 
-    cr.execute('DROP TABLE IF EXISTS stock_account_mc_ux_shared_migr')
+    cr.execute("DROP TABLE IF EXISTS stock_account_mc_ux_shared_migr")

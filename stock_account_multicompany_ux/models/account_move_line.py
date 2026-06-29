@@ -37,7 +37,7 @@ class AccountMoveLine(models.Model):
 
         # Solo interceptar si la categoría del producto está marcada como compartida.
         # Para el resto de categorías, la branch tiene su propio inventario y costo.
-        if not self.product_id.categ_id.shared_to_branches:
+        if not self.product_id.categ_id.with_company(parent_company.id).shared_to_branches:
             return super()._get_cogs_value()
 
         # --- Caso 1: Línea de nota de crédito (rectificación) ---
@@ -65,7 +65,7 @@ class AccountMoveLine(models.Model):
             # --- Caso 2: Hay movimientos de stock completados ---
             # Delegar a stock.move._get_cogs_price_unit(), que está override-ado
             # para retornar el costo de la compañía padre en lugar del de la branch.
-            price_unit = moves._get_cogs_price_unit(cogs_qty)
+            price_unit = moves.with_context(branch_company=branch_company.id)._get_cogs_price_unit(cogs_qty)
         else:
             # --- Caso 3: Sin movimientos de stock ---
             # (ej. servicio con valoración, venta sin picking, ajuste manual)
@@ -96,4 +96,12 @@ class AccountMoveLine(models.Model):
 
         # Descontar el valor de COGS ya contabilizado en asientos anteriores
         # (ej. entregas parciales previamente facturadas) para evitar doble registro.
-        return (price_unit * cogs_qty - self._get_posted_cogs_value()) / self.quantity
+        # `abs()` es imprescindible: en una nota de crédito `_get_cogs_qty()` devuelve
+        # la cantidad negada, por lo que `price_unit * cogs_qty` es negativo. El signo
+        # del refund lo aplica `_stock_account_prepare_realtime_out_lines_vals`
+        # (sign = -1 if out_refund); si devolviéramos un COGS negativo la doble
+        # negación cancelaría esa inversión y el asiento de la NC saldría con la misma
+        # dirección que la factura. Se convierte a la UoM del producto igual que Odoo
+        # estándar (no usar `self.quantity` crudo: rompe si la línea está en otra UoM).
+        line_quantity_uom = self.product_uom_id._compute_quantity(self.quantity, self.product_id.uom_id)
+        return abs((price_unit * cogs_qty - self._get_posted_cogs_value()) / line_quantity_uom)

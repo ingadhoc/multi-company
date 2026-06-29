@@ -16,44 +16,54 @@ class AccountMove(models.Model):
         para registrar esa diferencia en la factura.
 
         Flujo:
-        1. Llama al super() para obtener las líneas COGS base.
+        1. Llama al super() para obtener las líneas COGS base (ya valuadas al costo
+           del padre, vía el override de account_move_line._get_cogs_value).
         2. Solo continúa si la compañía del asiento es una branch (tiene parent_id).
         3. Para cada línea de factura que cumple las condiciones (categoría compartida,
-           valoración en tiempo real), busca movimientos de stock 'done' y verifica
-           si hubo diferencia de precio registrada en el contexto del move.
-        4. Si hay diferencia, construye las líneas adicionales y las agrega a la lista.
+           valoración en tiempo real) con movimientos de stock 'done', calcula la
+           diferencia de costo padre/branch directamente sobre los moves.
+        4. Si la diferencia no es cero, construye el par de líneas balanceadas y las
+           agrega a la lista. Si el costo está unificado (objetivo de shared_to_branches),
+           la diferencia es 0 y no se agrega nada.
         """
         lines_vals_list = super()._stock_account_prepare_realtime_out_lines_vals()
 
         # Solo proceder si la compañía es una branch (tiene compañía padre).
         # Las compañías padre calculan su propio COGS sin este override.
-        if not self.company_id.parent_id:
+        branch_company = self.company_id
+        parent_company = branch_company.parent_id
+        if not parent_company:
             return lines_vals_list
 
         # Iterar únicamente líneas de factura cuyo producto pertenece a una
-        # categoría con 'shared_to_branches' activo. El resto usa el flujo
-        # estándar de Odoo sin modificaciones.
-        for line in self.invoice_line_ids.filtered(lambda x: x.product_id.categ_id.shared_to_branches):
+        # categoría con 'shared_to_branches' activo. El flag es company_dependent:
+        # se lee en el contexto del PADRE (fuente de verdad), no de la branch.
+        # El resto usa el flujo estándar de Odoo sin modificaciones.
+        for line in self.invoice_line_ids.filtered(
+            lambda x: x.product_id.categ_id.with_company(parent_company).shared_to_branches
+        ):
             # Saltar líneas que no generan COGS o productos sin valoración en tiempo real
             if not line._eligible_for_stock_account() or line.product_id.valuation != "real_time":
                 continue
 
-            # Obtener los movimientos de stock completados asociados a esta línea de factura
+            # Movimientos de stock completados asociados a esta línea de factura
             stock_moves = line._get_stock_moves().filtered(lambda m: m.state == "done")
+            if not stock_moves:
+                continue
 
-            for move in stock_moves:
-                # La diferencia de inventario se registra en el contexto del move
-                # durante el proceso de valoración (ver stock_move._get_cogs_price_unit).
-                # Si no hay diferencia registrada, no hay nada que asentar.
-                if move._context.get("inventory_price_difference"):
-                    price_difference = move._context["inventory_price_difference"]
-                    price_diff_account_id = move._context.get("inventory_diff_account")
+            # Cuenta de diferencia de precio de la categoría (company_dependent → padre)
+            diff_account = line.product_id.categ_id.with_company(parent_company).property_price_difference_account_id
+            if not diff_account:
+                continue
 
-                    if price_diff_account_id:
-                        # Delegar la construcción de los vals al método dedicado en stock.move
-                        diff_lines = self.env["stock.move"]._prepare_inventory_difference_lines(
-                            self, line, price_difference, self.env["account.account"].browse(price_diff_account_id)
-                        )
-                        lines_vals_list.extend(diff_lines)
+            # Diferencia (costo padre - costo branch) * cantidad valorada de los moves.
+            sign = -1 if self.move_type == "out_refund" else 1
+            price_difference = sign * stock_moves._get_inventory_cost_difference(branch_company, parent_company)
+            if self.currency_id.is_zero(price_difference):
+                continue
+
+            lines_vals_list += self.env["stock.move"]._prepare_inventory_difference_lines(
+                self, line, price_difference, diff_account
+            )
 
         return lines_vals_list
