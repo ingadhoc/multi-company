@@ -70,6 +70,12 @@ class ProductCategory(models.Model):
         - property_cost_method y property_valuation: solo cuando la categoría
           está compartida, para imponer el costeo único del grupo. Si no está
           compartida, la branch gestiona su propia configuración.
+        - Cuentas contables de la categoría (income, expense, valoración de
+          stock, price difference / revaluación de costo) y el diario de stock:
+          solo cuando está compartida. Se pisan siempre con el valor de la raíz
+          para garantizar un mapeo contable único en todo el grupo. La cuenta de
+          "Stock Variation" NO se propaga: es un related read-only de la cuenta
+          de valoración, así que queda resuelta sola al propagar esta última.
 
         Solo propaga si el método se ejecuta en contexto de la compañía RAÍZ.
         Si se llama desde una branch (parent_id existe), se ignora para evitar
@@ -93,10 +99,23 @@ class ProductCategory(models.Model):
 
             # El flag se sincroniza siempre (también al desactivarlo).
             values = {"shared_to_branches": is_shared}
-            # El costeo solo se impone cuando la categoría está compartida.
+            # El costeo y las cuentas solo se imponen cuando está compartida.
             if is_shared:
                 values["property_cost_method"] = root_categ.property_cost_method
                 values["property_valuation"] = root_categ.property_valuation
+                # Cuentas contables: se pisan siempre con el valor de la raíz
+                # para garantizar un mapeo contable único en el grupo. Se toma
+                # .id (False si la raíz no tiene valor → limpia la branch).
+                # Stock Variation no va: es related de la cuenta de valoración.
+                values.update(
+                    {
+                        "property_account_income_categ_id": root_categ.property_account_income_categ_id.id,
+                        "property_account_expense_categ_id": root_categ.property_account_expense_categ_id.id,
+                        "property_stock_valuation_account_id": root_categ.property_stock_valuation_account_id.id,
+                        "property_price_difference_account_id": root_categ.property_price_difference_account_id.id,
+                        "property_stock_journal": root_categ.property_stock_journal.id,
+                    }
+                )
 
             for branch in branches:
                 categ.with_company(branch).write(values)

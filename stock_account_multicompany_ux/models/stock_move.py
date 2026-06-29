@@ -6,7 +6,7 @@ class StockMove(models.Model):
 
     def _get_cogs_price_unit(self, quantity=0):
         """
-        Override: Calcula el precio unitario de COGS usando la valoración de la
+        Override: calcula el precio unitario de COGS usando la valoración de la
         compañía padre cuando el movimiento pertenece a una branch con categoría
         de producto marcada como 'shared_to_branches'.
 
@@ -14,9 +14,10 @@ class StockMove(models.Model):
         el inventario real de la compañía padre, no el de la branch (que no posee
         stock físico propio para esos productos).
 
-        Además, si existe diferencia entre el costo del padre y el de la branch,
-        la registra mediante _log_inventory_cost_difference para que pueda ser
-        usada luego en account_move para generar las líneas de diferencia.
+        La diferencia entre el costo del padre y el de la branch (si existe) NO se
+        registra acá: la calcula y asienta account_move._stock_account_prepare_
+        realtime_out_lines_vals llamando a _get_inventory_cost_difference, para
+        evitar depender de side-effects de contexto entre llamadas.
 
         :param quantity: cantidad en UOM del producto para calcular el costo total
         :return: precio unitario COGS en la moneda de la compañía
@@ -25,30 +26,49 @@ class StockMove(models.Model):
             # Recordset con múltiples productos: no se puede calcular un único precio
             return 0
 
-        # Identificar la compañía branch y su padre
-        branch_company = self.company_id
+        # La branch es la compañía de la factura, propagada por _get_cogs_value
+        # vía contexto (puede no coincidir con la compañía de los moves).
+        branch_context = self.env.context.get("branch_company")
+        branch_company = self.env["res.company"].browse(branch_context) if branch_context else False
+        if not branch_company:
+            return super()._get_cogs_price_unit(quantity)
+
         parent_company = branch_company.parent_id
-
-        # Si no hay compañía padre, esta no es una branch → flujo estándar de Odoo
-        if not parent_company:
+        # Solo interceptar si hay padre y la categoría tiene 'shared_to_branches'
+        # activo. shared_to_branches es company_dependent: se lee en el contexto del
+        # PADRE (fuente de verdad), no de la branch, donde puede no estar seteado.
+        if not parent_company or not self.product_id.categ_id.with_company(parent_company).shared_to_branches:
             return super()._get_cogs_price_unit(quantity)
 
-        # Solo interceptar si la categoría tiene 'shared_to_branches' activo.
-        # Para otras categorías, la branch gestiona su propio inventario y costo.
-        if not self.product_id.categ_id.shared_to_branches:
-            return super()._get_cogs_price_unit(quantity)
-
-        # Determinar la cantidad valorada total del recordset
         move_valued_qty = sum(m._get_valued_qty() for m in self)
         cogs_qty = quantity or move_valued_qty
         if not cogs_qty:
             # Sin cantidad, devolver el precio estándar del padre como referencia
             return self.product_id.with_company(parent_company).standard_price
 
+        parent_price_unit, _branch_price_unit = self._get_branch_parent_unit_costs(
+            branch_company, parent_company, quantity
+        )
+        # El COGS de la branch siempre se valúa al costo del PADRE.
+        return parent_price_unit
+
+    def _get_branch_parent_unit_costs(self, branch_company, parent_company, quantity=0):
+        """
+        Calcula el costo unitario del producto de estos moves desde la perspectiva
+        del PADRE y de la BRANCH. Usado tanto para el COGS (toma el del padre) como
+        para detectar la diferencia padre/branch a asentar.
+
+        Asume un único producto en el recordset (el caller lo garantiza).
+
+        :return: tupla (parent_price_unit, branch_price_unit) en moneda de compañía
+        """
+        move_valued_qty = sum(m._get_valued_qty() for m in self)
+        cogs_qty = quantity or move_valued_qty
+
         product_parent = self.product_id.with_company(parent_company)
         product_branch = self.product_id.with_company(branch_company)
 
-        # --- Calcular el precio unitario desde la perspectiva del PADRE ---
+        # --- Costo unitario desde la perspectiva del PADRE ---
         if product_parent.cost_method == "fifo" or (
             product_parent.lot_valuated and product_parent.cost_method == "average"
         ):
@@ -61,37 +81,85 @@ class StockMove(models.Model):
             if parent_moves:
                 parent_total_qty = sum(m._get_valued_qty() for m in parent_moves)
                 if parent_total_qty:
-                    # Costo promedio ponderado de los movimientos del padre encontrados
                     parent_price_unit = sum(parent_moves.mapped("value")) / parent_total_qty
                 else:
                     parent_price_unit = product_parent.standard_price
             else:
-                # Sin movimientos equivalentes en el padre: caer al precio estándar
                 parent_price_unit = product_parent.standard_price
         else:
             # Standard o Average sin lotes: precio estándar vigente del padre
             parent_price_unit = product_parent.standard_price
 
-        # --- Calcular el precio unitario desde la perspectiva de la BRANCH ---
-        # (necesario para detectar si hay diferencia que registrar)
+        # --- Costo unitario desde la perspectiva de la BRANCH ---
         if product_branch.cost_method == "fifo" or (
             product_branch.lot_valuated and product_branch.cost_method == "average"
         ):
-            # FIFO/Average con lotes en la branch: usar el valor acumulado de los moves
+            # FIFO/Average con lotes: valor acumulado de los moves de la branch
             branch_price_unit = sum(self.mapped("value")) / cogs_qty if cogs_qty else product_branch.standard_price
         else:
-            # Standard/Average: precio estándar de la branch
             branch_price_unit = product_branch.standard_price
 
-        # --- Registrar diferencia de costos para auditoría y asientos posteriores ---
-        # Si el costo del padre difiere del de la branch, se registra en el contexto
-        # del move para que account_move pueda generar las líneas de diferencia.
-        if not branch_company.currency_id.is_zero(parent_price_unit - branch_price_unit):
-            for move in self:
-                move._log_inventory_cost_difference(parent_price_unit, branch_price_unit, move._get_valued_qty())
+        return parent_price_unit, branch_price_unit
 
-        # Retornar siempre el precio del PADRE como COGS de la branch
-        return parent_price_unit
+    def _get_inventory_cost_difference(self, branch_company, parent_company, quantity=0):
+        """
+        Diferencia total (costo padre - costo branch) * cantidad valorada, en
+        moneda de compañía, para los moves de este recordset. Positiva cuando el
+        costo del padre es mayor que el de la branch.
+
+        :return: float (0.0 si no hay cantidad o múltiples productos)
+        """
+        if not self or len(self.product_id) > 1:
+            return 0.0
+
+        move_valued_qty = sum(m._get_valued_qty() for m in self)
+        cogs_qty = quantity or move_valued_qty
+        if not cogs_qty:
+            return 0.0
+
+        parent_price_unit, branch_price_unit = self._get_branch_parent_unit_costs(
+            branch_company, parent_company, quantity
+        )
+        return (parent_price_unit - branch_price_unit) * cogs_qty
+
+    def _prepare_inventory_difference_lines(self, move, line, price_difference, diff_account):
+        """
+        Construye el par balanceado de líneas (display_type='cogs') que asienta la
+        diferencia de costo padre/branch:
+
+        - una línea contra la cuenta de diferencia de precio de la categoría;
+        - otra contra la cuenta de valoración de stock del producto.
+
+        El par suma cero en amount_currency (asiento balanceado). Con price_difference
+        positivo (costo padre > branch): debita la cuenta de diferencia y acredita la
+        de valoración.
+
+        Nota contable: este asiento ajusta el residuo que queda en la cuenta de
+        valoración/interim por valuar la entrega al costo de la branch y el COGS al
+        costo del padre. La cuenta de diferencia es property_price_difference_account_id
+        de la categoría. Validar el signo/cuentas contra el asiento esperado.
+        """
+        accounts = line.product_id.product_tmpl_id.get_product_accounts(fiscal_pos=move.fiscal_position_id)
+        stock_account = accounts["stock_valuation"]
+        qty = line.quantity or 1.0
+        unit = price_difference / qty
+
+        base_vals = {
+            "name": (line.name or "")[:64],
+            "move_id": move.id,
+            "partner_id": move.commercial_partner_id.id,
+            "product_id": line.product_id.id,
+            "product_uom_id": line.product_uom_id.id,
+            "quantity": line.quantity,
+            "analytic_distribution": line.analytic_distribution,
+            "display_type": "cogs",
+            "tax_ids": [],
+            "cogs_origin_id": line.id,
+        }
+        return [
+            {**base_vals, "account_id": diff_account.id, "price_unit": unit, "amount_currency": price_difference},
+            {**base_vals, "account_id": stock_account.id, "price_unit": -unit, "amount_currency": -price_difference},
+        ]
 
     def _get_parent_company_moves(self, parent_company):
         """

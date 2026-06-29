@@ -20,7 +20,7 @@ def migrate(cr, version):
     )
     res = cr.fetchone()
     # Si la columna no existe o ya es jsonb, no hay nada que migrar.
-    if not res or res[0] == 'jsonb':
+    if not res or res[0] == "jsonb":
         return
 
     # Guardar las categorías que estaban compartidas (valor global booleano).
@@ -40,4 +40,4 @@ def migrate(cr, version):
     )
 
     # Eliminar la columna boolean; Odoo recrea shared_to_branches como jsonb.
-    cr.execute('ALTER TABLE product_category DROP COLUMN shared_to_branches')
+    cr.execute("ALTER TABLE product_category DROP COLUMN shared_to_branches")
