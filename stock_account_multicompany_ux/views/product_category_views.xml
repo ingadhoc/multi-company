@@ -6,8 +6,9 @@
         <field name="inherit_id" ref="stock_account.view_category_property_form_stock"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='property_valuation']" position="after">
-                <field name="shared_to_branches" groups="base.group_multi_company" invisible="is_branch_company"/>
+                <field name="shared_to_branches" groups="base.group_multi_company" invisible="is_branch_company or not company_has_branches"/>
                 <field name="is_branch_company" invisible="True"/>
+                <field name="company_has_branches" invisible="True"/>
                 <div
                     class="alert alert-info"
                     role="alert"
