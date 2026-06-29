@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Parado en una branch, para productos cuya categoría está compartida a
+        branches (shared_to_branches), se muestra el costo de la compañía raíz
+        del grupo (parent_standard_price, solo lectura) en lugar del
+        standard_price local de la branch.
+    -->
+
+    <!-- Form de producto (product.template). El form de variante
+         (product_normal_form_view) lo hereda, por lo que queda cubierto también. -->
+    <record id="product_template_form_view_shared_cost" model="ir.ui.view">
+        <field name="name">product.template.form.shared.cost.branches</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <field name="standard_price" position="attributes">
+                <attribute name="invisible">is_cost_shared_from_parent</attribute>
+            </field>
+            <field name="standard_price" position="after">
+                <field name="is_cost_shared_from_parent" invisible="1"/>
+                <field
+                    name="parent_standard_price"
+                    class="oe_inline"
+                    widget="monetary"
+                    options="{'currency_field': 'cost_currency_id', 'field_digits': True}"
+                    invisible="not is_cost_shared_from_parent"
+                />
+            </field>
+        </field>
+    </record>
+
+    <!-- Form rápido de variante (product.product) -->
+    <record id="product_variant_easy_edit_view_shared_cost" model="ir.ui.view">
+        <field name="name">product.product.easy.edit.shared.cost.branches</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
+        <field name="arch" type="xml">
+            <field name="standard_price" position="attributes">
+                <attribute name="invisible">is_cost_shared_from_parent</attribute>
+            </field>
+            <field name="standard_price" position="after">
+                <field name="is_cost_shared_from_parent" invisible="1"/>
+                <field
+                    name="parent_standard_price"
+                    class="oe_inline"
+                    widget="monetary"
+                    options="{'currency_field': 'cost_currency_id', 'field_digits': True}"
+                    invisible="not is_cost_shared_from_parent"
+                />
+            </field>
+        </field>
+    </record>
+
+</odoo>
