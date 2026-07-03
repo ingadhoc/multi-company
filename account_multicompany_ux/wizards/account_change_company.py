@@ -208,7 +208,7 @@ class AccountChangeCurrency(models.TransientModel):
         self._get_change_company_line_taxes(move.invoice_line_ids, original_taxes)
         # para percepciones argentinas re-computamos con su propio método
         if move.fiscal_position_id._fields.get("l10n_ar_tax_ids"):
-            move._l10n_ar_recompute_fiscal_position_taxes()
+            move.with_context(skip_invoice_sync=True)._l10n_ar_recompute_fiscal_position_taxes()
 
         # PARTNER BANK
         if original_partner_bank_id and original_partner_bank_id.company_id.id in [False, self.company_id.id]:
