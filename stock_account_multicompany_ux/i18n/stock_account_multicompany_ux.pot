@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-05 15:37+0000\n"
-"PO-Revision-Date: 2026-06-05 15:37+0000\n"
+"POT-Creation-Date: 2026-07-06 19:44+0000\n"
+"PO-Revision-Date: 2026-07-06 19:44+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -29,9 +29,37 @@ msgid "Companies"
 msgstr ""
 
 #. module: stock_account_multicompany_ux
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_category__company_has_branches
+msgid "Company Has Branches"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model_terms:ir.ui.view,arch_db:stock_account_multicompany_ux.product_template_form_view_shared_cost
+#: model_terms:ir.ui.view,arch_db:stock_account_multicompany_ux.product_variant_easy_edit_view_shared_cost
+msgid "Cost"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_product__parent_standard_price
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_template__parent_standard_price
+msgid "Cost (Parent Company)"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_product__parent_standard_price
+#: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_template__parent_standard_price
+msgid ""
+"Costo de solo lectura que se muestra en las branches para productos cuya "
+"categoría está compartida a branches. El valor se toma de la compañía raíz "
+"del grupo, de modo que todo el grupo muestre un único costo unificado."
+msgstr ""
+
+#. module: stock_account_multicompany_ux
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_account_move__display_name
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_account_move_line__display_name
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_category__display_name
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_product__display_name
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_template__display_name
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_res_company__display_name
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_stock_move__display_name
 msgid "Display Name"
@@ -41,6 +69,8 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_account_move__id
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_account_move_line__id
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_category__id
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_product__id
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_template__id
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_res_company__id
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_stock_move__id
 msgid "ID"
@@ -49,6 +79,12 @@ msgstr ""
 #. module: stock_account_multicompany_ux
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_category__is_branch_company
 msgid "Is Branch Company"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_product__is_cost_shared_from_parent
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_template__is_cost_shared_from_parent
+msgid "Is Cost Shared From Parent"
 msgstr ""
 
 #. module: stock_account_multicompany_ux
@@ -62,8 +98,18 @@ msgid "Journal Item"
 msgstr ""
 
 #. module: stock_account_multicompany_ux
+#: model:ir.model,name:stock_account_multicompany_ux.model_product_template
+msgid "Product"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
 #: model:ir.model,name:stock_account_multicompany_ux.model_product_category
 msgid "Product Category"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model,name:stock_account_multicompany_ux.model_product_product
+msgid "Product Variant"
 msgstr ""
 
 #. module: stock_account_multicompany_ux
@@ -77,6 +123,23 @@ msgid "Stock Move"
 msgstr ""
 
 #. module: stock_account_multicompany_ux
+#: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_product__is_cost_shared_from_parent
+#: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_template__is_cost_shared_from_parent
+msgid ""
+"True cuando la compañía activa es una branch y la categoría del producto "
+"está compartida a branches: el costo debe leerse de la compañía raíz del "
+"grupo, no de la branch."
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_category__company_has_branches
+msgid ""
+"True when the active company has branches (child companies). "
+"shared_to_branches solo tiene sentido cuando la compañía realmente tiene "
+"branches, por eso el campo se oculta en compañías standalone."
+msgstr ""
+
+#. module: stock_account_multicompany_ux
 #: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_category__is_branch_company
 msgid "True when the active company is a branch (has a parent company)."
 msgstr ""
@@ -84,8 +147,7 @@ msgstr ""
 #. module: stock_account_multicompany_ux
 #: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_category__shared_to_branches
 msgid ""
-"When enabled, all branches of the parent company will use the same costing "
-"method and standard price defined in the parent company for products in this"
-" category. This ensures a single unified cost across the parent and all its "
-"branches."
+"When enabled, all branches of the parent company will use the same costing method and standard price defined in the parent company for products in this category. This ensures a single unified cost across the parent and all its branches.\n"
+"\n"
+"This flag is company-dependent: it is edited on the group's root company and synced down to its branches, so each company group can decide independently which categories are shared."
 msgstr ""
