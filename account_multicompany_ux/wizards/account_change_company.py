@@ -206,9 +206,6 @@ class AccountChangeCurrency(models.TransientModel):
 
         # TAXES
         self._get_change_company_line_taxes(move.invoice_line_ids, original_taxes)
-        # para percepciones argentinas re-computamos con su propio método
-        if move.fiscal_position_id._fields.get("l10n_ar_tax_ids"):
-            move.with_context(skip_invoice_sync=True)._l10n_ar_recompute_fiscal_position_taxes()
 
         # PARTNER BANK
         if original_partner_bank_id and original_partner_bank_id.company_id.id in [False, self.company_id.id]:
@@ -216,7 +213,16 @@ class AccountChangeCurrency(models.TransientModel):
 
         container = {"records": self.move_id}
         with self.move_id._check_balanced(container), self.move_id._sync_dynamic_lines(container):
-            pass
+            # Percepciones argentinas: re-computamos DENTRO del bloque de sync.
+            # _sync_tax_lines toma un snapshot de los tax_ids de las líneas al entrar y solo
+            # recomputa (crea el apunte contable) las líneas que cambian dentro de este bloque.
+            # Si el recompute corriera antes del bloque, el snapshot ya vería las percepciones
+            # puestas y no se generaría el apunte (ticket 122289).
+            # Lo hacemos con skip_invoice_sync para que cada asignación de tax_ids no dispare un
+            # sync intermedio: un único sync (el de este bloque) reconcilia todas las líneas de una,
+            # evitando el O(N²) que agotaba memoria en facturas largas (ingadhoc/multi-company#301).
+            if move.fiscal_position_id._fields.get("l10n_ar_tax_ids"):
+                move.with_context(skip_invoice_sync=True)._l10n_ar_recompute_fiscal_position_taxes()
 
     def _sync_lines_balance_from_amount_currency(self, move):
         """Alinea balance con amount_currency para soportar cambio de compañía entre monedas."""
