@@ -208,3 +208,96 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
 
         customer_invoice.action_post()
         vendor_bill.action_post()
+
+    def test_change_company_keeps_ar_perception_move_line(self):
+        """Regresión ticket 122289: al cambiar de compañía una factura con percepción AR,
+        el apunte contable de la percepción debe seguir existiendo.
+
+        El recompute de percepciones corre bajo ``skip_invoice_sync``; ``_sync_tax_lines``
+        solo genera la move line de un impuesto si el ``tax_ids`` de la base line cambia
+        DENTRO del bloque ``_sync_dynamic_lines`` final. Si el recompute corriera antes del
+        bloque, el snapshot ya vería la percepción puesta y no se crearía el apunte.
+
+        Solo aplica con la localización AR instalada (``l10n_ar_tax``), que no es dependencia
+        de este módulo; en su ausencia el test se saltea.
+        """
+        AFP = self.env["account.fiscal.position"]
+        if "l10n_ar_tax_ids" not in AFP._fields:
+            self.skipTest("l10n_ar_tax no instalado: las percepciones AR no aplican")
+
+        def _ar_company(exclude=None):
+            """Devuelve (company, fiscal_position, sale_journal) para una compañía AR con
+            posición fiscal de percepción, o (None, None, None)."""
+            companies = self.env["res.company"].search([("account_fiscal_country_id.code", "=", "AR")])
+            for company in companies - (exclude or self.env["res.company"]):
+                fp = AFP.search(
+                    [("company_id", "=", company.id), ("l10n_ar_tax_ids.tax_type", "=", "perception")],
+                    limit=1,
+                )
+                journal = self.env["account.journal"].search(
+                    [("company_id", "=", company.id), ("type", "=", "sale")], limit=1
+                )
+                if fp and journal:
+                    return company, fp, journal
+            return None, None, None
+
+        company_a, fp_a, journal_a = _ar_company()
+        if not company_a:
+            self.skipTest("No hay compañía AR con posición fiscal de percepción")
+        company_b, _fp_b, journal_b = _ar_company(exclude=company_a)
+        if not company_b:
+            self.skipTest("No hay una segunda compañía AR con posición fiscal de percepción")
+
+        # Grupos de impuesto de todas las percepciones AR configuradas (para identificar
+        # las tax lines de percepción sin depender de la identidad de grupo por compañía).
+        perception_groups = (
+            AFP.search([("l10n_ar_tax_ids.tax_type", "=", "perception")])
+            .mapped("l10n_ar_tax_ids")
+            .filtered(lambda x: x.tax_type == "perception")
+            .mapped("default_tax_id.tax_group_id")
+        )
+
+        partner = self.env["res.partner"].search([("parent_id", "=", False)], limit=1)
+        product = self.env.ref("product.product_product_16")
+
+        invoice = (
+            self.env["account.move"]
+            .with_company(company_a)
+            .create(
+                {
+                    "partner_id": partner.id,
+                    "invoice_date": self.today,
+                    "move_type": "out_invoice",
+                    "journal_id": journal_a.id,
+                    "company_id": company_a.id,
+                    "fiscal_position_id": fp_a.id,
+                    "invoice_line_ids": [
+                        Command.create({"product_id": product.id, "quantity": 1, "price_unit": 100}),
+                    ],
+                }
+            )
+        )
+        # Forzamos el cómputo de percepciones como lo hace la UI (onchange).
+        invoice._l10n_ar_recompute_fiscal_position_taxes()
+
+        def _perception_tax_lines(move):
+            return move.line_ids.filtered(lambda l: l.tax_line_id and l.tax_line_id.tax_group_id in perception_groups)
+
+        # Baseline: la factura de origen debe tener el apunte de percepción; si la posición
+        # fiscal no lo aplicó a este partner/producto, el caso no es reproducible.
+        if not _perception_tax_lines(invoice):
+            self.skipTest("La posición fiscal no aplicó percepción a la factura de prueba")
+
+        self.env["account.change.company"].create(
+            {
+                "move_id": invoice.id,
+                "company_ids": [company_a.id, company_b.id],
+                "company_id": company_b.id,
+                "journal_id": journal_b.id,
+            }
+        ).change_company()
+
+        self.assertTrue(
+            _perception_tax_lines(invoice),
+            "No se generó el apunte contable de la percepción tras el cambio de compañía (ticket 122289)",
+        )
