@@ -25,6 +25,13 @@ class PaymentPortal(portal.PaymentPortal):
         else:
             company_id = request.env.user.company_id
         availability_report = {}
+        # Drop request params that we already pass explicitly, so **kwargs doesn't
+        # duplicate them (e.g. a 'partner_id' in the query string -> TypeError).
+        provider_kwargs = {
+            key: value
+            for key, value in kwargs.items()
+            if key not in ("company_id", "partner_id", "amount", "force_tokenization", "is_validation", "report")
+        }
         # Select all the payment methods and tokens that match the payment context.
         providers_sudo = (
             request.env["payment.provider"]
@@ -36,7 +43,7 @@ class PaymentPortal(portal.PaymentPortal):
                 force_tokenization=True,
                 is_validation=True,
                 report=availability_report,
-                **kwargs,
+                **provider_kwargs,
             )
         )  # In sudo mode to read the fields of providers and partner (if logged out).
         payment_methods_sudo = (
