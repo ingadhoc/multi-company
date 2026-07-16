@@ -37,15 +37,11 @@ class AccountChangeCompany(models.TransientModel):
     @api.depends("move_id")
     @api.depends_context("allowed_company_ids")
     def _compute_company_ids(self):
-        self.company_ids = self.env["res.company"].search(
-            [
-                "&",
-                ("id", "!=", self.move_id.company_id.id),
-                "|",
-                ("id", "parent_of", self.move_id.company_id.ids),
-                ("id", "child_of", self.move_id.company_id.ids),
-            ]
-        )
+        company = self.move_id.company_id
+        if not company:
+            self.company_ids = self.env["res.company"]
+            return
+        self.company_ids = company.root_id._accessible_branches() - company
 
     @api.depends("company_ids")
     def _compute_company(self):
