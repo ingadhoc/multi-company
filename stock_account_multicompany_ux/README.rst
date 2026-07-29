@@ -14,11 +14,12 @@
 Stock Account Multicompany Usability
 ====================================
 
-Extends the stock-accounting integration for multi-company setups where a parent
-company has one or more branch companies. The key feature is **Shared Stock
-Valuation to Branches**: branches calculate COGS using the parent company's
-inventory cost instead of their own, ensuring a single unified cost across
-the entire group.
+Extends the stock integration for multi-company setups where a parent company has
+one or more branch companies. Two independent features: **Shared Stock Valuation
+to Branches**, where branches calculate COGS using the parent company's inventory
+cost instead of their own to keep a single unified cost across the group; and
+**Branch Stock**, which lets a user see where the group's stock is, without
+changing the quantity on hand of their own company.
 
 Features
 --------
@@ -46,6 +47,19 @@ Features
   difference between the branch cost and the parent cost to the appropriate
   inventory difference account when real-time valuation is active.
 
+- **Branch Stock** (``stock.location``, ``stock.quant`` record rules): new privilege
+  that lets a user read the locations and quants of the whole parent/branches scheme,
+  so the stock detail breakdowns list every warehouse of the group even for companies
+  the user cannot access. The **quantity on hand stays unchanged** — it keeps showing
+  only the user's own companies, because it is scoped by the active companies and not
+  by the record rules. The intent is that a salesperson sells from their own branch
+  first and only checks the rest of the group when their own stock is not enough.
+
+  Only **read** access is widened. Odoo's company rules on those two models keep
+  governing write, create and unlink with their original strict domain, so the user
+  cannot touch the other companies' records. Their read permission is turned off so
+  that the rules above are the ones that apply, and ``uninstall_hook`` restores it.
+
 Installation
 ============
 
@@ -54,6 +68,11 @@ To install this module, you need to:
 #. Install ``account_multicompany_ux`` and ``stock_account`` (declared as
    dependencies; they are installed automatically).
 #. Install this module.
+
+.. note::
+   The stock detail breakdowns themselves come from ``product_stock_by_location``
+   (product list and kanban) and ``sale_stock_ux`` (sale order line). They are not
+   dependencies: without them the privilege simply has nothing to widen.
 
 Configuration
 =============
@@ -69,6 +88,13 @@ Configuration
    The **Shared Stock Valuation to Branches** field is only visible when
    multi-company mode is active and the current company is *not* a branch
    (i.e. it has no parent company).
+
+To grant the **Branch Stock** privilege:
+
+#. Open **Settings → Users & Companies → Users** and edit the user.
+#. In the *Access Rights* tab, under **Supply Chain**, set **Branch Stock** to
+   *All Branches*. The default, *Own company only*, keeps Odoo's native
+   behaviour.
 
 Bug Tracker
 ===========
