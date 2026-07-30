@@ -32,14 +32,16 @@ Features
   ``_get_cogs_price_unit()`` so that when a branch generates COGS entries for
   a category with shared valuation, the cost is taken from the parent company.
   Supports standard, average, and FIFO cost methods. For FIFO it looks up
-  equivalent parent-company stock moves; when none exist it falls back to the
-  parent's last stock valuation layer or standard price.
+  equivalent parent-company stock moves and weights their value by quantity;
+  when none exist it falls back to the parent's standard price.
 
 - **Branch-aware COGS value** (``account.move.line``): overrides
   ``_get_cogs_value()`` to apply the same parent-cost logic even when there are
   no associated stock moves (e.g. service products billed from a branch, or
-  credit notes). Also respects reversed-entry lines to avoid re-computing
-  already-posted COGS.
+  credit notes). With no stock moves, standard/average take the parent's
+  standard price and FIFO is valued with ``product._run_fifo()`` in the parent
+  company, same as standard Odoo. Also respects reversed-entry lines to avoid
+  re-computing already-posted COGS.
 
 - **Inventory difference lines** (``account.move``): overrides
   ``_stock_account_prepare_realtime_out_lines_vals()`` to post the price

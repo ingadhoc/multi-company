@@ -22,8 +22,8 @@ class AccountMoveLine(models.Model):
         2. stock.move._get_cogs_price_unit() si hay stock moves completados
            (ese método ya tiene su propio override para usar el costo del padre).
         3. Precio estándar del padre (si no hay stock moves, método standard/average).
-        4. Última capa SVL del padre como aproximación FIFO.
-        5. Precio estándar del padre como fallback final.
+        4. FIFO del padre vía product._run_fifo() (si no hay stock moves y el método
+           es FIFO), igual que Odoo estándar.
         """
         self.ensure_one()
 
@@ -76,23 +76,11 @@ class AccountMoveLine(models.Model):
                 # Standard/Average: usar el precio estándar vigente en el padre
                 price_unit = product_parent.standard_price
             else:
-                # FIFO: leer la última capa de valoración (SVL) del padre.
-                # No se consume ni ajusta ninguna capa; es solo una lectura del costo.
-                StockValuationLayer = self.env["stock.valuation.layer"]
-                svl = StockValuationLayer.search(
-                    [
-                        ("product_id", "=", product_parent.id),
-                        ("company_id", "=", parent_company.id),
-                    ],
-                    order="id desc",
-                    limit=1,
-                )
-                if svl:
-                    # Usar el costo unitario de la última capa como aproximación FIFO
-                    price_unit = svl.unit_cost
-                else:
-                    # Sin capas previas disponibles: caer al precio estándar del padre
-                    price_unit = product_parent.standard_price
+                # FIFO: valuar contra el stack FIFO del padre, igual que Odoo estándar
+                # (stock_account/models/account_move_line.py). _run_fifo() solo lee el
+                # valor de los stock.move del padre: no consume ni ajusta nada, y si no
+                # hay entradas previas extrapola con el precio estándar.
+                price_unit = product_parent._run_fifo(cogs_qty) / cogs_qty if cogs_qty else 0
 
         # Descontar el valor de COGS ya contabilizado en asientos anteriores
         # (ej. entregas parciales previamente facturadas) para evitar doble registro.
