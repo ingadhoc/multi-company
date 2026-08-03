@@ -6,14 +6,34 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-06 19:44+0000\n"
-"PO-Revision-Date: 2026-07-06 19:44+0000\n"
+"POT-Creation-Date: 2026-08-03 18:42+0000\n"
+"PO-Revision-Date: 2026-08-03 18:42+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: stock_account_multicompany_ux
+#: model:res.groups,name:stock_account_multicompany_ux.group_stock_all_branches
+msgid "All Branches"
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:res.groups,comment:stock_account_multicompany_ux.group_stock_all_branches
+msgid ""
+"Allows the user to see the stock detail of the whole parent/branches company"
+" scheme, even for companies they cannot access. The quantity on hand keeps "
+"showing the user's own companies; it is the location breakdown that lists "
+"every warehouse of the group. Read only: the user still cannot write on the "
+"other companies' records."
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:res.groups.privilege,name:stock_account_multicompany_ux.res_groups_privilege_branch_stock
+msgid "Branch Stock"
+msgstr ""
 
 #. module: stock_account_multicompany_ux
 #: model_terms:ir.ui.view,arch_db:stock_account_multicompany_ux.product_category_form_view_stock_valuation_shared
@@ -61,6 +81,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_product__display_name
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_template__display_name
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_res_company__display_name
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_res_users__display_name
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_stock_move__display_name
 msgid "Display Name"
 msgstr ""
@@ -72,6 +93,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_product__id
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_template__id
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_res_company__id
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_res_users__id
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_stock_move__id
 msgid "ID"
 msgstr ""
@@ -142,6 +164,11 @@ msgstr ""
 #. module: stock_account_multicompany_ux
 #: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_category__is_branch_company
 msgid "True when the active company is a branch (has a parent company)."
+msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model,name:stock_account_multicompany_ux.model_res_users
+msgid "User"
 msgstr ""
 
 #. module: stock_account_multicompany_ux
