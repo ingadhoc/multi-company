@@ -14,7 +14,10 @@
 Website Sale Multicompany
 ==============================
 
-# Con este modulo, cuando un usuario hace una compra en sitio web la misma se hará en la compañía por defecto que tenga seteada el usuario (company_id) en vez de la compañía del sitio web. Los métodos de envío y pago que se mostrarán serán lo de la compañía de la orden.
+**Módulo vaciado.** No agrega modelos, vistas ni datos. Su funcionalidad se movió
+a un módulo de nuestra plataforma SaaS.
+
+Se mantiene instalable para no romper las bases que ya lo tienen instalado.
 
 Installation
 ============
@@ -26,21 +29,12 @@ To install this module, you need to:
 Configuration
 =============
 
-To configure this module, you need to:
-
-#. Go to a Payment acquirer and select a journal that belongs to a different company than the Payment method
+No configuration is needed.
 
 Usage
 =====
 
-To use this module, you need to:
-
-#. For testing we recommend to create one database with "saas-provider" name and install "saas-provider" module
-
-.. image:: https://odoo-community.org/website/image/ir.attachment/5784_f2813bd/datas
-   :alt: Try me on Runbot
-   :target: http://runbot.adhoc.com.ar/
-
+El módulo no tiene comportamiento propio.
 
 Contributors
 ------------
@@ -53,5 +47,3 @@ Maintainer
 This module is maintained by the |company|.
 
 To contribute to this module, please visit https://www.adhoc.com.ar.
-
-Este modulo es para que usuarios portal vean registros de las compañías que tienen asignadas como compañías permitidas (company_ids). Por defecto Odoo suele dejar ver solo lo de la compañía del sitio web.
