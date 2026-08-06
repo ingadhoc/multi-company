@@ -14,7 +14,11 @@
 Website Sale Stock Multicompany
 ===================================
 
-This module extends the functionality of website_sale_stock and website_sale_multicompany to properly handle warehouse assignments in multi-company environments when selling through the website.
+**Módulo vaciado.** No agrega modelos, vistas ni datos. Se vació junto con
+``website_sale_multicompany``, cuya funcionalidad se movió a un módulo de nuestra
+plataforma SaaS.
+
+Se mantiene instalable para no romper las bases que ya lo tienen instalado.
 
 Installation
 ============
@@ -22,21 +26,16 @@ Installation
 To install this module, you need to:
 
 #. Just install the module.
-#. This module is auto-installable when both website_sale_stock and website_sale_multicompany are installed.
 
 Configuration
 =============
 
-No additional configuration is needed.
+No configuration is needed.
 
 Usage
 =====
 
-This module works automatically in the background. It ensures that:
-
-* When a sale order is created through the website, the correct warehouse is assigned based on the user's company.
-* If the assigned warehouse doesn't belong to the user's company, it automatically searches for an appropriate warehouse that does.
-* The warehouse selection respects multi-company rules and defaults.
+El módulo no tiene comportamiento propio.
 
 Bug Tracker
 ===========
@@ -49,20 +48,13 @@ help us smashing it by providing a detailed and welcomed feedback.
 Credits
 =======
 
-Images
-------
-
-* ADHOC SA: `Icon <http://fotos.subefotos.com/83eab0381f1e15a8de24b1b91b2896a2o.png>`_.
-
 Contributors
 ------------
 
 Maintainer
 ----------
 
-.. image:: http://fotos.subefotos.com/83eab0381f1e15a8de24b1b91b2896a2o.png
-   :alt: Odoo Community Association
-   :target: https://www.adhoc.com.ar
+|company_logo|
 
 This module is maintained by the ADHOC SA.
 
