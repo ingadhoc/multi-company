@@ -156,6 +156,7 @@ class AccountChangeCurrency(models.TransientModel):
             # esto lo hacemos porque sino el write borra el invoice_payment_term_id en facturas de proveedor si en invoice_payment_term_id no tiene compañía
             invoice_payment_term_id = move.invoice_payment_term_id
 
+<<<<<<< 30a8a3df6b45662bf603862a44afee6efd695df3
         # EMPEZAMOS CON CAMBIOS
         # COMPANY, JOURNAL, DOC TYPE and PAYMENT TERM
         move.with_context(skip_invoice_sync=True).write(
@@ -165,7 +166,27 @@ class AccountChangeCurrency(models.TransientModel):
                 "journal_id": self.journal_id.id,
             }
         )
+||||||| 1d866d029c0e950a8e130765dc7d818417515319
+        if invoice_payment_term_id:
+            self.move_id.invoice_payment_term_id = invoice_payment_term_id
+        without_product = self.move_id.line_ids.filtered(lambda line : line.display_type == 'product' and not line.product_id)
+        (self.move_id.line_ids - without_product).with_company(self.company_id.id)._compute_account_id()
+        for line in without_product:
+            line.account_id = line.move_id.journal_id.default_account_id
+        if original_payment_term:
+            self.move_id.invoice_payment_term_id = original_payment_term.id
+=======
+        if invoice_payment_term_id:
+            self.move_id.invoice_payment_term_id = invoice_payment_term_id
+        without_product = self.move_id.line_ids.filtered(lambda line : line.display_type == 'product' and not line.product_id)
+        (self.move_id.line_ids - without_product).exists().with_company(self.company_id.id)._compute_account_id()
+        for line in without_product:
+            line.account_id = line.move_id.journal_id.default_account_id
+        if original_payment_term:
+            self.move_id.invoice_payment_term_id = original_payment_term.id
+>>>>>>> a2ea4d2a57b615deea494bd1aba40e191c30b745
 
+<<<<<<< 30a8a3df6b45662bf603862a44afee6efd695df3
         # LINES ACCOUNTS.
         # tomamos la del producto, o del diario sin no hay producto (salvo para downpamyent que se usan una especificas)
         without_product = move.line_ids.filtered(lambda line: line.display_type == "product" and not line.product_id)
@@ -179,7 +200,20 @@ class AccountChangeCurrency(models.TransientModel):
         )._compute_account_id()
         default_account = move.journal_id.default_account_id
         (without_product - downpayment_lines).account_id = default_account
+||||||| 1d866d029c0e950a8e130765dc7d818417515319
+        # Recompute taxes for product lines (excluding discount lines)
+        (self.move_id.line_ids - original_discount_lines).with_company(self.company_id.id)._compute_tax_ids()
+=======
+        # Recompute taxes for product lines (excluding discount lines).
+        # Solo las líneas de factura: las dinámicas (tax, epd, payment_term) las regenera
+        # el sync de Odoo al reponer el payment term, y a esta altura pueden estar borradas.
+        # Escribirles tax_ids sobre un recordset viejo rompe con "Registro faltante".
+        self.move_id.flush_recordset()
+        (self.move_id.invoice_line_ids - original_discount_lines).exists().with_company(
+            self.company_id.id)._compute_tax_ids()
+>>>>>>> a2ea4d2a57b615deea494bd1aba40e191c30b745
 
+<<<<<<< 30a8a3df6b45662bf603862a44afee6efd695df3
         for line in downpayment_lines:
             # TODO podria darse que tengo distintas cuentas para distantas categorias y distintos impuestos
             # tome la cuenta del ultimo producto que encontro.
@@ -206,6 +240,15 @@ class AccountChangeCurrency(models.TransientModel):
 
         # TAXES
         self._get_change_company_line_taxes(move.invoice_line_ids, original_taxes)
+||||||| 1d866d029c0e950a8e130765dc7d818417515319
+        # Recompute taxes for discount lines
+        if original_discount_lines:
+            self._get_change_company_discount_tax(original_discount_lines, original_discount_taxes)
+=======
+        # Recompute taxes for discount lines
+        if original_discount_lines:
+            self._get_change_company_discount_tax(original_discount_lines.exists(), original_discount_taxes)
+>>>>>>> a2ea4d2a57b615deea494bd1aba40e191c30b745
 
         # PARTNER BANK
         if original_partner_bank_id and original_partner_bank_id.company_id.id in [False, self.company_id.id]:
