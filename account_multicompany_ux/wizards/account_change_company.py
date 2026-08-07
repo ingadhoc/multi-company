@@ -109,18 +109,23 @@ class AccountChangeCurrency(models.TransientModel):
         if invoice_payment_term_id:
             self.move_id.invoice_payment_term_id = invoice_payment_term_id
         without_product = self.move_id.line_ids.filtered(lambda line : line.display_type == 'product' and not line.product_id)
-        (self.move_id.line_ids - without_product).with_company(self.company_id.id)._compute_account_id()
+        (self.move_id.line_ids - without_product).exists().with_company(self.company_id.id)._compute_account_id()
         for line in without_product:
             line.account_id = line.move_id.journal_id.default_account_id
         if original_payment_term:
             self.move_id.invoice_payment_term_id = original_payment_term.id
 
-        # Recompute taxes for product lines (excluding discount lines)
-        (self.move_id.line_ids - original_discount_lines).with_company(self.company_id.id)._compute_tax_ids()
+        # Recompute taxes for product lines (excluding discount lines).
+        # Solo las líneas de factura: las dinámicas (tax, epd, payment_term) las regenera
+        # el sync de Odoo al reponer el payment term, y a esta altura pueden estar borradas.
+        # Escribirles tax_ids sobre un recordset viejo rompe con "Registro faltante".
+        self.move_id.flush_recordset()
+        (self.move_id.invoice_line_ids - original_discount_lines).exists().with_company(
+            self.company_id.id)._compute_tax_ids()
 
         # Recompute taxes for discount lines
         if original_discount_lines:
-            self._get_change_company_discount_tax(original_discount_lines, original_discount_taxes)
+            self._get_change_company_discount_tax(original_discount_lines.exists(), original_discount_taxes)
 
         self.move_id._compute_partner_bank_id()
         # PARTNER BANK
