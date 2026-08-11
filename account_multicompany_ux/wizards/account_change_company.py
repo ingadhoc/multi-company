@@ -74,6 +74,7 @@ class AccountChangeCompany(models.TransientModel):
     def change_company(self):
         self.ensure_one()
         old_payment_term = self.move_id.invoice_payment_term_id
+        old_fiscal_position = self.move_id.fiscal_position_id
         vals = {
             "company_id": self.company_id.id,
             "journal_id": self.journal_id.id,
@@ -82,3 +83,12 @@ class AccountChangeCompany(models.TransientModel):
             vals["invoice_payment_term_id"] = old_payment_term.id
         self.move_id.with_context(skip_invoice_sync=True).write(vals)
         self.move_id.line_ids._compute_account_id() if self.move_id.line_ids else None
+        if (
+            self.move_id.state == "draft"
+            and self.move_id.is_sale_document(include_receipts=True)
+            and self.move_id.fiscal_position_id != old_fiscal_position
+        ):
+            # the write recomputes the fiscal position but not tax_ids, so we call the same method as the
+            # "Update Taxes" button. Only if the fiscal position changed: it recomputes taxes from the
+            # product, discarding the ones set by hand.
+            self.move_id.action_update_fpos_values()
