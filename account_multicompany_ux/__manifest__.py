@@ -25,7 +25,6 @@
     "license": "AGPL-3",
     "depends": [
         "account",
-        "account_reports",
         "base_company_dependent",
         "sale",  # solo por property_account_downpayment_categ_id, ideal en proximas versiones evitar esta dependencia
     ],
