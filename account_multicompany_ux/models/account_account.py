@@ -7,6 +7,11 @@ class AccountAccount(models.Model):
     def _compute_display_name(self):
         """
         Agregamos sufijo de compañía en reportes financieros si hay más de una compañía seleccionada
+
+        El ``report_id`` de contexto lo pone ``account_accountant_ux`` al expandir una
+        línea del reporte (ahí vive ``account.report``, que es de Enterprise). Sin ese
+        módulo la clave nunca aparece y este override no hace nada, que es justo lo que
+        queremos: sin Enterprise no hay reportes financieros a los que ponerle sufijo.
         """
         if self.env.context.get("report_id") and len(self.env.context.get("company_ids", self.env.companies.ids)) > 1:
             for account in self:

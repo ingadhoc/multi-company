@@ -19,6 +19,12 @@ Account Multicompany Usability
 #. Add new field short_name on company that is used later to be appended on the "display name" of the journals. This is usefull because when you select journals you don't have a filter of the companies. (TODO check if we can avoid all this and have a different approach)
 #. For this module to work properly with sales this PR is needed: https://github.com/odoo/odoo/pull/226688
 
+This module does not depend on Enterprise. The multi-company behaviour that needs
+``account_reports`` or ``account_accountant`` lives in ``account_accountant_ux``:
+the bridge between our "same legal entity" criterion (defined in ``account_ux``) and
+``res.company._get_branches_with_same_vat``, the company suffix on financial report
+lines, and the option to block reconciliation between different companies.
+
 Installation
 ============
 
