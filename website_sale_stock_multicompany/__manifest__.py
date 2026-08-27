@@ -22,7 +22,7 @@
     "summary": "Módulo vaciado junto con website_sale_multicompany, su funcionalidad se movió "
     "a un módulo de la plataforma SaaS. "
     "Se mantiene instalable para no romper bases que ya lo tienen instalado.",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "author": "ADHOC SA",
     "website": "www.adhoc.com.ar",
     "license": "AGPL-3",
