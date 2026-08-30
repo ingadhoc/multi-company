@@ -16,6 +16,18 @@ class AccountMove(models.Model):
         help="True if the company has no branches and is not a branch",
     )
 
+    partner_id_domain = fields.Json(
+        compute="_compute_partner_id_domain",
+        exportable=False,
+    )
+
+    @api.depends("company_id")
+    @api.depends_context("allowed_company_ids")
+    def _compute_partner_id_domain(self):
+        for move in self:
+            company = move.company_id or self.env.company
+            move.partner_id_domain = self.env["res.partner"]._check_company_domain(company)
+
     @api.depends("company_id", "company_id.parent_id", "company_id.child_ids")
     def _compute_company_can_change(self):
         for move in self:
