@@ -84,6 +84,36 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
             }
         )
 
+    def _fill_latam_document_number(self, invoice):
+        """Completa el número de documento cuando el diario exige cargarlo a mano.
+
+        En una localización LATAM el número de una factura de proveedor es el del
+        comprobante que emitió el proveedor, así que se tipea a mano y no sale de
+        nuestra secuencia: ``_is_manual_document_number`` devuelve True para todo
+        diario de compras con documentos, y sin número ``_check_l10n_latam_documents``
+        rechaza el asiento al postearlo.
+
+        Este test no arma su propia compañía ni su propio diario: ``setUp`` toma los
+        primeros que encuentra en la base, así que le puede tocar un diario con
+        documentos o uno sin ellos según qué localizaciones tenga instaladas el build.
+        De ahí que el número se complete solo cuando hace falta.
+
+        El formato depende del país y no hay un literal que sirva para todos: AR parte
+        el número por el guion y rechaza lo que no tenga las dos partes
+        (``l10n_ar``, ``_format_document_number``), mientras que CL exige solo dígitos
+        (``l10n_cl``, ``_check_l10n_latam_document_number_is_numeric``).
+        """
+        if "l10n_latam_manual_document_number" not in invoice._fields:
+            # l10n_latam_invoice_document no es dependencia de este módulo.
+            return
+        if not invoice.l10n_latam_manual_document_number or invoice.l10n_latam_document_number:
+            return
+        if invoice.company_id.country_id.code == "AR":
+            # l10n_ar lo normaliza a 00001-00000001.
+            invoice.l10n_latam_document_number = "1-1"
+        else:
+            invoice.l10n_latam_document_number = "1"
+
     def test_multicompany_sale_order(self):
         """Cambio de compañía de una factura que cuenta con res partner bank seteado para la compañia original"""
         invoice = self.env["account.move"].create(
@@ -207,6 +237,7 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         self.assertTrue(self.account_payable.id in vendor_bill.line_ids.mapped("account_id.id"))
 
         customer_invoice.action_post()
+        self._fill_latam_document_number(vendor_bill)
         vendor_bill.action_post()
 
     def test_change_company_keeps_ar_perception_move_line(self):
