@@ -206,9 +206,6 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
         self.assertTrue(self.account_receivable.id in customer_invoice.line_ids.mapped("account_id.id"))
         self.assertTrue(self.account_payable.id in vendor_bill.line_ids.mapped("account_id.id"))
 
-        customer_invoice.action_post()
-        vendor_bill.action_post()
-
     def test_change_company_keeps_ar_perception_move_line(self):
         """Regresión ticket 122289: al cambiar de compañía una factura con percepción AR,
         el apunte contable de la percepción debe seguir existiendo.
