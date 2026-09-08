@@ -303,10 +303,7 @@ class AccountChangeCurrency(models.TransientModel):
         products = line.sale_line_ids.mapped("order_id.order_line.product_id")
         product_accounts = []
         for product in products:
-            accounts = product.product_tmpl_id.with_company(line.move_id.company_id).get_product_accounts(
-                fiscal_pos=fiscal_pos
-            )
-            account = accounts.get("downpayment") or accounts.get("income")
+            account = product.product_tmpl_id._get_downpayment_or_income_account(line.move_id.company_id, fiscal_pos)
             if account:
                 product_accounts.append((product, account))
         if product_accounts:
@@ -314,10 +311,7 @@ class AccountChangeCurrency(models.TransientModel):
 
             if matching:
                 matched_product = matching[0][0]
-                matched_account = matched_product.product_tmpl_id.with_company(to_company).get_product_accounts(
-                    fiscal_pos=fiscal_pos
-                )
-                account = matched_account.get("downpayment") or matched_account.get("income")
+                account = matched_product.product_tmpl_id._get_downpayment_or_income_account(to_company, fiscal_pos)
 
         if not account:
             line.with_company(to_company.id)._compute_account_id()
