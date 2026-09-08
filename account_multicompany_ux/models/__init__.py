@@ -14,3 +14,4 @@ from . import product_category
 from . import account_account
 from . import account_report
 from . import account_move_line
+from . import sale_order_line

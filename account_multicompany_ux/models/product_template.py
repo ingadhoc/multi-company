@@ -26,6 +26,12 @@ class ProductTemplate(models.Model):
         compute="_compute_properties",
     )
 
+    def _get_downpayment_or_income_account(self, company, fiscal_pos=None):
+        """Account to be used on a downpayment line of the given company: the downpayment
+        account of the product category, or the income account when there is none."""
+        accounts = self.with_company(company).get_product_accounts(fiscal_pos=fiscal_pos)
+        return accounts.get("downpayment") or accounts.get("income")
+
     @api.depends()
     def _compute_properties(self):
         company_property = self.env["res.company.property"]
