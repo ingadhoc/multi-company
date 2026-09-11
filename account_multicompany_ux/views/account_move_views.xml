@@ -14,6 +14,16 @@
                 </div>
             </label>
 
+            <!-- Inject computed partner domain (includes parent-company contacts) -->
+            <field name="company_id" position="after">
+                <field name="partner_id_domain" invisible="1"/>
+            </field>
+
+            <!-- Override partner_id domain to include parent-company contacts -->
+            <xpath expr="//field[@name='partner_id'][@widget='res_partner_many2one']" position="attributes">
+                <attribute name="domain">partner_id_domain</attribute>
+            </xpath>
+
         </field>
     </record>
 
