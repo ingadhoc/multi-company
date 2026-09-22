@@ -90,7 +90,7 @@ class ResCompany(models.Model):
                 ]
             )
         else:
-            return super().stock_accounting_value()
+            return super().stock_accounting_value(accounts_by_product=accounts_by_product, at_date=at_date)
         account_data = defaultdict(float)
         for account, balance in (
             self.env["account.move.line"].sudo()._read_group(domain, ["account_id"], ["balance:sum"])
