@@ -1,5 +1,5 @@
 from odoo import Command
-from odoo.tests import TransactionCase, tagged
+from odoo.tests import TransactionCase, new_test_user, tagged
 
 
 @tagged("post_install", "-at_install")
@@ -254,3 +254,89 @@ class TestBranchSharedCogs(TransactionCase):
 
         self.assertFalse(categ.with_company(self.parent_company).shared_to_branches)
         self.assertEqual(invoice.invoice_line_ids._get_cogs_value(), 70.0)
+
+    def _branch_only_env(self):
+        """Environment of a user that can only access the branch, not the parent."""
+        user = new_test_user(
+            self.env,
+            login="branch_only_71584",
+            groups="base.group_user,account.group_account_invoice,stock.group_stock_user",
+            company_id=self.branch_company.id,
+            company_ids=[Command.set(self.branch_company.ids)],
+        )
+        # Drop values computed as admin so they are recomputed as the branch user.
+        self.env.invalidate_all()
+        return self.env(user=user, context=dict(self.env.context, allowed_company_ids=self.branch_company.ids))
+
+    def test_branch_only_user_posts_invoice(self):
+        """A user without access to the parent can post a branch invoice."""
+        invoice = self._create_branch_invoice()
+
+        invoice.with_env(self._branch_only_env()).action_post()
+
+        self.assertEqual(invoice.state, "posted")
+        cogs_lines = invoice.line_ids.filtered(lambda line: line.display_type == "cogs")
+        self.assertEqual(sum(cogs_lines.mapped("debit")), 300.0)
+
+    def test_branch_only_user_reads_shared_product_cost(self):
+        """A user without access to the parent can open a shared product."""
+        env = self._branch_only_env()
+
+        for product in (self.product.with_env(env), self.product.product_tmpl_id.with_env(env)):
+            self.assertTrue(product.is_cost_shared_from_parent)
+            self.assertEqual(product.parent_standard_price, 500.0)
+
+    def _create_done_receipt(self, company, origin):
+        """Done receipt of 10 units in a picking with the given origin."""
+        warehouse = self.env["stock.warehouse"].search([("company_id", "=", company.id)], limit=1)
+        picking = (
+            self.env["stock.picking"]
+            .with_company(company)
+            .create(
+                {
+                    "picking_type_id": warehouse.in_type_id.id,
+                    "location_id": self.env.ref("stock.stock_location_suppliers").id,
+                    "location_dest_id": warehouse.lot_stock_id.id,
+                    "origin": origin,
+                    "company_id": company.id,
+                    "move_ids": [
+                        Command.create(
+                            {
+                                "product_id": self.product.id,
+                                "product_uom_qty": 10.0,
+                                "location_id": self.env.ref("stock.stock_location_suppliers").id,
+                                "location_dest_id": warehouse.lot_stock_id.id,
+                                "company_id": company.id,
+                            }
+                        )
+                    ],
+                }
+            )
+        )
+        picking.action_confirm()
+        picking.move_ids.quantity = 10.0
+        picking.move_ids.picked = True
+        picking.move_ids._action_done()
+        return picking.move_ids
+
+    def test_branch_only_user_gets_parent_fifo_cost_from_moves(self):
+        """With done moves, a branch-only user values the COGS with the parent FIFO moves."""
+        # Receipts are valued at the standard price of the moment.
+        self.product.with_company(self.parent_company).standard_price = 100.0
+        self._create_done_receipt(self.parent_company, "PO71584")
+        branch_move = self._create_done_receipt(self.branch_company, "PO71584")
+        self.product.with_company(self.parent_company).standard_price = 500.0
+
+        price_unit = (
+            branch_move.with_env(self._branch_only_env())
+            .with_context(branch_company=self.branch_company.id)
+            ._get_cogs_price_unit(3.0)
+        )
+
+        self.assertEqual(price_unit, 100.0)
+
+    def test_branch_only_user_gets_stock_accounting_value(self):
+        """A user without access to the parent can compute the branch stock valuation."""
+        branch = self.branch_company.with_env(self._branch_only_env())
+
+        self.assertIsInstance(branch.stock_accounting_value(), dict)

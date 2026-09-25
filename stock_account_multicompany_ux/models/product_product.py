@@ -45,7 +45,7 @@ class ProductProduct(models.Model):
         root_company = company.root_id
         for product in self:
             product.is_cost_shared_from_parent = (
-                is_branch and product.categ_id.with_company(root_company).shared_to_branches
+                is_branch and product.categ_id.sudo().with_company(root_company).shared_to_branches
             )
 
     @api.depends_context("company")
@@ -54,6 +54,6 @@ class ProductProduct(models.Model):
         root_company = self.env.company.root_id
         for product in self:
             if product.is_cost_shared_from_parent:
-                product.parent_standard_price = product.with_company(root_company).standard_price
+                product.parent_standard_price = product.sudo().with_company(root_company).standard_price
             else:
                 product.parent_standard_price = product.standard_price
