@@ -37,7 +37,7 @@ class AccountMoveLine(models.Model):
 
         # Solo interceptar si la categoría del producto está marcada como compartida.
         # Para el resto de categorías, la branch tiene su propio inventario y costo.
-        if not self.product_id.categ_id.with_company(parent_company.id).shared_to_branches:
+        if not self.product_id.categ_id.sudo().with_company(parent_company.id).shared_to_branches:
             return super()._get_cogs_value()
 
         # --- Caso 1: Línea de nota de crédito (rectificación) ---
@@ -70,7 +70,7 @@ class AccountMoveLine(models.Model):
             # --- Caso 3: Sin movimientos de stock ---
             # (ej. servicio con valoración, venta sin picking, ajuste manual)
             # Obtener el costo directamente desde la compañía padre.
-            product_parent = self.product_id.with_company(parent_company)
+            product_parent = self.product_id.sudo().with_company(parent_company)
 
             if product_parent.cost_method in ["standard", "average"]:
                 # Standard/Average: usar el precio estándar vigente en el padre

@@ -56,7 +56,11 @@ class ResCompany(models.Model):
         # Categorías compartidas según la RAÍZ del grupo (fuente de verdad del
         # flag company_dependent). Filtramos por categ_id, no por el flag.
         shared_categ_ids = (
-            self.env["product.category"].with_company(self.root_id).search([("shared_to_branches", "=", True)]).ids
+            self.env["product.category"]
+            .sudo()
+            .with_company(self.root_id)
+            .search([("shared_to_branches", "=", True)])
+            .ids
         )
 
         base = Domain(
