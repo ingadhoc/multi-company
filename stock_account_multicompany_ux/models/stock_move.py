@@ -37,14 +37,14 @@ class StockMove(models.Model):
         # Solo interceptar si hay padre y la categoría tiene 'shared_to_branches'
         # activo. shared_to_branches es company_dependent: se lee en el contexto del
         # PADRE (fuente de verdad), no de la branch, donde puede no estar seteado.
-        if not parent_company or not self.product_id.categ_id.with_company(parent_company).shared_to_branches:
+        if not parent_company or not self.product_id.categ_id.sudo().with_company(parent_company).shared_to_branches:
             return super()._get_cogs_price_unit(quantity)
 
         move_valued_qty = sum(m._get_valued_qty() for m in self)
         cogs_qty = quantity or move_valued_qty
         if not cogs_qty:
             # Sin cantidad, devolver el precio estándar del padre como referencia
-            return self.product_id.with_company(parent_company).standard_price
+            return self.product_id.sudo().with_company(parent_company).standard_price
 
         parent_price_unit, _branch_price_unit = self._get_branch_parent_unit_costs(
             branch_company, parent_company, quantity
@@ -65,7 +65,7 @@ class StockMove(models.Model):
         move_valued_qty = sum(m._get_valued_qty() for m in self)
         cogs_qty = quantity or move_valued_qty
 
-        product_parent = self.product_id.with_company(parent_company)
+        product_parent = self.product_id.sudo().with_company(parent_company)
         product_branch = self.product_id.with_company(branch_company)
 
         # --- Costo unitario desde la perspectiva del PADRE ---

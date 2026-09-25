@@ -40,7 +40,7 @@ class AccountMove(models.Model):
         # se lee en el contexto del PADRE (fuente de verdad), no de la branch.
         # El resto usa el flujo estándar de Odoo sin modificaciones.
         for line in self.invoice_line_ids.filtered(
-            lambda x: x.product_id.categ_id.with_company(parent_company).shared_to_branches
+            lambda x: x.product_id.categ_id.sudo().with_company(parent_company).shared_to_branches
         ):
             # Saltar líneas que no generan COGS o productos sin valoración en tiempo real
             if not line._eligible_for_stock_account() or line.product_id.valuation != "real_time":
@@ -52,7 +52,9 @@ class AccountMove(models.Model):
                 continue
 
             # Cuenta de diferencia de precio de la categoría (company_dependent → padre)
-            diff_account = line.product_id.categ_id.with_company(parent_company).property_price_difference_account_id
+            diff_account = (
+                line.product_id.categ_id.sudo().with_company(parent_company).property_price_difference_account_id
+            )
             if not diff_account:
                 continue
 
