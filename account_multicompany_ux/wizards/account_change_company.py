@@ -127,7 +127,7 @@ class AccountChangeCurrency(models.TransientModel):
             fp_tax_group_ids = set()
         original_taxes = {
             line.id: [tax.id for tax in line.tax_ids if tax.tax_group_id.id not in fp_tax_group_ids]
-            for line in self.move_id.invoice_line_ids
+            for line in self.move_id.invoice_line_ids.filtered(lambda line: line.display_type == "product")
         }
 
         # Remove taxes from invoice lines to allow changing account
