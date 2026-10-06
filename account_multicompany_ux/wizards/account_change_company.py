@@ -81,6 +81,8 @@ class AccountChangeCompany(models.TransientModel):
         }
         if old_payment_term and (not old_payment_term.company_id or old_payment_term.company_id == self.company_id):
             vals["invoice_payment_term_id"] = old_payment_term.id
+        # taxes are never recomputed on sections and notes, so a tax left there could belong to the old company
+        self.move_id.invoice_line_ids.filtered(lambda line: line.display_type != "product").tax_ids = False
         self.move_id.with_context(skip_invoice_sync=True).write(vals)
         self.move_id.line_ids._compute_account_id() if self.move_id.line_ids else None
         if (
