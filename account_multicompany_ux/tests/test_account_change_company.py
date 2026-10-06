@@ -1,3 +1,5 @@
+from odoo import Command, fields
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests.common import TransactionCase, tagged
 
 
@@ -119,3 +121,51 @@ class TestAccountChangeCompany(TransactionCase):
         self.assertIn(self.branch_a, company_ids, "El padre directo debería estar disponible")
         self.assertIn(self.branch_b, company_ids, "La hermana del padre (tía) debería estar disponible")
         self.assertNotIn(self.branch_a_child, company_ids, "La propia compañía actual no debe listarse")
+
+
+@tagged("post_install", "-at_install")
+class TestAccountChangeCompanyTaxes(AccountTestInvoicingCommon):
+    def test_change_company_clears_note_taxes(self):
+        """A tax of the source branch left on a note must not block posting the invoice in the target branch."""
+        branch_a = self._create_company(name="Branch A", parent_id=self.env.company.id)
+        branch_b = self._create_company(name="Branch B", parent_id=self.env.company.id)
+        self.env.user.company_ids |= branch_a | branch_b
+        note_only_tax = self.env["account.tax"].create(
+            {
+                "name": "Note only tax",
+                "amount": 7.77,
+                "type_tax_use": "sale",
+                "company_id": branch_a.id,
+                "tax_group_id": self.tax_sale_a.tax_group_id.id,
+                "country_id": self.tax_sale_a.country_id.id,
+            }
+        )
+        invoice = self.env["account.move"].create(
+            {
+                "partner_id": self.partner_a.id,
+                "invoice_date": fields.Date.today(),
+                "move_type": "out_invoice",
+                "company_id": branch_a.id,
+                "invoice_line_ids": [
+                    Command.create({"product_id": self.product_a.id, "price_unit": 100}),
+                    Command.create(
+                        {"display_type": "line_note", "name": "Note", "tax_ids": [Command.set(note_only_tax.ids)]}
+                    ),
+                ],
+            }
+        )
+        note = invoice.invoice_line_ids.filtered(lambda line: line.display_type == "line_note")
+        self.assertEqual(note.tax_ids, note_only_tax)
+
+        self.env["account.change.company"].create(
+            {
+                "move_id": invoice.id,
+                "company_id": branch_b.id,
+                "journal_id": invoice.journal_id.id,
+            }
+        ).change_company()
+
+        self.assertEqual(invoice.company_id, branch_b)
+        self.assertFalse(note.tax_ids)
+        invoice.action_post()
+        self.assertEqual(invoice.state, "posted")
