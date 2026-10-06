@@ -144,6 +144,7 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
 
         self.first_company.write({"short_name": "FC"})
 
+<<<<<<< 9f6cd3a2eebc43d0a2a23d392ea838c2f7db1293
         self.assertEqual(self.first_company.get_company_sufix(), " (FC)")
         self.assertEqual(self.first_company.with_context(no_company_sufix=True).get_company_sufix(), "")
 
@@ -165,3 +166,54 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
 
         groups_field = "group_ids" if "group_ids" in self.env.user._fields else "groups_id"
         self.env.user.write({groups_field: [(4, multi_company_group.id)]})
+||||||| e0dc004b4f9338c2a71c99c1454a2115fc721d28
+        self.assertTrue(
+            _perception_tax_lines(invoice),
+            "No se generó el apunte contable de la percepción tras el cambio de compañía (ticket 122289)",
+        )
+=======
+        self.assertTrue(
+            _perception_tax_lines(invoice),
+            "No se generó el apunte contable de la percepción tras el cambio de compañía (ticket 122289)",
+        )
+
+    def test_change_company_ignores_note_taxes(self):
+        """Taxes left on note lines must not block the change of company."""
+        note_only_tax = self.env["account.tax"].create(
+            {
+                "name": "Note only tax",
+                "amount": 7.77,
+                "type_tax_use": "sale",
+                "company_id": self.first_company.id,
+            }
+        )
+        invoice = self.env["account.move"].create(
+            {
+                "partner_id": self.partner_ri.id,
+                "invoice_date": self.today,
+                "move_type": "out_invoice",
+                "journal_id": self.first_company_journal.id,
+                "company_id": self.first_company.id,
+                "invoice_line_ids": [
+                    Command.create({"product_id": self.env.ref("product.product_product_16").id, "price_unit": 100}),
+                    Command.create(
+                        {"display_type": "line_note", "name": "Note", "tax_ids": [Command.set(note_only_tax.ids)]}
+                    ),
+                ],
+            }
+        )
+        note = invoice.invoice_line_ids.filtered(lambda line: line.display_type == "line_note")
+        self.assertEqual(note.tax_ids, note_only_tax)
+
+        self.env["account.change.company"].create(
+            {
+                "move_id": invoice.id,
+                "company_ids": [self.first_company.id, self.second_company.id],
+                "company_id": self.second_company.id,
+                "journal_id": self.second_company_journal.id,
+            }
+        ).change_company()
+
+        self.assertEqual(invoice.company_id, self.second_company)
+        self.assertFalse(note.tax_ids)
+>>>>>>> d5b36eb8d88a5df6530aba3d62964e404346979b

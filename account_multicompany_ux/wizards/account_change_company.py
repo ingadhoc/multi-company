@@ -73,11 +73,115 @@ class AccountChangeCompany(models.TransientModel):
 
     def change_company(self):
         self.ensure_one()
+<<<<<<< 9f6cd3a2eebc43d0a2a23d392ea838c2f7db1293
         old_payment_term = self.move_id.invoice_payment_term_id
         old_fiscal_position = self.move_id.fiscal_position_id
         vals = {
             "company_id": self.company_id.id,
             "journal_id": self.journal_id.id,
+||||||| e0dc004b4f9338c2a71c99c1454a2115fc721d28
+
+        # Validar que la empresa destino tenga la misma localización fiscal,
+        # salvo que se indique explícitamente que se permite cross-localization.
+        if not self.env.context.get("allow_cross_localization", False):
+            src_country = self.move_id.company_id.account_fiscal_country_id
+            dst_country = self.company_id.account_fiscal_country_id
+            if src_country != dst_country and not tools.config["test_enable"]:
+                raise UserError(
+                    _(
+                        "Cannot change company to '%(company)s': it belongs to a different fiscal "
+                        "localization (%(dst)s) than the current company (%(src)s). "
+                        "Use the context key 'allow_cross_localization' to bypass this restriction."
+                    )
+                    % {
+                        "company": self.company_id.name,
+                        "dst": dst_country.name or _("undefined"),
+                        "src": src_country.name or _("undefined"),
+                    }
+                )
+
+        # BACK UP DE DATOS ANTES DE CHANGE DE COMPANY
+        old_name = False
+        original_payment_term = False
+        # odoo no permite modificar diario si hay name, esto no es del todo correcto para facturas de proveedor con manual number y de hecho deberiamos
+        # ver de cambiarlo en el codigo original, por ahora lo permitimos desde aca haciendo backup del nro y restaurando si corresponde
+        if (
+            self.move_id._fields.get("l10n_latam_manual_document_number")
+            and self.move_id.l10n_latam_manual_document_number
+            and self.move_id.name
+        ):
+            old_name = self.move_id.name
+            self.move_id.name = "/"
+        old_doc_type = False
+        if self.move_id._fields.get("l10n_latam_document_type_id") and self.move_id.l10n_latam_manual_document_number:
+            old_doc_type = self.move_id.l10n_latam_document_type_id
+
+        # BACKUP PARTNER BANK ID
+        original_partner_bank_id = self.move_id.partner_bank_id or False
+
+        if self.move_id.fiscal_position_id._fields.get("l10n_ar_tax_ids"):
+            fp_tax_group_ids = set(
+                self.move_id.fiscal_position_id.l10n_ar_tax_ids.filtered(lambda x: x.tax_type == "perception")
+                .mapped("default_tax_id.tax_group_id")
+                .ids
+            )
+        else:
+            fp_tax_group_ids = set()
+        original_taxes = {
+            line.id: [tax.id for tax in line.tax_ids if tax.tax_group_id.id not in fp_tax_group_ids]
+            for line in self.move_id.invoice_line_ids
+=======
+
+        # Validar que la empresa destino tenga la misma localización fiscal,
+        # salvo que se indique explícitamente que se permite cross-localization.
+        if not self.env.context.get("allow_cross_localization", False):
+            src_country = self.move_id.company_id.account_fiscal_country_id
+            dst_country = self.company_id.account_fiscal_country_id
+            if src_country != dst_country and not tools.config["test_enable"]:
+                raise UserError(
+                    _(
+                        "Cannot change company to '%(company)s': it belongs to a different fiscal "
+                        "localization (%(dst)s) than the current company (%(src)s). "
+                        "Use the context key 'allow_cross_localization' to bypass this restriction."
+                    )
+                    % {
+                        "company": self.company_id.name,
+                        "dst": dst_country.name or _("undefined"),
+                        "src": src_country.name or _("undefined"),
+                    }
+                )
+
+        # BACK UP DE DATOS ANTES DE CHANGE DE COMPANY
+        old_name = False
+        original_payment_term = False
+        # odoo no permite modificar diario si hay name, esto no es del todo correcto para facturas de proveedor con manual number y de hecho deberiamos
+        # ver de cambiarlo en el codigo original, por ahora lo permitimos desde aca haciendo backup del nro y restaurando si corresponde
+        if (
+            self.move_id._fields.get("l10n_latam_manual_document_number")
+            and self.move_id.l10n_latam_manual_document_number
+            and self.move_id.name
+        ):
+            old_name = self.move_id.name
+            self.move_id.name = "/"
+        old_doc_type = False
+        if self.move_id._fields.get("l10n_latam_document_type_id") and self.move_id.l10n_latam_manual_document_number:
+            old_doc_type = self.move_id.l10n_latam_document_type_id
+
+        # BACKUP PARTNER BANK ID
+        original_partner_bank_id = self.move_id.partner_bank_id or False
+
+        if self.move_id.fiscal_position_id._fields.get("l10n_ar_tax_ids"):
+            fp_tax_group_ids = set(
+                self.move_id.fiscal_position_id.l10n_ar_tax_ids.filtered(lambda x: x.tax_type == "perception")
+                .mapped("default_tax_id.tax_group_id")
+                .ids
+            )
+        else:
+            fp_tax_group_ids = set()
+        original_taxes = {
+            line.id: [tax.id for tax in line.tax_ids if tax.tax_group_id.id not in fp_tax_group_ids]
+            for line in self.move_id.invoice_line_ids.filtered(lambda line: line.display_type == "product")
+>>>>>>> d5b36eb8d88a5df6530aba3d62964e404346979b
         }
         if old_payment_term and (not old_payment_term.company_id or old_payment_term.company_id == self.company_id):
             vals["invoice_payment_term_id"] = old_payment_term.id
