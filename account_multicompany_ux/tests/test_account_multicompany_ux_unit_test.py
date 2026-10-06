@@ -298,3 +298,43 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
             _perception_tax_lines(invoice),
             "No se generó el apunte contable de la percepción tras el cambio de compañía (ticket 122289)",
         )
+
+    def test_change_company_ignores_note_taxes(self):
+        """Taxes left on note lines must not block the change of company."""
+        note_only_tax = self.env["account.tax"].create(
+            {
+                "name": "Note only tax",
+                "amount": 7.77,
+                "type_tax_use": "sale",
+                "company_id": self.first_company.id,
+            }
+        )
+        invoice = self.env["account.move"].create(
+            {
+                "partner_id": self.partner_ri.id,
+                "invoice_date": self.today,
+                "move_type": "out_invoice",
+                "journal_id": self.first_company_journal.id,
+                "company_id": self.first_company.id,
+                "invoice_line_ids": [
+                    Command.create({"product_id": self.env.ref("product.product_product_16").id, "price_unit": 100}),
+                    Command.create(
+                        {"display_type": "line_note", "name": "Note", "tax_ids": [Command.set(note_only_tax.ids)]}
+                    ),
+                ],
+            }
+        )
+        note = invoice.invoice_line_ids.filtered(lambda line: line.display_type == "line_note")
+        self.assertEqual(note.tax_ids, note_only_tax)
+
+        self.env["account.change.company"].create(
+            {
+                "move_id": invoice.id,
+                "company_ids": [self.first_company.id, self.second_company.id],
+                "company_id": self.second_company.id,
+                "journal_id": self.second_company_journal.id,
+            }
+        ).change_company()
+
+        self.assertEqual(invoice.company_id, self.second_company)
+        self.assertFalse(note.tax_ids)
