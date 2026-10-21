@@ -48,6 +48,7 @@ class ProductCategory(models.Model):
             self._propagate_valuation_to_branches()
         return res
 
+    @api.model_create_multi
     def create(self, vals_list):
         if isinstance(vals_list, dict):
             vals_list = [vals_list]
