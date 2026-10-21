@@ -17,7 +17,7 @@ class AccountAccount(models.Model):
             for account in self:
                 if account.code:
                     if len(account.company_ids) > 1:
-                        to_show_company = self._context["allowed_company_ids"][0]
+                        to_show_company = self.env.context["allowed_company_ids"][0]
                     else:
                         to_show_company = account.company_ids.id
 
