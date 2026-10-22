@@ -14,7 +14,7 @@
 Website Sale Multicompany Usability
 ===================================
 
-#. This module sets the company to False when a new contact is created during the ecommerce checkout process
+#. This module sets the company to False when a new contact is created during the ecommerce checkout process of an anonymous cart (a visitor who is not logged in)
 
 Installation
 ============
