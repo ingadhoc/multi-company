@@ -255,16 +255,18 @@ class AccountChangeCurrency(models.TransientModel):
         # 2) Buscar el equivalente en la nueva compañía una sola vez por impuesto único
         tax_mapping = {}
         for tax in self.env["account.tax"].browse(list(all_tax_ids)):
+            domain = [
+                ("type_tax_use", "=", tax.type_tax_use),
+                ("tax_group_id.name", "=", tax.tax_group_id.name),
+                ("amount", "=", tax.amount),
+                ("active", "=", True),
+                ("price_include_override", "=", tax.price_include_override),
+            ]
+            # A branch has no taxes of its own: it uses the ones of its parent company
             new_tax = self.env["account.tax"].search(
-                [
-                    ("type_tax_use", "=", tax.type_tax_use),
-                    ("tax_group_id.name", "=", tax.tax_group_id.name),
-                    ("amount", "=", tax.amount),
-                    ("active", "=", True),
-                    ("price_include_override", "=", tax.price_include_override),
-                    ("company_id", "=", self.company_id.id),
-                ],
-                limit=1,
+                domain + [("company_id", "=", self.company_id.id)], limit=1
+            ) or self.env["account.tax"].search(
+                domain + self.env["account.tax"]._check_company_domain(self.company_id), limit=1
             )
             if not new_tax and not by_pass_exception:
                 message = _(
