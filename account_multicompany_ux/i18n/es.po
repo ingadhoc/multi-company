@@ -223,6 +223,12 @@ msgid "Move"
 msgstr "Asiento"
 
 #. module: account_multicompany_ux
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_bank_statement_line__reversed_entry_id
+#: model:ir.model.fields,field_description:account_multicompany_ux.field_account_move__reversed_entry_id
+msgid "Reversal of"
+msgstr ""
+
+#. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_sale_order_line
 msgid "Sales Order Line"
 msgstr "Línea de la orden de venta"
