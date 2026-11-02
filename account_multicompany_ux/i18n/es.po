@@ -169,7 +169,7 @@ msgstr "Creado el"
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_res_company__display_name
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_sale_order_line__display_name
 msgid "Display Name"
-msgstr "Nombre para mostrar"
+msgstr "Mostrar nombre"
 
 #. module: account_multicompany_ux
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_account__id
@@ -226,7 +226,7 @@ msgstr "Asiento"
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_bank_statement_line__reversed_entry_id
 #: model:ir.model.fields,field_description:account_multicompany_ux.field_account_move__reversed_entry_id
 msgid "Reversal of"
-msgstr ""
+msgstr "Reversión de"
 
 #. module: account_multicompany_ux
 #: model:ir.model,name:account_multicompany_ux.model_sale_order_line
