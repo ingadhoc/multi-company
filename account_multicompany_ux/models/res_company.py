@@ -3,7 +3,7 @@
 # directory
 ##############################################################################
 
-from odoo import fields, models, tools
+from odoo import api, fields, models
 
 
 class ResCompany(models.Model):
@@ -19,7 +19,7 @@ class ResCompany(models.Model):
 
     # TODO habria que terminar de ver si esta bien este cache o en realidad para
     # ser mas performante no hay que usar nada de self
-    @tools.ormcache(
+    @api.ormcache(
         "self.env.uid",
         "self.name",
         "self.short_name",
