@@ -171,7 +171,7 @@ class TestAccountChangeCompanyTaxes(AccountTestInvoicingCommon):
         self.assertEqual(invoice.state, "posted")
 
     def test_change_company_keeps_cross_company_reversal(self):
-        """A credit note reversing a parent bill can be moved to a branch keeping the reversal link."""
+        """A credit note reversing a parent bill can be moved to a branch keeping the reversal link, without paying the bill."""
         branch = self._create_company(name="Branch", parent_id=self.env.company.id)
         self.env.user.company_ids |= branch
         bill = self.init_invoice("in_invoice", products=self.product_a, post=True)
@@ -191,3 +191,8 @@ class TestAccountChangeCompanyTaxes(AccountTestInvoicingCommon):
 
         self.assertEqual(refund.company_id, branch)
         self.assertEqual(refund.reversed_entry_id, bill)
+
+        refund.invoice_date = bill.invoice_date
+        refund.action_post()
+        self.assertEqual(bill.payment_state, "not_paid")
+        self.assertEqual(refund.payment_state, "not_paid")
