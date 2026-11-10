@@ -1,4 +1,5 @@
 from odoo import Command, fields
+from odoo.exceptions import AccessError
 from odoo.tests.common import TransactionCase
 
 
@@ -338,3 +339,34 @@ class TestAccountMulticompanyUxUnitTest(TransactionCase):
 
         self.assertEqual(invoice.company_id, self.second_company)
         self.assertFalse(note.tax_ids)
+
+    def test_payment_term_property_requires_sale_or_invoicing_group(self):
+        """The payment term (edit) honors the same groups as the partner form with sale installed."""
+        payment_term = self.env.ref("account.account_payment_term_30days")
+        base_groups = [self.env.ref("base.group_user").id, self.env.ref("base.group_partner_manager").id]
+
+        def create_user(login, extra_groups):
+            return self.env["res.users"].create(
+                {
+                    "name": login,
+                    "login": login,
+                    "company_id": self.first_company.id,
+                    "company_ids": [Command.set(self.first_company.ids)],
+                    "groups_id": [Command.set(base_groups + [self.env.ref(g).id for g in extra_groups])],
+                }
+            )
+
+        salesman = create_user("mc_salesman", ["sales_team.group_sale_salesman"])
+        readonly = create_user("mc_readonly", ["account.group_account_readonly"])
+        no_groups = create_user("mc_no_groups", [])
+
+        for property_field in ("property_payment_term_id", "property_supplier_payment_term_id"):
+            ctx = {"active_model": "res.partner", "active_id": self.partner_ri.id, "property_field": property_field}
+            company_property = self.env["res.company.property"].browse(self.first_company.id)
+
+            company_property.with_user(salesman).with_context(**ctx).property_term_id = payment_term
+            self.assertEqual(self.partner_ri.with_company(self.first_company)[property_field], payment_term)
+
+            for user in (readonly, no_groups):
+                with self.assertRaises(AccessError):
+                    company_property.with_user(user).with_context(**ctx).property_term_id = False
