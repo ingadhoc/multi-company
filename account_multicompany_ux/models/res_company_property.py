@@ -5,7 +5,7 @@
 import logging
 
 from odoo import _, api, fields, models, tools
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 from psycopg2 import sql
 
 _logger = logging.getLogger(__name__)
@@ -21,6 +21,11 @@ class ResCompanyProperty(models.Model):
     _description = "Company Property"
     _auto = False
     _check_company_auto = True
+    # Same groups the partner form requires for the original field (sale view)
+    _property_field_groups = {
+        "property_payment_term_id": "account.group_account_invoice,sales_team.group_sale_salesman",
+        "property_supplier_payment_term_id": "account.group_account_invoice,sales_team.group_sale_salesman",
+    }
     # _rec_name = 'display_name'
     _depends = {
         "res.company": [
@@ -306,12 +311,18 @@ class ResCompanyProperty(models.Model):
             else:
                 record.property_credit_id = 0
 
+    def _check_property_groups(self, property_field):
+        groups = self._property_field_groups.get(property_field)
+        if groups and not self.env.su and not self.env.user.has_groups(groups):
+            raise AccessError(_("You are not allowed to modify this property."))
+
     def _set_property_value(self, value):
         self.ensure_one()
         record = self._get_record()
         property_field = self.property_field
         if not record or not property_field:
             return True
+        self._check_property_groups(property_field)
         setattr(record, property_field, value)
 
     def _inverse_property_account(self):
