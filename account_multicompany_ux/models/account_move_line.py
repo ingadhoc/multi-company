@@ -29,6 +29,11 @@ class AccountMoveLine(models.Model):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_move_lines(self):
+        # at_uninstall=False only skips this check when this module is uninstalled:
+        # uninstalling another module that deletes move lines runs with the user env
+        # (not as superuser), so a settings admin without sales access would abort it
+        if self.pool.uninstalling_modules:
+            return
         move_ids = self.mapped("move_id").ids
         if not move_ids:
             return self.env["sale.order.line"]

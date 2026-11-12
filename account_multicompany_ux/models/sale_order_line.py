@@ -38,7 +38,7 @@ class SaleOrderLine(models.Model):
     def _get_downpayment_account(self, company):
         """Downpayment account of the given company, with the same criteria the advance
         payment wizard applies: the account configured on the company, and the
-        downpayment or income account of the products otherwise."""
+        income account of the products otherwise."""
         fiscal_pos = self.order_id.fiscal_position_id
         account = company.downpayment_account_id
         if account:
@@ -48,7 +48,7 @@ class SaleOrderLine(models.Model):
         templates = self.product_id.product_tmpl_id | self.order_id.order_line.product_id.product_tmpl_id
         for template in templates:
             accounts = template.with_company(company).get_product_accounts(fiscal_pos=fiscal_pos)
-            account = accounts.get("downpayment") or accounts.get("income")
+            account = accounts["income"]
             if account and account.filtered_domain(account._check_company_domain(company)):
                 return account
         return self.env["account.account"]
