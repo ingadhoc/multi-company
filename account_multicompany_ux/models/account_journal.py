@@ -10,17 +10,21 @@ class AccountJournal(models.Model):
 
     @api.depends("name", "currency_id", "company_id", "company_id.currency_id")
     def _compute_display_name(self):
+        """Append the company suffix and the currency to the journal name.
+
+        Journals whose company has no suffix keep the native name. So do all of them
+        when the context asks to show the company (show_company_journal), because
+        Odoo already prefixes the company name there and the suffix would repeat it.
         """
-        Este método lo que haría es agregar el nombre de la compañía entre paréntesis al final del nombre del diario
-        cuando uno ingresa a la vista form esto lo hace en el nombre que está en el menú hamburguesa.
-        en caso de que {journal.company_id.get_company_sufix()} sea False llamamos a super para mantener el comportamiento
-        nativo de odoo
-        """
+        show_company = len(self.env.companies) > 1 and self.env.context.get("show_company_journal")
+        native_journals = self.browse()
         for journal in self:
             company = journal.company_id.sudo()
+            sufix = company.get_company_sufix()
+            if show_company or not sufix:
+                native_journals |= journal
+                continue
             currency = journal.currency_id or company.currency_id
-            if company.get_company_sufix():
-                name = f"{journal.name} ({currency.name}) {company.get_company_sufix()}"
-                journal.display_name = name
-            else:
-                super()._compute_display_name()
+            journal.display_name = f"{journal.name} ({currency.name}) {sufix}"
+        if native_journals:
+            super(AccountJournal, native_journals)._compute_display_name()
