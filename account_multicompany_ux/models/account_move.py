@@ -51,13 +51,9 @@ class AccountMove(models.Model):
             if move.company_id.consolidation_company:
                 raise ValidationError(self.env._("You can not create entries on a consolidation company"))
 
-    def _reconcile_reversed_moves(self, reverse_moves, move_reverse_cancel):
+    def _post(self, soft=True):
         # a credit note moved to another company must not pay the origin invoice
-        pairs = [(move, reverse) for move, reverse in zip(self, reverse_moves) if move.company_id == reverse.company_id]
-        moves = self.browse([move.id for move, _reverse in pairs])
-        reverses = reverse_moves.browse([reverse.id for _move, reverse in pairs])
-        super(AccountMove, moves)._reconcile_reversed_moves(reverses, move_reverse_cancel)
-        return reverse_moves
+        return super(AccountMove, self.with_context(skip_cross_company_reversal_reconcile=True))._post(soft=soft)
 
     def _reverse_moves(self, default_values_list=None, cancel=False):
         sale_lines = self.env["sale.order.line"].sudo().search([("invoice_lines.move_id", "in", self.ids)])
