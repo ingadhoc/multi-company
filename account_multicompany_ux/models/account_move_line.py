@@ -9,6 +9,24 @@ from odoo.exceptions import ValidationError
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
+    def _reconcile_plan(self, reconciliation_plan):
+        if self.env.context.get("skip_cross_company_reversal_reconcile"):
+            reconciliation_plan = self._filter_cross_company_reversal_plan(reconciliation_plan)
+        return super()._reconcile_plan(reconciliation_plan)
+
+    @api.model
+    def _filter_cross_company_reversal_plan(self, plan):
+        filtered_plan = []
+        for item in plan:
+            if isinstance(item, list):
+                filtered_plan.append(self._filter_cross_company_reversal_plan(item))
+                continue
+            moves = item.move_id
+            if len(moves.company_id) > 1 and any(move.reversed_entry_id in moves for move in moves):
+                continue
+            filtered_plan.append(item)
+        return filtered_plan
+
     @api.ondelete(at_uninstall=False)
     def _unlink_move_lines(self):
         move_ids = self.mapped("move_id").ids
