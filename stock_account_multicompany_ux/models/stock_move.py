@@ -104,10 +104,12 @@ class StockMove(models.Model):
 
     def _get_inventory_cost_difference(self, branch_company, parent_company, quantity=0):
         """
-        Diferencia total (costo padre - costo branch) * cantidad valorada, en
-        moneda de compañía, para los moves de este recordset. Positiva cuando el
-        costo del padre es mayor que el de la branch.
+        Diferencia total (costo padre - costo branch) * cantidad, en moneda de
+        compañía, para los moves de este recordset. Positiva cuando el costo del
+        padre es mayor que el de la branch.
 
+        :param quantity: cantidad facturada en la UoM del producto. Sin ella se usa
+            la cantidad valorada de los moves.
         :return: float (0.0 si no hay cantidad o múltiples productos)
         """
         if not self or len(self.product_id) > 1:
@@ -118,9 +120,8 @@ class StockMove(models.Model):
         if not cogs_qty:
             return 0.0
 
-        parent_price_unit, branch_price_unit = self._get_branch_parent_unit_costs(
-            branch_company, parent_company, quantity
-        )
+        # Unit costs come from every move of the line; only the total uses the invoiced quantity.
+        parent_price_unit, branch_price_unit = self._get_branch_parent_unit_costs(branch_company, parent_company)
         return (parent_price_unit - branch_price_unit) * cogs_qty
 
     def _prepare_inventory_difference_lines(self, move, line, price_difference, diff_account):
