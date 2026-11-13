@@ -346,6 +346,17 @@ class TestBranchSharedCogs(TransactionCase):
 
         self.assertEqual(price_unit, 100.0)
 
+    def test_inventory_cost_difference_uses_given_quantity(self):
+        """The difference is valued on the invoiced quantity, not on every move of the line."""
+        self.product.with_company(self.parent_company).standard_price = 100.0
+        self._create_done_receipt(self.parent_company, "PO71584D")
+        self.product.with_company(self.branch_company).standard_price = 60.0
+        branch_move = self._create_done_receipt(self.branch_company, "PO71584D")
+
+        difference = branch_move._get_inventory_cost_difference(self.branch_company, self.parent_company, 4.0)
+
+        self.assertEqual(difference, (100.0 - 60.0) * 4.0)
+
     def test_branch_only_user_gets_stock_accounting_value(self):
         """A user without access to the parent can compute the branch stock valuation."""
         branch = self.branch_company.with_env(self._branch_only_env())
