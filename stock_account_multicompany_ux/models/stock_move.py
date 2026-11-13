@@ -15,9 +15,9 @@ class StockMove(models.Model):
         stock físico propio para esos productos).
 
         La diferencia entre el costo del padre y el de la branch (si existe) NO se
-        registra acá: la calcula y asienta account_move._stock_account_prepare_
-        realtime_out_lines_vals llamando a _get_inventory_cost_difference, para
-        evitar depender de side-effects de contexto entre llamadas.
+        registra acá: la calcula y asienta account_move._get_cogs_lines_vals
+        llamando a _get_inventory_cost_difference, para evitar depender de
+        side-effects de contexto entre llamadas.
 
         :param quantity: cantidad en UOM del producto para calcular el costo total
         :return: precio unitario COGS en la moneda de la compañía
@@ -31,14 +31,14 @@ class StockMove(models.Model):
         branch_context = self.env.context.get("branch_company")
         branch_company = self.env["res.company"].browse(branch_context) if branch_context else False
         if not branch_company:
-            return super()._get_cogs_price_unit(quantity)
+            return self._get_native_cogs_price_unit()
 
         parent_company = branch_company.parent_id
         # Solo interceptar si hay padre y la categoría tiene 'shared_to_branches'
         # activo. shared_to_branches es company_dependent: se lee en el contexto del
         # PADRE (fuente de verdad), no de la branch, donde puede no estar seteado.
         if not parent_company or not self.product_id.categ_id.sudo().with_company(parent_company).shared_to_branches:
-            return super()._get_cogs_price_unit(quantity)
+            return self._get_native_cogs_price_unit()
 
         move_valued_qty = sum(m._get_valued_qty() for m in self)
         cogs_qty = quantity or move_valued_qty
@@ -52,6 +52,10 @@ class StockMove(models.Model):
         # El COGS de la branch siempre se valúa al costo del PADRE.
         return parent_price_unit
 
+    def _get_native_cogs_price_unit(self):
+        # Same price the native account.move.line._get_cogs_value uses for these moves.
+        return self._get_price_unit(include_consigned=True, product=self.product_id[:1])
+
     def _get_branch_parent_unit_costs(self, branch_company, parent_company, quantity=0):
         """
         Calcula el costo unitario del producto de estos moves desde la perspectiva
@@ -62,9 +66,6 @@ class StockMove(models.Model):
 
         :return: tupla (parent_price_unit, branch_price_unit) en moneda de compañía
         """
-        move_valued_qty = sum(m._get_valued_qty() for m in self)
-        cogs_qty = quantity or move_valued_qty
-
         product_parent = self.product_id.sudo().with_company(parent_company)
         product_branch = self.product_id.with_company(branch_company)
 
@@ -96,7 +97,8 @@ class StockMove(models.Model):
             product_branch.lot_valuated and product_branch.cost_method == "average"
         ):
             # FIFO/Average con lotes: valor acumulado de los moves de la branch
-            branch_price_unit = sum(self.mapped("value")) / cogs_qty if cogs_qty else product_branch.standard_price
+            # Signed value / signed qty, so deliveries and returns of the sale line net out.
+            branch_price_unit = self._get_price_unit(product=self.product_id) or product_branch.standard_price
         else:
             branch_price_unit = product_branch.standard_price
 
@@ -104,10 +106,12 @@ class StockMove(models.Model):
 
     def _get_inventory_cost_difference(self, branch_company, parent_company, quantity=0):
         """
-        Diferencia total (costo padre - costo branch) * cantidad valorada, en
-        moneda de compañía, para los moves de este recordset. Positiva cuando el
-        costo del padre es mayor que el de la branch.
+        Diferencia total (costo padre - costo branch) * cantidad, en moneda de
+        compañía, para los moves de este recordset. Positiva cuando el costo del
+        padre es mayor que el de la branch.
 
+        :param quantity: cantidad facturada en la UoM del producto. Sin ella se usa
+            la cantidad valorada de los moves.
         :return: float (0.0 si no hay cantidad o múltiples productos)
         """
         if not self or len(self.product_id) > 1:
@@ -118,9 +122,8 @@ class StockMove(models.Model):
         if not cogs_qty:
             return 0.0
 
-        parent_price_unit, branch_price_unit = self._get_branch_parent_unit_costs(
-            branch_company, parent_company, quantity
-        )
+        # Unit costs come from every move of the line; only the total uses the invoiced quantity.
+        parent_price_unit, branch_price_unit = self._get_branch_parent_unit_costs(branch_company, parent_company)
         return (parent_price_unit - branch_price_unit) * cogs_qty
 
     def _prepare_inventory_difference_lines(self, move, line, price_difference, diff_account):
@@ -145,21 +148,11 @@ class StockMove(models.Model):
         qty = line.quantity or 1.0
         unit = price_difference / qty
 
-        base_vals = {
-            "name": (line.name or "")[:64],
-            "move_id": move.id,
-            "partner_id": move.commercial_partner_id.id,
-            "product_id": line.product_id.id,
-            "product_uom_id": line.product_uom_id.id,
-            "quantity": line.quantity,
-            "analytic_distribution": line.analytic_distribution,
-            "display_type": "cogs",
-            "tax_ids": [],
-            "cogs_origin_id": line.id,
-        }
+        # The difference is in company currency, like the native COGS lines: it goes as balance.
+        base_vals = move._get_cogs_common_vals(line)
         return [
-            {**base_vals, "account_id": diff_account.id, "price_unit": unit, "amount_currency": price_difference},
-            {**base_vals, "account_id": stock_account.id, "price_unit": -unit, "amount_currency": -price_difference},
+            {**base_vals, "account_id": diff_account.id, "price_unit": unit, "balance": price_difference},
+            {**base_vals, "account_id": stock_account.id, "price_unit": -unit, "balance": -price_difference},
         ]
 
     def _get_parent_company_moves(self, parent_company):

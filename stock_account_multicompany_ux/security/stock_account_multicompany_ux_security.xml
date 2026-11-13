@@ -16,35 +16,16 @@
         <field name="comment">Allows the user to see the stock detail of the whole parent/branches company scheme, even for companies they cannot access. The quantity on hand keeps showing the user's own companies; it is the location breakdown that lists every warehouse of the group. Read only: the user still cannot write on the other companies' records.</field>
     </record>
 
-    <!-- Las reglas multicompañía de stock son globales y se combinan con AND, así que no
-         alcanza con sumar una permisiva: hay que sacarles la lectura y pasarla a estas.
-         Las de stock siguen gobernando write/create/unlink con su dominio estricto. -->
-    <record model="ir.rule" id="stock.stock_location_comp_rule">
-        <field name="perm_read" eval="False"/>
+    <!-- Las restricciones multicompañía de stock (ir.access sin grupo) se combinan con
+         AND, así que no alcanza con sumar una permisiva: hay que sacarles la lectura y
+         pasarla a las de ir.access.csv. Las de stock siguen gobernando
+         create/update/delete con su dominio estricto. -->
+    <record model="ir.access" id="stock.stock_location_comp_rule">
+        <field name="operation">cud</field>
     </record>
 
-    <record model="ir.rule" id="stock.stock_quant_rule">
-        <field name="perm_read" eval="False"/>
-    </record>
-
-    <record model="ir.rule" id="stock_location_read_rule">
-        <field name="name">Location multi-company: read (branch stock aware)</field>
-        <field name="model_id" ref="stock.model_stock_location"/>
-        <field name="domain_force">['|', ('company_id', 'in', company_ids + [False]), ('company_id', 'child_of', user._get_branch_stock_root_ids(company_ids))]</field>
-        <field name="perm_read" eval="True"/>
-        <field name="perm_write" eval="False"/>
-        <field name="perm_create" eval="False"/>
-        <field name="perm_unlink" eval="False"/>
-    </record>
-
-    <record model="ir.rule" id="stock_quant_read_rule">
-        <field name="name">stock_quant multi-company: read (branch stock aware)</field>
-        <field name="model_id" ref="stock.model_stock_quant"/>
-        <field name="domain_force">['|', ('company_id', 'in', company_ids + [False]), ('company_id', 'child_of', user._get_branch_stock_root_ids(company_ids))]</field>
-        <field name="perm_read" eval="True"/>
-        <field name="perm_write" eval="False"/>
-        <field name="perm_create" eval="False"/>
-        <field name="perm_unlink" eval="False"/>
+    <record model="ir.access" id="stock.stock_quant_rule">
+        <field name="operation">cud</field>
     </record>
 
 </odoo>
