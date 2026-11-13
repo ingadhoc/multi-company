@@ -66,9 +66,6 @@ class StockMove(models.Model):
 
         :return: tupla (parent_price_unit, branch_price_unit) en moneda de compañía
         """
-        move_valued_qty = sum(m._get_valued_qty() for m in self)
-        cogs_qty = quantity or move_valued_qty
-
         product_parent = self.product_id.sudo().with_company(parent_company)
         product_branch = self.product_id.with_company(branch_company)
 
@@ -100,8 +97,8 @@ class StockMove(models.Model):
             product_branch.lot_valuated and product_branch.cost_method == "average"
         ):
             # FIFO/Average con lotes: valor acumulado de los moves de la branch
-            # In 20 the value of an outgoing move is negative.
-            branch_price_unit = abs(sum(self.mapped("value"))) / cogs_qty if cogs_qty else product_branch.standard_price
+            # Signed value / signed qty, so deliveries and returns of the sale line net out.
+            branch_price_unit = self._get_price_unit(product=self.product_id) or product_branch.standard_price
         else:
             branch_price_unit = product_branch.standard_price
 
