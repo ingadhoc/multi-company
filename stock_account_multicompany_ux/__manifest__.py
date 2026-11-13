@@ -29,9 +29,9 @@
     ],
     "data": [
         "security/stock_account_multicompany_ux_security.xml",
+        "security/ir.access.csv",
         "views/product_category_views.xml",
         "views/product_views.xml",
-        'security/ir.access.csv',
     ],
     "demo": [],
     "uninstall_hook": "uninstall_hook",

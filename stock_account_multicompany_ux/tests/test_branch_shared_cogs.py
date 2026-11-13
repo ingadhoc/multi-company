@@ -167,7 +167,7 @@ class TestBranchSharedCogs(TransactionCase):
         self.assertTrue(self.categ.with_company(self.parent_company).shared_to_branches)
         self.assertEqual(self.product.with_company(self.parent_company).cost_method, "fifo")
         self.assertEqual(self.product.with_company(self.branch_company).valuation, "real_time")
-        self.assertFalse(line._get_stock_moves().filtered(lambda m: m.state == "done"))
+        self.assertFalse(line.cogs_move_ids.filtered(lambda m: m.state == "done"))
 
     def test_cogs_value_uses_parent_fifo_stack(self):
         """Sin stock moves y con FIFO, el COGS se valúa contra el FIFO del padre.
@@ -197,6 +197,17 @@ class TestBranchSharedCogs(TransactionCase):
             cogs_lines.filtered(lambda line: line.credit).account_id,
             self.account_stock_valuation,
         )
+
+    def test_set_cogs_keeps_parent_cost(self):
+        """Recomputing the posted COGS keeps the parent cost of a shared category."""
+        invoice = self._create_branch_invoice()
+        invoice.action_post()
+        cogs_lines = invoice.line_ids.filtered(lambda line: line.display_type == "cogs")
+
+        cogs_lines._set_cogs()
+
+        self.assertEqual(sum(cogs_lines.mapped("debit")), 300.0)
+        self.assertEqual(sum(cogs_lines.mapped("credit")), 300.0)
 
     def test_cogs_value_falls_back_to_standard_price_without_parent_stock(self):
         """Sin entradas en el padre, FIFO extrapola con el precio estándar del padre."""
@@ -339,4 +350,4 @@ class TestBranchSharedCogs(TransactionCase):
         """A user without access to the parent can compute the branch stock valuation."""
         branch = self.branch_company.with_env(self._branch_only_env())
 
-        self.assertIsInstance(branch.stock_accounting_value(), dict)
+        self.assertIsInstance(branch.get_inventory_accounting_value(), dict)

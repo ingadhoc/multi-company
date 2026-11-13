@@ -6,10 +6,10 @@ from odoo.tests import TransactionCase, tagged
 class TestStandaloneCompanyAccountingValue(TransactionCase):
     """Valor contable de inventario en una compañía sin padre ni sucursales.
 
-    Es la tercera rama de `stock_accounting_value`, la que delega en el estándar.
-    Antes del fix delegaba sin pasar `accounts_by_product` ni `at_date`, así que
-    el reporte de valuación y el asiento de cierre comparaban el stock a una
-    fecha contra el saldo contable de hoy.
+    Es la tercera rama de `get_inventory_accounting_value`, la que delega en el
+    estándar. Antes del fix delegaba sin pasar `at_date`, así que el reporte de
+    valuación y el asiento de cierre comparaban el stock a una fecha contra el
+    saldo contable de hoy.
 
     Los datos se crean a mano (sin plan de cuentas ni demo data) para que el test
     corra igual en una base mínima y en una base OBA completa.
@@ -74,14 +74,6 @@ class TestStandaloneCompanyAccountingValue(TransactionCase):
         cls._create_valuation_entry(cls, "2026-06-15", 1000.0)
         cls._create_valuation_entry(cls, "2026-08-15", 400.0)
 
-        cls.accounts_by_product = {
-            cls.product: {
-                "valuation": cls.account_stock_valuation,
-                "variation": cls.account_expense,
-                "expense": cls.account_expense,
-            }
-        }
-
     def _create_account(self, code, name, account_type):
         return (
             self.env["account.account"]
@@ -128,31 +120,12 @@ class TestStandaloneCompanyAccountingValue(TransactionCase):
         hoy, así que el reporte comparaba el stock a la fecha contra la
         contabilidad completa.
         """
-        value = self.company.stock_accounting_value(self.accounts_by_product, at_date="2026-06-30")
+        value = self.company.get_inventory_accounting_value(at_date="2026-06-30")
 
         self.assertEqual(value[self.account_stock_valuation], 1000.0)
 
     def test_accounting_value_without_at_date_sums_every_entry(self):
         """Sin fecha de corte el saldo es el total, y difiere del de la fecha."""
-        value = self.company.stock_accounting_value(self.accounts_by_product)
+        value = self.company.get_inventory_accounting_value()
 
         self.assertEqual(value[self.account_stock_valuation], 1400.0)
-
-    def test_accounting_value_respects_accounts_by_product(self):
-        """Las cuentas las fija el llamador, no el recálculo del estándar.
-
-        Antes del fix el `super()` se llamaba sin `accounts_by_product` y lo
-        recalculaba para todos los productos valuables, trayendo cuentas fuera
-        del alcance de la llamada.
-        """
-        accounts_by_product = {
-            self.product: {
-                "valuation": self.account_other_valuation,
-                "variation": self.account_expense,
-                "expense": self.account_expense,
-            }
-        }
-
-        value = self.company.stock_accounting_value(accounts_by_product)
-
-        self.assertNotIn(self.account_stock_valuation, value)

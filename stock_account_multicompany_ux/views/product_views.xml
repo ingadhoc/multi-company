@@ -32,27 +32,4 @@
         </field>
     </record>
 
-    <!-- Form rápido de variante (product.product) -->
-    <record id="product_variant_easy_edit_view_shared_cost" model="ir.ui.view">
-        <field name="name">product.product.easy.edit.shared.cost.branches</field>
-        <field name="model">product.product</field>
-        <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
-        <field name="arch" type="xml">
-            <field name="standard_price" position="attributes">
-                <attribute name="invisible">is_cost_shared_from_parent</attribute>
-            </field>
-            <field name="standard_price" position="after">
-                <field name="is_cost_shared_from_parent" invisible="1"/>
-                <field
-                    name="parent_standard_price"
-                    string="Cost"
-                    class="oe_inline"
-                    widget="monetary"
-                    options="{'currency_field': 'cost_currency_id', 'field_digits': True}"
-                    invisible="not is_cost_shared_from_parent"
-                />
-            </field>
-        </field>
-    </record>
-
 </odoo>
