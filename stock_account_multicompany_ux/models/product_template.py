@@ -45,6 +45,12 @@ class ProductTemplate(models.Model):
                 is_branch and template.categ_id.sudo().with_company(root_company).shared_to_branches
             )
 
+    def write(self, vals):
+        res = super().write(vals)
+        if "categ_id" in vals:
+            self.product_variant_ids._sync_shared_cost_to_branches()
+        return res
+
     @api.depends_context("company")
     @api.depends("standard_price", "categ_id.shared_to_branches")
     def _compute_parent_standard_price(self):

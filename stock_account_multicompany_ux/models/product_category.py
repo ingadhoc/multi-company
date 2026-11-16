@@ -1,4 +1,19 @@
 from odoo import api, fields, models
+from odoo.exceptions import UserError
+
+# Category fields the root company imposes on its branches when the valuation is shared.
+SHARED_VALUATION_FIELDS = {
+    "shared_to_branches",
+    "property_cost_method",
+    "property_valuation",
+    "property_account_income_categ_id",
+    "property_account_expense_categ_id",
+    "property_stock_valuation_account_id",
+    "property_price_difference_account_id",
+    "property_stock_journal",
+    # stock_currency_valuation, when it is installed
+    "valuation_currency_id",
+}
 
 
 class ProductCategory(models.Model):
@@ -29,24 +44,59 @@ class ProductCategory(models.Model):
         string="Shared Stock Valuation to Branches",
         company_dependent=True,
         help=(
-            "When enabled, all branches of the parent company will use the same "
-            "costing method and standard price defined in the parent company for "
-            "products in this category. This ensures a single unified cost across "
-            "the parent and all its branches.\n\n"
+            "When enabled, the branches of the parent company value the products "
+            "of this category at the parent's cost, whatever the parent's costing "
+            "method, and cannot change it. This ensures a single unified cost "
+            "across the parent and all its branches.\n\n"
             "This flag is company-dependent: it is edited on the group's root "
             "company and synced down to its branches, so each company group can "
             "decide independently which categories are shared."
         ),
     )
 
+    is_valuation_shared_from_parent = fields.Boolean(
+        compute="_compute_is_valuation_shared_from_parent",
+        help="True when the active company is a branch and the root company shares "
+        "this category's valuation: the branch cannot change it.",
+    )
+
+    @api.depends_context("company")
+    def _compute_is_valuation_shared_from_parent(self):
+        company = self.env.company
+        if not company.parent_id:
+            self.is_valuation_shared_from_parent = False
+            return
+        for categ in self:
+            categ.is_valuation_shared_from_parent = categ.sudo().with_company(company.root_id).shared_to_branches
+
     def write(self, vals):
+        if SHARED_VALUATION_FIELDS & vals.keys() and not self.env.context.get("shared_valuation_sync"):
+            self._check_branch_valuation_change()
         res = super().write(vals)
         # Si se modificaron campos de valoración o el flag 'shared_to_branches',
         # propagar la configuración a las branches para mantener coherencia.
-        propagate_fields = {"shared_to_branches", "property_cost_method", "property_valuation"}
+        propagate_fields = {"shared_to_branches", "property_cost_method", "property_valuation", "valuation_currency_id"}
         if propagate_fields & vals.keys():
             self._propagate_valuation_to_branches()
+            self.env["product.product"].search([("categ_id", "in", self.ids)])._sync_shared_cost_to_branches()
         return res
+
+    def _check_branch_valuation_change(self):
+        """A branch cannot change the valuation of a category the root shares."""
+        company = self.env.company
+        if not company.parent_id:
+            return
+        shared = self.filtered(lambda c: c.sudo().with_company(company.root_id).shared_to_branches)
+        if shared:
+            raise UserError(
+                self.env._(
+                    "The inventory valuation of %(categories)s is shared to branches by %(root)s. "
+                    "Change it on %(root)s, or disable 'Shared Stock Valuation to Branches' there "
+                    "to configure each branch on its own.",
+                    categories=", ".join(shared.mapped("display_name")),
+                    root=company.root_id.name,
+                )
+            )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -117,9 +167,11 @@ class ProductCategory(models.Model):
                         "property_stock_journal": root_categ.property_stock_journal.id,
                     }
                 )
+                if "valuation_currency_id" in categ._fields:
+                    values["valuation_currency_id"] = root_categ.valuation_currency_id.id
 
             for branch in branches:
-                categ.with_company(branch).write(values)
+                categ.with_company(branch).with_context(shared_valuation_sync=True).write(values)
 
     @api.depends_context("company")
     def _compute_is_branch_company(self):

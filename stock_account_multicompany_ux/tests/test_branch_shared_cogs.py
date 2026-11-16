@@ -198,6 +198,18 @@ class TestBranchSharedCogs(TransactionCase):
             self.account_stock_valuation,
         )
 
+    def test_branch_cogs_counts_for_the_parent_stock(self):
+        """Sold from the parent's stock and invoiced in the branch: the COGS is the parent's."""
+        invoice = self._create_branch_invoice()
+        invoice.action_post()
+        accounts = {self.product: {"valuation": self.account_stock_valuation}}
+
+        branch_value = self.branch_company.stock_accounting_value(accounts)
+        parent_value = self.parent_company.stock_accounting_value(accounts)
+
+        self.assertFalse(branch_value.get(self.account_stock_valuation))
+        self.assertEqual(parent_value[self.account_stock_valuation], -300.0)
+
     def test_cogs_value_falls_back_to_standard_price_without_parent_stock(self):
         """Sin entradas en el padre, FIFO extrapola con el precio estándar del padre."""
         product = (

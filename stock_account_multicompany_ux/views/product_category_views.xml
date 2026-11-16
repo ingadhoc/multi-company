@@ -5,7 +5,24 @@
         <field name="model">product.category</field>
         <field name="inherit_id" ref="stock_account.view_category_property_form_stock"/>
         <field name="arch" type="xml">
+            <field name="property_cost_method" position="attributes">
+                <attribute name="readonly">is_valuation_shared_from_parent</attribute>
+            </field>
+            <field name="property_valuation" position="attributes">
+                <attribute name="readonly">is_valuation_shared_from_parent</attribute>
+            </field>
             <xpath expr="//field[@name='property_valuation']" position="after">
+                <field name="is_valuation_shared_from_parent" invisible="True"/>
+                <div
+                    class="alert alert-warning"
+                    role="alert"
+                    colspan="2"
+                    invisible="not is_valuation_shared_from_parent"
+                >
+                    The parent company shares this valuation to its branches. To configure
+                    this branch on its own, disable "Shared Stock Valuation to Branches" on
+                    the parent company.
+                </div>
                 <field name="shared_to_branches" groups="base.group_multi_company" invisible="is_branch_company or not company_has_branches"/>
                 <field name="is_branch_company" invisible="True"/>
                 <field name="company_has_branches" invisible="True"/>
@@ -13,7 +30,7 @@
                     class="alert alert-info"
                     role="alert"
                     colspan="2"
-                    invisible="not shared_to_branches"
+                    invisible="not shared_to_branches or is_branch_company"
                 >
                     Branches will use the costing method and standard price of the
                     parent company for this category, ensuring a single unified

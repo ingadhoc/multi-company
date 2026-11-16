@@ -4,6 +4,33 @@ from odoo import models
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
+    def _get_stock_valuation_company(self):
+        """Company whose stock this valuation line moves.
+
+        A COGS line (customer invoice) or a product line (vendor bill) belongs to the
+        company of the stock moves it invoices, which may not be the invoice's one.
+        A branch invoice of a shared product without moves is valued at the parent's
+        cost, so it consumes the parent's stock.
+        """
+        self.ensure_one()
+        origin = (self.cogs_origin_id if self.display_type == "cogs" else self).sudo()
+        moves = origin._get_stock_moves().filtered(lambda m: m.state == "done") if origin else origin.env["stock.move"]
+        if moves:
+            return moves.company_id if len(moves.company_id) == 1 else self.company_id
+        parent = self.company_id.parent_id
+        if (
+            self.display_type == "cogs"
+            and parent
+            and self.product_id.categ_id.sudo().with_company(parent).shared_to_branches
+        ):
+            return parent
+        return self.company_id
+
+    def _has_own_stock_moves(self):
+        """The invoiced goods left this line's own company (it has its own warehouse)."""
+        moves = self._get_stock_moves().filtered(lambda m: m.state == "done")
+        return bool(moves) and moves.company_id == self.company_id
+
     def _get_cogs_value(self):
         """
         Override para calcular el COGS (costo de mercadería vendida) usando el
@@ -38,6 +65,11 @@ class AccountMoveLine(models.Model):
         # Solo interceptar si la categoría del producto está marcada como compartida.
         # Para el resto de categorías, la branch tiene su propio inventario y costo.
         if not self.product_id.categ_id.sudo().with_company(parent_company.id).shared_to_branches:
+            return super()._get_cogs_value()
+
+        # The goods left the branch's own warehouse: Odoo values them from the
+        # branch's moves, which already carry the shared cost.
+        if self._has_own_stock_moves():
             return super()._get_cogs_value()
 
         # --- Caso 1: Línea de nota de crédito (rectificación) ---

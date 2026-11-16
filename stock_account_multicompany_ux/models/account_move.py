@@ -48,7 +48,7 @@ class AccountMove(models.Model):
 
             # Movimientos de stock completados asociados a esta línea de factura
             stock_moves = line._get_stock_moves().filtered(lambda m: m.state == "done")
-            if not stock_moves:
+            if not stock_moves or line._has_own_stock_moves():
                 continue
 
             # Cuenta de diferencia de precio de la categoría (company_dependent → padre)

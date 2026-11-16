@@ -29,6 +29,29 @@ Features
   costing method and standard price are automatically propagated to all
   accessible branches. The field is hidden for branch users.
 
+- **Locked on branches**: while a category is shared, a branch cannot change its
+  costing method, valuation, accounts or stock journal, nor the cost of its
+  products. To configure a branch on its own, disable the flag on the parent
+  company.
+
+- **Shared cost on branches with their own warehouses** (``product.product``):
+  the branches keep the parent's costing method (standard, average or FIFO), and
+  the parent's cost is copied to every branch. Whatever the method, the branch's
+  moves and stock on hand are valued at the parent's cost, not at the branch's own
+  average or FIFO layers, and every change of the parent's cost (by hand, a new
+  average or the FIFO cost) revalues the branches' stock too. Lot valuation keeps
+  a cost per lot. With ``stock_currency_valuation`` installed, the secondary
+  valuation currency of the category and the cost in that currency are shared
+  and locked the same way.
+
+- **Stock valued where it moved** (``res.company``): each company's accounting
+  value of the stock (inventory valuation report and stock closing) counts the
+  valuation lines of the goods that entered or left its own stock, whichever
+  company invoiced them. When the parent sells and the branch invoices, the COGS
+  of the branch invoice counts for the parent; when the branch sells from its own
+  warehouse, it counts for the branch, and Odoo values it from the branch's moves.
+  Vendor bills follow the same rule with the company that received the goods.
+
 - **Branch-aware COGS price** (``stock.move``): overrides
   ``_get_cogs_price_unit()`` so that when a branch generates COGS entries for
   a category with shared valuation, the cost is taken from the parent company.
