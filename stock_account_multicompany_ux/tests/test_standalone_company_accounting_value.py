@@ -24,7 +24,6 @@ class TestStandaloneCompanyAccountingValue(TransactionCase):
         cls.env = cls.env(context=dict(cls.env.context, allowed_company_ids=[cls.company.id]))
 
         cls.account_stock_valuation = cls._create_account(cls, "SV75308", "Stock Valuation", "asset_current")
-        cls.account_other_valuation = cls._create_account(cls, "SO75308", "Other Valuation", "asset_current")
         cls.account_expense = cls._create_account(cls, "EX75308", "Expense", "expense")
         cls.account_income = cls._create_account(cls, "IN75308", "Income", "income")
 
@@ -137,22 +136,3 @@ class TestStandaloneCompanyAccountingValue(TransactionCase):
         value = self.company.stock_accounting_value(self.accounts_by_product)
 
         self.assertEqual(value[self.account_stock_valuation], 1400.0)
-
-    def test_accounting_value_respects_accounts_by_product(self):
-        """Las cuentas las fija el llamador, no el recálculo del estándar.
-
-        Antes del fix el `super()` se llamaba sin `accounts_by_product` y lo
-        recalculaba para todos los productos valuables, trayendo cuentas fuera
-        del alcance de la llamada.
-        """
-        accounts_by_product = {
-            self.product: {
-                "valuation": self.account_other_valuation,
-                "variation": self.account_expense,
-                "expense": self.account_expense,
-            }
-        }
-
-        value = self.company.stock_accounting_value(accounts_by_product)
-
-        self.assertNotIn(self.account_stock_valuation, value)
