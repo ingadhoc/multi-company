@@ -18,15 +18,12 @@ class ResCompany(models.Model):
         self.ensure_one()
         if not (self.parent_id or self.child_ids):
             return super().stock_accounting_value(accounts_by_product=accounts_by_product, at_date=at_date)
-        if not accounts_by_product:
-            accounts_by_product = self._get_accounts_by_product()
         account_data = super().stock_accounting_value(accounts_by_product=accounts_by_product, at_date=at_date)
 
-        valuation_account_ids = {accounts["valuation"].id for accounts in accounts_by_product.values()}
         group = self.sudo().search([("id", "child_of", self.root_id.id)])
         domain = Domain(
             [
-                ("account_id", "in", list(valuation_account_ids)),
+                ("account_id", "in", self._get_stock_valuation_accounts().ids),
                 ("parent_state", "=", "posted"),
                 ("display_type", "in", ["cogs", "product"]),
                 ("company_id", "in", group.ids),
@@ -43,3 +40,18 @@ class ResCompany(models.Model):
             elif stock_company == self:
                 account_data[line.account_id] += line.balance
         return account_data
+
+    def _get_stock_valuation_accounts(self):
+        """Valuation accounts of the company, the same ones the standard reads: the
+        company default plus the product categories ones. Taking them from the valued
+        products would miss a branch with no stock of its own."""
+        self.ensure_one()
+        categories = (
+            self.env["product.category"]
+            .with_company(self)
+            .search_fetch(
+                [("property_stock_valuation_account_id", "!=", False)],
+                ["property_stock_valuation_account_id"],
+            )
+        )
+        return self.account_stock_valuation_id | categories.property_stock_valuation_account_id

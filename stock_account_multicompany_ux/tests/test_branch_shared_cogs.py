@@ -210,6 +210,18 @@ class TestBranchSharedCogs(TransactionCase):
         self.assertFalse(branch_value.get(self.account_stock_valuation))
         self.assertEqual(parent_value[self.account_stock_valuation], -300.0)
 
+    def test_branch_without_stock_leaves_out_the_parent_cogs(self):
+        """The report asks for the value with no accounts: the branch has no stock, so
+        no product is valued there and the accounts come from the categories."""
+        invoice = self._create_branch_invoice()
+        invoice.action_post()
+        report = self.env["stock_account.stock.valuation.report"]
+
+        self.assertFalse(self.branch_company.stock_accounting_value().get(self.account_stock_valuation))
+        self.assertEqual(self.parent_company.stock_accounting_value()[self.account_stock_valuation], -300.0)
+        branch_data = report.with_company(self.branch_company)._get_report_data()
+        self.assertFalse(branch_data["initial_balance"]["value"])
+
     def test_cogs_value_falls_back_to_standard_price_without_parent_stock(self):
         """Sin entradas en el padre, FIFO extrapola con el precio estándar del padre."""
         product = (
