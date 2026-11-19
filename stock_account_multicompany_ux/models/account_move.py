@@ -4,7 +4,7 @@ from odoo import models
 class AccountMove(models.Model):
     _inherit = "account.move"
 
-    def _stock_account_prepare_realtime_out_lines_vals(self):
+    def _get_cogs_lines_vals(self):
         """
         Override para agregar líneas de diferencia de inventario en facturas
         emitidas por compañías branch cuya categoría de producto tiene
@@ -26,7 +26,7 @@ class AccountMove(models.Model):
            agrega a la lista. Si el costo está unificado (objetivo de shared_to_branches),
            la diferencia es 0 y no se agrega nada.
         """
-        lines_vals_list = super()._stock_account_prepare_realtime_out_lines_vals()
+        lines_vals_list = super()._get_cogs_lines_vals()
 
         # Solo proceder si la compañía es una branch (tiene compañía padre).
         # Las compañías padre calculan su propio COGS sin este override.
@@ -43,11 +43,11 @@ class AccountMove(models.Model):
             lambda x: x.product_id.categ_id.sudo().with_company(parent_company).shared_to_branches
         ):
             # Saltar líneas que no generan COGS o productos sin valoración en tiempo real
-            if not line._eligible_for_stock_account() or line.product_id.valuation != "real_time":
+            if not line._use_inventory_valuation():
                 continue
 
             # Movimientos de stock completados asociados a esta línea de factura
-            stock_moves = line._get_stock_moves().filtered(lambda m: m.state == "done")
+            stock_moves = line.cogs_move_ids.filtered(lambda m: m.state == "done")
             if not stock_moves:
                 continue
 
@@ -58,10 +58,13 @@ class AccountMove(models.Model):
             if not diff_account:
                 continue
 
-            # Diferencia (costo padre - costo branch) * cantidad valorada de los moves.
+            # Diferencia (costo padre - costo branch) * cantidad facturada en la línea.
             sign = -1 if self.move_type == "out_refund" else 1
-            price_difference = sign * stock_moves._get_inventory_cost_difference(branch_company, parent_company)
-            if self.currency_id.is_zero(price_difference):
+            invoiced_qty = line.product_uom_id._compute_quantity(line.quantity, line.product_id.uom_id)
+            price_difference = sign * stock_moves._get_inventory_cost_difference(
+                branch_company, parent_company, invoiced_qty
+            )
+            if self.company_currency_id.is_zero(price_difference):
                 continue
 
             lines_vals_list += self.env["stock.move"]._prepare_inventory_difference_lines(

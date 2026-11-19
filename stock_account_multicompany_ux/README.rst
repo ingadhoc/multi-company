@@ -29,9 +29,9 @@ Features
   costing method and standard price are automatically propagated to all
   accessible branches. The field is hidden for branch users.
 
-- **Branch-aware COGS price** (``stock.move``): overrides
-  ``_get_cogs_price_unit()`` so that when a branch generates COGS entries for
-  a category with shared valuation, the cost is taken from the parent company.
+- **Branch-aware COGS price** (``stock.move``): ``_get_cogs_price_unit()``
+  returns, when a branch generates COGS entries for a category with shared
+  valuation, the cost of the parent company.
   Supports standard, average, and FIFO cost methods. For FIFO it looks up
   equivalent parent-company stock moves and weights their value by quantity;
   when none exist it falls back to the parent's standard price.
@@ -40,27 +40,29 @@ Features
   ``_get_cogs_value()`` to apply the same parent-cost logic even when there are
   no associated stock moves (e.g. service products billed from a branch, or
   credit notes). With no stock moves, standard/average take the parent's
-  standard price and FIFO is valued with ``product._run_fifo()`` in the parent
-  company, same as standard Odoo. Also respects reversed-entry lines to avoid
-  re-computing already-posted COGS.
+  standard price and FIFO is valued with ``product._get_fifo_value()`` in the
+  parent company, same as standard Odoo. Also respects reversed-entry lines to
+  avoid re-computing already-posted COGS. When the value of a stock move changes
+  later, the posted COGS of a shared category is not recomputed with the branch
+  cost (``_set_cogs()``).
 
 - **Inventory difference lines** (``account.move``): overrides
-  ``_stock_account_prepare_realtime_out_lines_vals()`` to post the price
+  ``_get_cogs_lines_vals()`` to post the price
   difference between the branch cost and the parent cost to the appropriate
   inventory difference account when real-time valuation is active.
 
-- **Branch Stock** (``stock.location``, ``stock.quant`` record rules): new privilege
+- **Branch Stock** (``stock.location``, ``stock.quant`` access restrictions): new privilege
   that lets a user read the locations and quants of the whole parent/branches scheme,
   so the stock detail breakdowns list every warehouse of the group even for companies
   the user cannot access. The **quantity on hand stays unchanged** — it keeps showing
   only the user's own companies, because it is scoped by the active companies and not
-  by the record rules. The intent is that a salesperson sells from their own branch
+  by the access restrictions. The intent is that a salesperson sells from their own branch
   first and only checks the rest of the group when their own stock is not enough.
 
-  Only **read** access is widened. Odoo's company rules on those two models keep
+  Only **read** access is widened. Odoo's company restrictions on those two models keep
   governing write, create and unlink with their original strict domain, so the user
-  cannot touch the other companies' records. Their read permission is turned off so
-  that the rules above are the ones that apply, and ``uninstall_hook`` restores it.
+  cannot touch the other companies' records. Their read operation is turned off so
+  that the restrictions above are the ones that apply, and ``uninstall_hook`` restores it.
 
 Installation
 ============
@@ -81,7 +83,7 @@ Configuration
 
 #. On the **parent** company, open **Inventory → Configuration → Product
    Categories** and edit the category you want to share.
-#. In the *Account Properties* tab, enable **Shared Stock Valuation to
+#. In the *Accounting* tab, enable **Shared Stock Valuation to
    Branches**.
 #. Save. The module will immediately propagate the costing method and valuation
    type to all branches that the current user can access.

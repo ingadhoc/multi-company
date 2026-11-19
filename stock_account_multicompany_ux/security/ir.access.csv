@@ -1,0 +1,3 @@
+id,name,model_id,group_id/id,operation,domain
+stock_location_read_rule,Location multi-company: read (branch stock aware),stock.location,,r,"['|', ('company_id', 'in', company_ids + [False]), ('company_id', 'child_of', user._get_branch_stock_root_ids(company_ids))]"
+stock_quant_read_rule,stock_quant multi-company: read (branch stock aware),stock.quant,,r,"['|', ('company_id', 'in', company_ids + [False]), ('company_id', 'child_of', user._get_branch_stock_root_ids(company_ids))]"

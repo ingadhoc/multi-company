@@ -7,7 +7,7 @@ from odoo.fields import Domain
 class ResCompany(models.Model):
     """
     Override de res.company para adaptar el cálculo del valor contable de
-    inventario (stock_accounting_value) al modelo de branches con valoración
+    inventario (get_inventory_accounting_value) al modelo de branches con valoración
     compartida.
 
     Problema que resuelve:
@@ -32,7 +32,7 @@ class ResCompany(models.Model):
 
     _inherit = "res.company"
 
-    def stock_accounting_value(self, accounts_by_product=None, at_date=None):
+    def get_inventory_accounting_value(self, at_date=None):
         """
         Calcula el valor contable del inventario para la compañía.
 
@@ -42,16 +42,18 @@ class ResCompany(models.Model):
         - BRANCH (sin child_ids): solo AMLs propios de productos NO compartidos;
           los compartidos quedan excluidos (su valoración es del padre).
 
-        :param accounts_by_product: dict {product: {valuation: account, ...}}
         :param at_date: fecha de corte (None = saldo actual)
         :return: dict {account.account: balance_sum}
         """
         self.ensure_one()
 
-        if not accounts_by_product:
-            accounts_by_product = self._get_accounts_by_product()
+        if not self.parent_id and not self.child_ids:
+            return super().get_inventory_accounting_value(at_date=at_date)
 
-        stock_valuation_accounts_ids = {accounts["valuation"].id for accounts in accounts_by_product.values()}
+        accounts_by_product = self._get_accounts_by_product(at_date)
+        stock_valuation_accounts_ids = {
+            accounts["valuation"].id for accounts in accounts_by_product.values() if accounts["valuation"]
+        }
 
         # Categorías compartidas según la RAÍZ del grupo (fuente de verdad del
         # flag company_dependent). Filtramos por categ_id, no por el flag.
@@ -83,7 +85,7 @@ class ResCompany(models.Model):
                     ("company_id", "in", self.ids + self.child_ids.ids),
                 ]
             )
-        elif self.parent_id:
+        else:
             # --- BRANCH ---
             # Solo asientos propios de productos NO compartidos (los compartidos son
             # valoración del padre; excluirlos limpia el reporte de la branch).
@@ -93,12 +95,10 @@ class ResCompany(models.Model):
                     ("product_id.categ_id.id", "not in", shared_categ_ids),
                 ]
             )
-        else:
-            return super().stock_accounting_value(accounts_by_product=accounts_by_product, at_date=at_date)
         account_data = defaultdict(float)
         for account, balance in (
             self.env["account.move.line"].sudo()._read_group(domain, ["account_id"], ["balance:sum"])
         ):
             account_data[account] += balance
 
-        return account_data
+        return dict(account_data)
