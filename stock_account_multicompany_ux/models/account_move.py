@@ -58,9 +58,12 @@ class AccountMove(models.Model):
             if not diff_account:
                 continue
 
-            # Diferencia (costo padre - costo branch) * cantidad valorada de los moves.
+            # Diferencia (costo padre - costo branch) * cantidad facturada en la línea.
             sign = -1 if self.move_type == "out_refund" else 1
-            price_difference = sign * stock_moves._get_inventory_cost_difference(branch_company, parent_company)
+            invoiced_qty = line.product_uom_id._compute_quantity(line.quantity, line.product_id.uom_id)
+            price_difference = sign * stock_moves._get_inventory_cost_difference(
+                branch_company, parent_company, invoiced_qty
+            )
             if self.currency_id.is_zero(price_difference):
                 continue
 
