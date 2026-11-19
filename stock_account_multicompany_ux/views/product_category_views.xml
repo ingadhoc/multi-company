@@ -5,19 +5,43 @@
         <field name="model">product.category</field>
         <field name="inherit_id" ref="stock_account.view_category_property_form_stock"/>
         <field name="arch" type="xml">
+            <field name="property_cost_method" position="attributes">
+                <attribute name="readonly">is_valuation_shared_from_parent</attribute>
+            </field>
+            <field name="property_valuation" position="attributes">
+                <attribute name="readonly">is_valuation_shared_from_parent</attribute>
+            </field>
             <xpath expr="//field[@name='property_valuation']" position="after">
-                <field name="shared_to_branches" groups="base.group_multi_company" invisible="is_branch_company or not company_has_branches"/>
+                <field name="is_valuation_shared_from_parent" invisible="True"/>
+                <div
+                    class="alert alert-warning"
+                    role="alert"
+                    colspan="2"
+                    invisible="not is_valuation_shared_from_parent"
+                >
+                    The parent company shares this valuation to its branches. To configure
+                    this branch on its own, disable "Shared Stock Valuation to Branches" on
+                    the parent company.
+                </div>
+                <!-- Also shown while already enabled, so it can be turned off where it no longer applies. -->
+                <field
+                    name="shared_to_branches"
+                    groups="base.group_multi_company"
+                    invisible="is_branch_company or not company_has_branches or not (shared_to_branches or can_share_to_branches)"
+                />
                 <field name="is_branch_company" invisible="True"/>
                 <field name="company_has_branches" invisible="True"/>
+                <field name="can_share_to_branches" invisible="True"/>
                 <div
                     class="alert alert-info"
                     role="alert"
                     colspan="2"
-                    invisible="not shared_to_branches"
+                    invisible="not shared_to_branches or is_branch_company"
                 >
-                    Branches will use the costing method and standard price of the
-                    parent company for this category, ensuring a single unified
-                    cost across all branches.
+                    Meant for stock and purchases on this company with branches that only
+                    invoice: the branches take this valuation and invoice the cost of goods
+                    sold at this company's cost. It does not apply when the branches have
+                    their own warehouses.
                 </div>
             </xpath>
         </field>

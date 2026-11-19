@@ -32,6 +32,16 @@ class ResCompany(models.Model):
 
     _inherit = "res.company"
 
+    def _get_branch_warehouses(self):
+        """Active warehouses of the branches of this company's group."""
+        self.ensure_one()
+        root = self.root_id
+        return (
+            self.env["stock.warehouse"]
+            .sudo()
+            .search([("company_id", "child_of", root.id), ("company_id", "!=", root.id)])
+        )
+
     def stock_accounting_value(self, accounts_by_product=None, at_date=None):
         """
         Calcula el valor contable del inventario para la compañía.
