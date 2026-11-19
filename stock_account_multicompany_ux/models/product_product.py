@@ -1,4 +1,6 @@
 from odoo import api, fields, models
+from odoo.exceptions import UserError
+from odoo.tools import float_compare
 
 
 class ProductProduct(models.Model):
@@ -57,3 +59,33 @@ class ProductProduct(models.Model):
                 product.parent_standard_price = product.sudo().with_company(root_company).standard_price
             else:
                 product.parent_standard_price = product.standard_price
+
+    def write(self, vals):
+        # Odoo's own cost updates (average cost, FIFO) pass disable_auto_revaluation.
+        if "standard_price" in vals and not self.env.context.get("disable_auto_revaluation"):
+            self._check_branch_cost_change(vals["standard_price"])
+        return super().write(vals)
+
+    def _check_branch_cost_change(self, new_cost):
+        """A branch cannot change the cost of a product whose category the root shares.
+
+        Writing the same cost is let through: creating a product writes its cost.
+        """
+        company = self.env.company
+        if not company.parent_id:
+            return
+        digits = self.env["decimal.precision"].precision_get("Product Price")
+        shared = self.filtered(
+            lambda p: p.categ_id.sudo().with_company(company.root_id).shared_to_branches
+            and float_compare(p.standard_price, new_cost or 0.0, precision_digits=digits)
+        )
+        if shared:
+            raise UserError(
+                self.env._(
+                    "The cost of %(products)s is shared to branches by %(root)s. Change it on %(root)s, "
+                    "or disable 'Shared Stock Valuation to Branches' on its category to manage "
+                    "each branch's cost on its own.",
+                    products=", ".join(shared[:5].mapped("display_name")),
+                    root=company.root_id.name,
+                )
+            )

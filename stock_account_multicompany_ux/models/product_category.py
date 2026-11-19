@@ -1,4 +1,17 @@
 from odoo import api, fields, models
+from odoo.exceptions import UserError
+
+# Category fields the root company imposes on its branches when the valuation is shared.
+SHARED_VALUATION_FIELDS = {
+    "shared_to_branches",
+    "property_cost_method",
+    "property_valuation",
+    "property_account_income_categ_id",
+    "property_account_expense_categ_id",
+    "property_stock_valuation_account_id",
+    "property_price_difference_account_id",
+    "property_stock_journal",
+}
 
 
 class ProductCategory(models.Model):
@@ -29,17 +42,52 @@ class ProductCategory(models.Model):
         string="Shared Stock Valuation to Branches",
         company_dependent=True,
         help=(
-            "When enabled, all branches of the parent company will use the same "
-            "costing method and standard price defined in the parent company for "
-            "products in this category. This ensures a single unified cost across "
-            "the parent and all its branches.\n\n"
+            "For a parent company that keeps the stock and the purchases while its "
+            "branches only invoice (for example, a branch to invoice in B). The branches "
+            "take the costing method, valuation and accounts of the parent, cannot change "
+            "them, and their invoices take the cost of goods sold at the parent's cost.\n\n"
+            "It does not apply when the branches have their own warehouses: their stock "
+            "moves would be valued at each branch's own cost.\n\n"
             "This flag is company-dependent: it is edited on the group's root "
             "company and synced down to its branches, so each company group can "
             "decide independently which categories are shared."
         ),
     )
 
+    can_share_to_branches = fields.Boolean(
+        compute="_compute_can_share_to_branches",
+        help="True when the active company is a parent with branches and no branch has "
+        "an active warehouse: its stock lives on the parent and the branches only invoice.",
+    )
+
+    is_valuation_shared_from_parent = fields.Boolean(
+        compute="_compute_is_valuation_shared_from_parent",
+        help="True when the active company is a branch and the root company shares "
+        "this category's valuation: the branch cannot change it.",
+    )
+
+    @api.depends_context("company")
+    def _compute_can_share_to_branches(self):
+        company = self.env.company
+        self.can_share_to_branches = bool(
+            not company.parent_id and company.child_ids and not company._get_branch_warehouses()
+        )
+
+    @api.depends_context("company")
+    def _compute_is_valuation_shared_from_parent(self):
+        company = self.env.company
+        if not company.parent_id:
+            self.is_valuation_shared_from_parent = False
+            return
+        for categ in self:
+            categ.is_valuation_shared_from_parent = categ.sudo().with_company(company.root_id).shared_to_branches
+
     def write(self, vals):
+        if not self.env.context.get("shared_valuation_sync"):
+            if SHARED_VALUATION_FIELDS & vals.keys():
+                self._check_branch_valuation_change()
+            if vals.get("shared_to_branches"):
+                self._check_share_to_branches()
         res = super().write(vals)
         # Si se modificaron campos de valoración o el flag 'shared_to_branches',
         # propagar la configuración a las branches para mantener coherencia.
@@ -52,6 +100,8 @@ class ProductCategory(models.Model):
     def create(self, vals_list):
         if isinstance(vals_list, dict):
             vals_list = [vals_list]
+        if any(vals.get("shared_to_branches") for vals in vals_list):
+            self._check_share_to_branches()
         categs = super().create(vals_list)
         # Si la categoría se crea con shared_to_branches desde el inicio,
         # propagar la configuración de valoración a las branches inmediatamente.
@@ -119,7 +169,43 @@ class ProductCategory(models.Model):
                 )
 
             for branch in branches:
-                categ.with_company(branch).write(values)
+                categ.with_company(branch).with_context(shared_valuation_sync=True).write(values)
+
+    def _check_branch_valuation_change(self):
+        """A branch cannot change the valuation of a category the root shares."""
+        company = self.env.company
+        if not company.parent_id:
+            return
+        shared = self.filtered(lambda c: c.sudo().with_company(company.root_id).shared_to_branches)
+        if shared:
+            raise UserError(
+                self.env._(
+                    "The inventory valuation of %(categories)s is shared to branches by %(root)s. "
+                    "Change it on %(root)s, or disable 'Shared Stock Valuation to Branches' there "
+                    "to configure each branch on its own.",
+                    categories=", ".join(shared.mapped("display_name")),
+                    root=company.root_id.name,
+                )
+            )
+
+    @api.model
+    def _check_share_to_branches(self):
+        """The valuation can only be shared while no branch has a warehouse."""
+        company = self.env.company
+        if company.parent_id:
+            return
+        warehouses = company._get_branch_warehouses()
+        if warehouses:
+            raise UserError(
+                self.env._(
+                    "'Shared Stock Valuation to Branches' is meant for stock on the parent company "
+                    "and branches that only invoice. These branches of %(root)s have active "
+                    "warehouses: %(branches)s. Their stock would be valued at each branch's own "
+                    "cost, so the valuation cannot be shared.",
+                    root=company.name,
+                    branches=", ".join(sorted(set(warehouses.company_id.mapped("name")))),
+                )
+            )
 
     @api.depends_context("company")
     def _compute_is_branch_company(self):

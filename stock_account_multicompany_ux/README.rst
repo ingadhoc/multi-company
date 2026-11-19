@@ -25,9 +25,23 @@ Features
 --------
 
 - **Shared Stock Valuation to Branches** (``product.category``): new boolean
-  field on product categories. When enabled on the parent company, the parent's
-  costing method and standard price are automatically propagated to all
-  accessible branches. The field is hidden for branch users.
+  field on product categories, for a parent company that keeps the stock and the
+  purchases while its branches only invoice (for example, a branch to invoice in
+  B). When enabled on the parent company, the parent's costing method, valuation
+  and accounts are propagated to all accessible branches. It does not apply when
+  the branches have their own warehouses: their moves would be valued at each
+  branch's own cost.
+
+- **Only for branches that only invoice**: the category field is only shown on
+  a parent with branches and no active warehouse on any branch (or while the
+  flag is already enabled, so it can be turned off). The flag cannot be enabled
+  while a branch has an active warehouse, and a branch cannot create or
+  unarchive a warehouse while its parent shares a category.
+
+- **Locked on branches**: while a category is shared, a branch cannot change its
+  costing method, valuation, accounts or stock journal, nor the cost of its
+  products. To configure a branch on its own, disable the flag on the parent
+  company.
 
 - **Branch-aware COGS price** (``stock.move``): overrides
   ``_get_cogs_price_unit()`` so that when a branch generates COGS entries for
