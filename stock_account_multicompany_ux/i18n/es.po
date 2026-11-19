@@ -17,6 +17,36 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
 #. module: stock_account_multicompany_ux
+#. odoo-python
+#: code:addons/stock_account_multicompany_ux/models/stock_warehouse.py:0
+msgid ""
+"%(branch)s is a branch of %(root)s, which shares the stock valuation of "
+"%(count)s product categories to its branches (for example, %(categories)s). "
+"That setup is meant for stock on the parent company only, so a branch cannot"
+" have a warehouse. Disable 'Shared Stock Valuation to Branches' on those "
+"categories first."
+msgstr ""
+"%(branch)s es sucursal de %(root)s, que comparte con sus sucursales la "
+"valoración de inventario de %(count)s categorías de productos (por ejemplo, "
+"%(categories)s). Ese esquema es solo para stock en la compañía padre, así "
+"que una sucursal no puede tener un almacén. Primero desactive «Valoración de"
+" inventario compartida con las sucursales» en esas categorías."
+
+#. module: stock_account_multicompany_ux
+#. odoo-python
+#: code:addons/stock_account_multicompany_ux/models/product_category.py:0
+msgid ""
+"'Shared Stock Valuation to Branches' is meant for stock on the parent "
+"company and branches that only invoice. These branches of %(root)s have "
+"active warehouses: %(branches)s. Their stock would be valued at each "
+"branch's own cost, so the valuation cannot be shared."
+msgstr ""
+"«Valoración de inventario compartida con las sucursales» es para stock en la"
+" compañía padre y sucursales que solo facturan. Estas sucursales de %(root)s"
+" tienen almacenes activos: %(branches)s. Su stock se valuaría al costo "
+"propio de cada sucursal, así que la valoración no se puede compartir."
+
+#. module: stock_account_multicompany_ux
 #: model:res.groups,name:stock_account_multicompany_ux.group_stock_all_branches
 msgid "All Branches"
 msgstr ""
@@ -37,12 +67,9 @@ msgid "Branch Stock"
 msgstr ""
 
 #. module: stock_account_multicompany_ux
-#: model_terms:ir.ui.view,arch_db:stock_account_multicompany_ux.product_category_form_view_stock_valuation_shared
-msgid ""
-"Branches will use the costing method and standard price of the\n"
-"                    parent company for this category, ensuring a single unified\n"
-"                    cost across all branches."
-msgstr ""
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_category__can_share_to_branches
+msgid "Can Share To Branches"
+msgstr "Puede compartir con las sucursales"
 
 #. module: stock_account_multicompany_ux
 #: model:ir.model,name:stock_account_multicompany_ux.model_res_company
@@ -84,8 +111,24 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_res_company__display_name
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_res_users__display_name
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_stock_move__display_name
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_stock_warehouse__display_name
 msgid "Display Name"
 msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_category__shared_to_branches
+msgid ""
+"For a parent company that keeps the stock and the purchases while its branches only invoice (for example, a branch to invoice in B). The branches take the costing method, valuation and accounts of the parent, cannot change them, and their invoices take the cost of goods sold at the parent's cost.\n"
+"\n"
+"It does not apply when the branches have their own warehouses: their stock moves would be valued at each branch's own cost.\n"
+"\n"
+"This flag is company-dependent: it is edited on the group's root company and synced down to its branches, so each company group can decide independently which categories are shared."
+msgstr ""
+"Para una compañía padre que tiene el stock y las compras mientras sus sucursales solo facturan (por ejemplo, una sucursal para facturar en B). Las sucursales toman el método de costo, la valoración y las cuentas de la padre, no pueden cambiarlos, y sus facturas toman el costo de mercadería vendida al costo de la padre.\n"
+"\n"
+"No aplica cuando las sucursales tienen sus propios almacenes: sus movimientos de stock se valuarían al costo propio de cada sucursal.\n"
+"\n"
+"Este indicador depende de la compañía: se edita en la compañía raíz del grupo y se sincroniza a sus sucursales, así cada grupo de compañías decide qué categorías comparte."
 
 #. module: stock_account_multicompany_ux
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_account_move__id
@@ -96,6 +139,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_res_company__id
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_res_users__id
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_stock_move__id
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_stock_warehouse__id
 msgid "ID"
 msgstr ""
 
@@ -111,6 +155,11 @@ msgid "Is Cost Shared From Parent"
 msgstr ""
 
 #. module: stock_account_multicompany_ux
+#: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_category__is_valuation_shared_from_parent
+msgid "Is Valuation Shared From Parent"
+msgstr "Valoración compartida por la padre"
+
+#. module: stock_account_multicompany_ux
 #: model:ir.model,name:stock_account_multicompany_ux.model_account_move
 msgid "Journal Entry"
 msgstr ""
@@ -119,6 +168,19 @@ msgstr ""
 #: model:ir.model,name:stock_account_multicompany_ux.model_account_move_line
 msgid "Journal Item"
 msgstr ""
+
+#. module: stock_account_multicompany_ux
+#: model_terms:ir.ui.view,arch_db:stock_account_multicompany_ux.product_category_form_view_stock_valuation_shared
+msgid ""
+"Meant for stock and purchases on this company with branches that only\n"
+"                    invoice: the branches take this valuation and invoice the cost of goods\n"
+"                    sold at this company's cost. It does not apply when the branches have\n"
+"                    their own warehouses."
+msgstr ""
+"Pensado para stock y compras en esta compañía con sucursales que solo "
+"facturan: las sucursales toman esta valoración y facturan el costo de "
+"mercadería vendida al costo de esta compañía. No aplica cuando las "
+"sucursales tienen sus propios almacenes."
 
 #. module: stock_account_multicompany_ux
 #: model:ir.model,name:stock_account_multicompany_ux.model_product_template
@@ -138,12 +200,48 @@ msgstr ""
 #. module: stock_account_multicompany_ux
 #: model:ir.model.fields,field_description:stock_account_multicompany_ux.field_product_category__shared_to_branches
 msgid "Shared Stock Valuation to Branches"
-msgstr ""
+msgstr "Valoración de inventario compartida con las sucursales"
 
 #. module: stock_account_multicompany_ux
 #: model:ir.model,name:stock_account_multicompany_ux.model_stock_move
 msgid "Stock Move"
 msgstr ""
+
+#. module: stock_account_multicompany_ux
+#. odoo-python
+#: code:addons/stock_account_multicompany_ux/models/product_product.py:0
+msgid ""
+"The cost of %(products)s is shared to branches by %(root)s. Change it on "
+"%(root)s, or disable 'Shared Stock Valuation to Branches' on its category to"
+" manage each branch's cost on its own."
+msgstr ""
+"El costo de %(products)s lo comparte %(root)s con sus sucursales. Cámbielo "
+"en %(root)s, o desactive «Valoración de inventario compartida con las "
+"sucursales» en su categoría para manejar el costo de cada sucursal por "
+"separado."
+
+#. module: stock_account_multicompany_ux
+#. odoo-python
+#: code:addons/stock_account_multicompany_ux/models/product_category.py:0
+msgid ""
+"The inventory valuation of %(categories)s is shared to branches by %(root)s."
+" Change it on %(root)s, or disable 'Shared Stock Valuation to Branches' "
+"there to configure each branch on its own."
+msgstr ""
+"La valoración de inventario de %(categories)s la comparte %(root)s con sus "
+"sucursales. Cámbiela en %(root)s, o desactive allí «Valoración de inventario"
+" compartida con las sucursales» para configurar cada sucursal por separado."
+
+#. module: stock_account_multicompany_ux
+#: model_terms:ir.ui.view,arch_db:stock_account_multicompany_ux.product_category_form_view_stock_valuation_shared
+msgid ""
+"The parent company shares this valuation to its branches. To configure\n"
+"                    this branch on its own, disable \"Shared Stock Valuation to Branches\" on\n"
+"                    the parent company."
+msgstr ""
+"La compañía padre comparte esta valoración con sus sucursales. Para "
+"configurar esta sucursal por separado, desactive «Valoración de inventario "
+"compartida con las sucursales» en la compañía padre."
 
 #. module: stock_account_multicompany_ux
 #: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_product__is_cost_shared_from_parent
@@ -166,6 +264,28 @@ msgstr ""
 #: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_category__is_branch_company
 msgid "True when the active company is a branch (has a parent company)."
 msgstr ""
+"Verdadero cuando la compañía activa es una sucursal y la compañía raíz "
+"comparte la valoración de esta categoría: la sucursal no la puede cambiar."
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_category__is_valuation_shared_from_parent
+msgid ""
+"True when the active company is a branch and the root company shares this "
+"category's valuation: the branch cannot change it."
+msgstr ""
+"Verdadero cuando la compañía activa es una sucursal y la compañía raíz "
+"comparte la valoración de esta categoría: la sucursal no la puede cambiar."
+
+#. module: stock_account_multicompany_ux
+#: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_category__can_share_to_branches
+msgid ""
+"True when the active company is a parent with branches and no branch has an "
+"active warehouse: its stock lives on the parent and the branches only "
+"invoice."
+msgstr ""
+"Verdadero cuando la compañía activa es una padre con sucursales y ninguna "
+"sucursal tiene un almacén activo: su stock está en la padre y las sucursales"
+" solo facturan."
 
 #. module: stock_account_multicompany_ux
 #: model:ir.model,name:stock_account_multicompany_ux.model_res_users
@@ -173,9 +293,6 @@ msgid "User"
 msgstr ""
 
 #. module: stock_account_multicompany_ux
-#: model:ir.model.fields,help:stock_account_multicompany_ux.field_product_category__shared_to_branches
-msgid ""
-"When enabled, all branches of the parent company will use the same costing method and standard price defined in the parent company for products in this category. This ensures a single unified cost across the parent and all its branches.\n"
-"\n"
-"This flag is company-dependent: it is edited on the group's root company and synced down to its branches, so each company group can decide independently which categories are shared."
-msgstr ""
+#: model:ir.model,name:stock_account_multicompany_ux.model_stock_warehouse
+msgid "Warehouse"
+msgstr "Almacén"
