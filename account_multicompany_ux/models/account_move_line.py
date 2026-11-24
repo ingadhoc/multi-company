@@ -9,6 +9,14 @@ from odoo.exceptions import ValidationError
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
+    def _get_analytic_distribution_arguments(self, root_plans):
+        # the account code is company dependent and stored on the company root, so reading it
+        # from another root returns it empty and no distribution model matches the prefix
+        arguments = super()._get_analytic_distribution_arguments(root_plans)
+        if self.company_id:
+            arguments["account_prefix"] = self.account_id.with_company(self.company_id).code
+        return arguments
+
     @api.ondelete(at_uninstall=False)
     def _unlink_move_lines(self):
         move_ids = self.mapped("move_id").ids
