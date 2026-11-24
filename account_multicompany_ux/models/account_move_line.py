@@ -9,6 +9,7 @@ from odoo.exceptions import ValidationError
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
+<<<<<<< 509f02de86da983fc943f3b74e0aed4826bc3f38
     def _reconcile_plan(self, reconciliation_plan):
         if self.env.context.get("skip_cross_company_reversal_reconcile"):
             reconciliation_plan = self._filter_cross_company_reversal_plan(reconciliation_plan)
@@ -27,6 +28,17 @@ class AccountMoveLine(models.Model):
             filtered_plan.append(item)
         return filtered_plan
 
+||||||| 917d9a1d9a744a187cdd50a8a235079e313c4a1d
+=======
+    def _get_analytic_distribution_arguments(self, root_plans):
+        # the account code is company dependent and stored on the company root, so reading it
+        # from another root returns it empty and no distribution model matches the prefix
+        arguments = super()._get_analytic_distribution_arguments(root_plans)
+        if self.company_id:
+            arguments["account_prefix"] = self.account_id.with_company(self.company_id).code
+        return arguments
+
+>>>>>>> f338d3b08a15206e309fbe19565c2634a6e95776
     @api.ondelete(at_uninstall=False)
     def _unlink_move_lines(self):
         # at_uninstall=False only skips this check when this module is uninstalled:
