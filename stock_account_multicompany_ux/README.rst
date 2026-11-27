@@ -24,24 +24,31 @@ changing the quantity on hand of their own company.
 Features
 --------
 
-- **Shared Stock Valuation to Branches** (``product.category``): new boolean
-  field on product categories, for a parent company that keeps the stock and the
-  purchases while its branches only invoice (for example, a branch to invoice in
-  B). When enabled on the parent company, the parent's costing method, valuation
-  and accounts are propagated to all accessible branches. It does not apply when
-  the branches have their own warehouses: their moves would be valued at each
-  branch's own cost.
+- **Shared Stock Valuation to Branches** (``product.category``): company-dependent
+  selection, edited on the parent company and synced to its branches, with three
+  options:
 
-- **Only for branches that only invoice**: the category field is only shown on
-  a parent with branches and no active warehouse on any branch (or while the
-  flag is already enabled, so it can be turned off). The flag cannot be enabled
-  while a branch has an active warehouse, and a branch cannot create or
-  unarchive a warehouse while its parent shares a category.
+  - **Not shared**: the parent and each branch value their stock on their own.
+  - **Stock on the parent**: for a parent company that keeps the stock and the
+    purchases while its branches only invoice (for example, a branch to invoice in
+    B). The parent's costing method, valuation and accounts are propagated to the
+    branches, and their invoices take the cost of goods sold at the parent's cost.
+    It can only be chosen while no branch has an active warehouse, and a branch
+    cannot create or unarchive a warehouse while its parent uses it.
+  - **Parent's cost, stock on the branches**: every branch keeps stock in its own
+    warehouses, valued at standard cost whatever the parent uses, with its own
+    inventory valuation (periodic or perpetual). Each branch takes the parent's cost (copied, with its cost history, on
+    every change on the parent), so the branches' purchases do not change it.
+    With an average cost on the parent, the average counts the quantities in the
+    branches' warehouses too: only the parent's receipts set the cost, and the
+    branches' moves add or take units at the current cost. It can only be chosen
+    while every branch has an active warehouse; archiving the last warehouse of a
+    branch shows a warning.
 
-- **Locked on branches**: while a category is shared, a branch cannot change its
-  costing method, valuation, accounts or stock journal, nor the cost of its
-  products. To configure a branch on its own, disable the flag on the parent
-  company.
+- **Locked on branches**: while a category is shared, a branch cannot change what
+  the parent sets (the costing method; with "Stock on the parent", also the
+  valuation, the accounts and the stock journal), nor the cost of its products. To configure
+  a branch on its own, set the field to "Not shared" on the parent company.
 
 - **Branch-aware COGS price** (``stock.move``): overrides
   ``_get_cogs_price_unit()`` so that when a branch generates COGS entries for
@@ -62,6 +69,11 @@ Features
   ``_stock_account_prepare_realtime_out_lines_vals()`` to post the price
   difference between the branch cost and the parent cost to the appropriate
   inventory difference account when real-time valuation is active.
+
+- **Accounting value per company** (``res.company.stock_accounting_value``): the
+  parent adds the branches' valuation entries only for "Stock on the parent"
+  categories, and a branch leaves those out. With the other options each company
+  books its own stock.
 
 - **Branch Stock** (``stock.location``, ``stock.quant`` record rules): new privilege
   that lets a user read the locations and quants of the whole parent/branches scheme,

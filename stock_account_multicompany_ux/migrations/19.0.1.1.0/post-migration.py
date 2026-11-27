@@ -52,6 +52,6 @@ def migrate(cr, version):
                         categs.ids,
                     )
                     continue
-                categs.with_company(company).write({"shared_to_branches": True})
+                categs.with_company(company).write({"shared_to_branches": "parent_stock"})
 
     cr.execute("DROP TABLE IF EXISTS stock_account_mc_ux_shared_migr")

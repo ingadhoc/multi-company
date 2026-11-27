@@ -42,8 +42,14 @@ class ProductTemplate(models.Model):
         root_company = company.root_id
         for template in self:
             template.is_cost_shared_from_parent = (
-                is_branch and template.categ_id.sudo().with_company(root_company).shared_to_branches
+                is_branch and template.categ_id._get_shared_valuation(root_company) != "none"
             )
+
+    def write(self, vals):
+        res = super().write(vals)
+        if "categ_id" in vals:
+            self.product_variant_ids.with_company(self.env.company.root_id)._sync_shared_cost_to_branches()
+        return res
 
     @api.depends_context("company")
     @api.depends("standard_price", "categ_id.shared_to_branches")

@@ -26,18 +26,19 @@ class TestBranchSharedScope(TransactionCase):
 
     def _shared_category(self):
         return self.Category.create(
-            {"name": "Shared 132117", "property_cost_method": "standard", "shared_to_branches": True}
+            {"name": "Shared 132117", "property_cost_method": "standard", "shared_to_branches": "parent_stock"}
         )
 
     def test_flag_only_without_branch_warehouses(self):
         categ = self.Category.create({"name": "Not shared 132117"})
-        self.assertTrue(categ.can_share_to_branches)
+        self.assertEqual(categ.shared_to_branches, "none")
+        self.assertTrue(categ.can_share_parent_stock)
 
         self.branch_warehouse.active = True
-        categ.invalidate_recordset(["can_share_to_branches"])
-        self.assertFalse(categ.can_share_to_branches)
+        categ.invalidate_recordset(["can_share_parent_stock"])
+        self.assertFalse(categ.can_share_parent_stock)
         with self.assertRaisesRegex(UserError, "Branch Co 132117"):
-            categ.shared_to_branches = True
+            categ.shared_to_branches = "parent_stock"
         with self.assertRaises(UserError):
             self._shared_category()
 
@@ -73,7 +74,7 @@ class TestBranchSharedScope(TransactionCase):
             branch_categ.property_cost_method = "average"
 
         # Once the parent stops sharing it, the branch configures it on its own.
-        categ.shared_to_branches = False
+        categ.shared_to_branches = "none"
         branch_categ.property_cost_method = "average"
         self.assertEqual(categ.with_company(self.parent).property_cost_method, "standard")
 

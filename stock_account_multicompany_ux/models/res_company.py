@@ -42,15 +42,22 @@ class ResCompany(models.Model):
             .search([("company_id", "child_of", root.id), ("company_id", "!=", root.id)])
         )
 
+    def _get_branches_without_warehouse(self):
+        """Branches of this company's group with no active warehouse."""
+        self.ensure_one()
+        root = self.root_id
+        branches = self.sudo().search([("id", "child_of", root.id), ("id", "!=", root.id)])
+        return branches - self._get_branch_warehouses().company_id
+
     def stock_accounting_value(self, accounts_by_product=None, at_date=None):
         """
         Calcula el valor contable del inventario para la compañía.
 
-        - PADRE (con child_ids): AMLs propios de productos NO compartidos +
-          AMLs de TODO el grupo (padre + branches) de productos compartidos, de
-          modo que el COGS facturado en las branches consuma su valoración.
-        - BRANCH (sin child_ids): solo AMLs propios de productos NO compartidos;
-          los compartidos quedan excluidos (su valoración es del padre).
+        - PADRE (con child_ids): AMLs propios + AMLs de las branches de productos
+          con 'parent_stock', de modo que el COGS facturado en las branches
+          consuma su valoración.
+        - BRANCH (sin child_ids): solo AMLs propios, sin los productos con
+          'parent_stock' (su valoración es del padre).
 
         :param accounts_by_product: dict {product: {valuation: account, ...}}
         :param at_date: fecha de corte (None = saldo actual)
@@ -69,7 +76,7 @@ class ResCompany(models.Model):
             self.env["product.category"]
             .sudo()
             .with_company(self.root_id)
-            .search([("shared_to_branches", "=", True)])
+            .search([("shared_to_branches", "=", "parent_stock")])
             .ids
         )
 
@@ -83,15 +90,17 @@ class ResCompany(models.Model):
             base &= Domain([("date", "<=", at_date)])
 
         # --- PADRE ---
-        # Comportamiento estándar por ahora. La consolidación del COGS de las
-        # branches quedó pendiente de diseño con datos reales: sumar todos los
-        # AMLs del grupo sobre-consume (arrastra los asientos de entrega de la
-        # branch, no solo el COGS) y deja el contable negativo.
+        # Its own entries, plus the branches' ones only for 'Stock on the parent':
+        # with any other option each branch books its own stock.
         if self.child_ids:
-            domain = base & Domain(
-                [
-                    ("company_id", "in", self.ids + self.child_ids.ids),
-                ]
+            domain = base & (
+                Domain([("company_id", "=", self.id)])
+                | Domain(
+                    [
+                        ("company_id", "in", self.child_ids.ids),
+                        ("product_id.categ_id", "in", shared_categ_ids),
+                    ]
+                )
             )
         elif self.parent_id:
             # --- BRANCH ---

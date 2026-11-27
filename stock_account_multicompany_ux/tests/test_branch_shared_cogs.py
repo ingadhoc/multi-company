@@ -68,7 +68,7 @@ class TestBranchSharedCogs(TransactionCase):
                     "name": "Shared FIFO 71584",
                     "property_cost_method": "fifo",
                     "property_valuation": "real_time",
-                    "shared_to_branches": True,
+                    "shared_to_branches": "parent_stock",
                     "property_account_income_categ_id": cls.account_income.id,
                     "property_account_expense_categ_id": cls.account_expense.id,
                     "property_stock_valuation_account_id": cls.account_stock_valuation.id,
@@ -168,7 +168,7 @@ class TestBranchSharedCogs(TransactionCase):
 
         self.assertEqual(invoice.company_id, self.branch_company)
         self.assertTrue(invoice.company_id.parent_id)
-        self.assertTrue(self.categ.with_company(self.parent_company).shared_to_branches)
+        self.assertEqual(self.categ.with_company(self.parent_company).shared_to_branches, "parent_stock")
         self.assertEqual(self.product.with_company(self.parent_company).cost_method, "fifo")
         self.assertEqual(self.product.with_company(self.branch_company).valuation, "real_time")
         self.assertFalse(line._get_stock_moves().filtered(lambda m: m.state == "done"))
@@ -268,7 +268,7 @@ class TestBranchSharedCogs(TransactionCase):
         invoice = self._create_branch_invoice()
         invoice.invoice_line_ids.product_id = product
 
-        self.assertFalse(categ.with_company(self.parent_company).shared_to_branches)
+        self.assertEqual(categ.with_company(self.parent_company).shared_to_branches, "none")
         self.assertEqual(invoice.invoice_line_ids._get_cogs_value(), 70.0)
 
     def _branch_only_env(self):

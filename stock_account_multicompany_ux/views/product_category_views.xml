@@ -9,39 +9,61 @@
                 <attribute name="readonly">is_valuation_shared_from_parent</attribute>
             </field>
             <field name="property_valuation" position="attributes">
-                <attribute name="readonly">is_valuation_shared_from_parent</attribute>
+                <attribute name="readonly">parent_shared_valuation == 'parent_stock'</attribute>
             </field>
             <xpath expr="//field[@name='property_valuation']" position="after">
                 <field name="is_valuation_shared_from_parent" invisible="True"/>
+                <field name="parent_shared_valuation" invisible="True"/>
                 <div
                     class="alert alert-warning"
                     role="alert"
                     colspan="2"
                     invisible="not is_valuation_shared_from_parent"
                 >
-                    The parent company shares this valuation to its branches. To configure
-                    this branch on its own, disable "Shared Stock Valuation to Branches" on
-                    the parent company.
+                    The parent company sets this valuation for its branches. To configure
+                    this branch on its own, set "Shared Stock Valuation to Branches" to
+                    "Not shared" on the parent company.
                 </div>
-                <!-- Also shown while already enabled, so it can be turned off where it no longer applies. -->
                 <field
                     name="shared_to_branches"
+                    widget="radio"
                     groups="base.group_multi_company"
-                    invisible="is_branch_company or not company_has_branches or not (shared_to_branches or can_share_to_branches)"
+                    invisible="is_branch_company or not company_has_branches"
                 />
                 <field name="is_branch_company" invisible="True"/>
                 <field name="company_has_branches" invisible="True"/>
-                <field name="can_share_to_branches" invisible="True"/>
+                <field name="can_share_parent_stock" invisible="True"/>
+                <field name="can_share_parent_cost" invisible="True"/>
                 <div
                     class="alert alert-info"
                     role="alert"
                     colspan="2"
-                    invisible="not shared_to_branches or is_branch_company"
+                    invisible="shared_to_branches != 'parent_stock' or is_branch_company"
                 >
                     Meant for stock and purchases on this company with branches that only
                     invoice: the branches take this valuation and invoice the cost of goods
-                    sold at this company's cost. It does not apply when the branches have
-                    their own warehouses.
+                    sold at this company's cost. Only while no branch has a warehouse.
+                </div>
+                <div
+                    class="alert alert-info"
+                    role="alert"
+                    colspan="2"
+                    invisible="shared_to_branches != 'parent_cost' or is_branch_company"
+                >
+                    Every branch keeps stock in its own warehouses, valued at standard cost with
+                    this company's cost and with its own inventory valuation. The branches' purchases do not change
+                    the cost, and an average cost here counts the branches' quantities too.
+                    Only while every branch has a warehouse.
+                </div>
+                <div
+                    class="alert alert-warning"
+                    role="alert"
+                    colspan="2"
+                    invisible="is_branch_company or (shared_to_branches != 'parent_stock' or can_share_parent_stock) and (shared_to_branches != 'parent_cost' or can_share_parent_cost)"
+                >
+                    This option does not fit the warehouses of the branches: "Stock on the parent"
+                    needs no warehouse on any branch, and "Parent's cost, stock on the branches"
+                    needs one on every branch.
                 </div>
             </xpath>
         </field>
