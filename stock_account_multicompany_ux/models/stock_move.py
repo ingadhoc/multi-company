@@ -37,7 +37,7 @@ class StockMove(models.Model):
         # Solo interceptar si hay padre y la categoría tiene 'shared_to_branches'
         # activo. shared_to_branches es company_dependent: se lee en el contexto del
         # PADRE (fuente de verdad), no de la branch, donde puede no estar seteado.
-        if not parent_company or not self.product_id.categ_id.sudo().with_company(parent_company).shared_to_branches:
+        if not parent_company or self.product_id.categ_id._get_shared_valuation(parent_company) != "parent_stock":
             return super()._get_cogs_price_unit(quantity)
 
         move_valued_qty = sum(m._get_valued_qty() for m in self)

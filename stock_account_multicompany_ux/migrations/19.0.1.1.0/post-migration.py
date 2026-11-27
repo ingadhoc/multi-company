@@ -1,4 +1,8 @@
+import logging
+
 from odoo import SUPERUSER_ID, api
+
+_logger = logging.getLogger(__name__)
 
 
 def migrate(cr, version):
@@ -8,9 +12,11 @@ def migrate(cr, version):
     tabla temporal por pre-migration).
 
     El valor booleano viejo era global, así que lo marcamos True en cada compañía
-    raíz del sistema. La escritura usa el ORM —que serializa el jsonb correcto— y
-    dispara _propagate_valuation_to_branches, sincronizando el flag a las branches
-    de cada grupo.
+    raíz del sistema cuyas branches no tienen almacenes activos (el flag es para
+    stock en la padre y branches que solo facturan); las otras quedan en el log.
+    La escritura usa el ORM —que serializa el jsonb correcto— y dispara
+    _propagate_valuation_to_branches, sincronizando el flag a las branches de
+    cada grupo.
     """
     cr.execute(
         """
@@ -33,6 +39,19 @@ def migrate(cr, version):
             # se encarga de sincronizar el flag a las branches.
             root_companies = env["res.company"].search([("parent_id", "=", False)])
             for company in root_companies:
-                categs.with_company(company).write({"shared_to_branches": True})
+                # Only for stock on the parent: with warehouses on the branches the
+                # shared valuation does not apply, so it is left off and logged.
+                warehouses = company.child_ids and company._get_branch_warehouses()
+                if warehouses:
+                    _logger.info(
+                        "Shared stock valuation not enabled on %s (id %s): branches with active "
+                        "warehouses %s. Categories: %s",
+                        company.name,
+                        company.id,
+                        sorted(set(warehouses.company_id.ids)),
+                        categs.ids,
+                    )
+                    continue
+                categs.with_company(company).write({"shared_to_branches": "parent_stock"})
 
     cr.execute("DROP TABLE IF EXISTS stock_account_mc_ux_shared_migr")

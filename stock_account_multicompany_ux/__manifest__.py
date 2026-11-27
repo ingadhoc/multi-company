@@ -19,7 +19,7 @@
 ##############################################################################
 {
     "name": "Stock Account Multicompany Usability",
-    "version": "19.0.1.7.0",
+    "version": "19.0.1.8.0",
     "author": "ADHOC SA",
     "website": "www.adhoc.com.ar",
     "license": "AGPL-3",
@@ -29,6 +29,7 @@
     ],
     "data": [
         "security/stock_account_multicompany_ux_security.xml",
+        "data/ir_default.xml",
         "views/product_category_views.xml",
         "views/product_views.xml",
     ],

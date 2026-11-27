@@ -25,6 +25,10 @@ class TestBranchSharedCogs(TransactionCase):
             context=dict(cls.env.context, allowed_company_ids=[cls.branch_company.id, cls.parent_company.id])
         )
 
+        # The shared valuation is for stock on the parent: in tests Odoo creates a
+        # warehouse for every new company, so the branch's one is archived.
+        cls.env["stock.warehouse"].search([("company_id", "=", cls.branch_company.id)]).active = False
+
         cls.account_receivable = cls._create_account(cls, "AR71584", "Receivable", "asset_receivable")
         cls.account_income = cls._create_account(cls, "IN71584", "Income", "income")
         cls.account_expense = cls._create_account(cls, "EX71584", "Expense", "expense")
@@ -64,7 +68,7 @@ class TestBranchSharedCogs(TransactionCase):
                     "name": "Shared FIFO 71584",
                     "property_cost_method": "fifo",
                     "property_valuation": "real_time",
-                    "shared_to_branches": True,
+                    "shared_to_branches": "parent_stock",
                     "property_account_income_categ_id": cls.account_income.id,
                     "property_account_expense_categ_id": cls.account_expense.id,
                     "property_stock_valuation_account_id": cls.account_stock_valuation.id,
@@ -164,7 +168,7 @@ class TestBranchSharedCogs(TransactionCase):
 
         self.assertEqual(invoice.company_id, self.branch_company)
         self.assertTrue(invoice.company_id.parent_id)
-        self.assertTrue(self.categ.with_company(self.parent_company).shared_to_branches)
+        self.assertEqual(self.categ.with_company(self.parent_company).shared_to_branches, "parent_stock")
         self.assertEqual(self.product.with_company(self.parent_company).cost_method, "fifo")
         self.assertEqual(self.product.with_company(self.branch_company).valuation, "real_time")
         self.assertFalse(line._get_stock_moves().filtered(lambda m: m.state == "done"))
@@ -197,6 +201,18 @@ class TestBranchSharedCogs(TransactionCase):
             cogs_lines.filtered(lambda line: line.credit).account_id,
             self.account_stock_valuation,
         )
+
+    def test_branch_without_stock_leaves_out_the_parent_cogs(self):
+        """The report asks for the value with no accounts: the branch has no stock, so
+        no product is valued there and the accounts come from the categories."""
+        invoice = self._create_branch_invoice()
+        invoice.action_post()
+        report = self.env["stock_account.stock.valuation.report"]
+
+        self.assertFalse(self.branch_company.stock_accounting_value().get(self.account_stock_valuation))
+        self.assertEqual(self.parent_company.stock_accounting_value()[self.account_stock_valuation], -300.0)
+        branch_data = report.with_company(self.branch_company)._get_report_data()
+        self.assertFalse(branch_data["initial_balance"]["value"])
 
     def test_cogs_value_falls_back_to_standard_price_without_parent_stock(self):
         """Sin entradas en el padre, FIFO extrapola con el precio estándar del padre."""
@@ -252,7 +268,7 @@ class TestBranchSharedCogs(TransactionCase):
         invoice = self._create_branch_invoice()
         invoice.invoice_line_ids.product_id = product
 
-        self.assertFalse(categ.with_company(self.parent_company).shared_to_branches)
+        self.assertEqual(categ.with_company(self.parent_company).shared_to_branches, "none")
         self.assertEqual(invoice.invoice_line_ids._get_cogs_value(), 70.0)
 
     def _branch_only_env(self):
@@ -287,8 +303,16 @@ class TestBranchSharedCogs(TransactionCase):
             self.assertEqual(product.parent_standard_price, 500.0)
 
     def _create_done_receipt(self, company, origin):
-        """Done receipt of 10 units in a picking with the given origin."""
-        warehouse = self.env["stock.warehouse"].search([("company_id", "=", company.id)], limit=1)
+        """Done receipt of 10 units in a picking with the given origin.
+
+        The branch's warehouse is archived (shared valuation is for stock on the
+        parent): its locations still receive the move this test needs.
+        """
+        warehouse = (
+            self.env["stock.warehouse"]
+            .with_context(active_test=False)
+            .search([("company_id", "=", company.id)], limit=1)
+        )
         picking = (
             self.env["stock.picking"]
             .with_company(company)

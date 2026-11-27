@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Fallback of the company-dependent field for companies without a value -->
+    <record id="default_shared_to_branches" model="ir.default">
+        <field name="field_id" ref="field_product_category__shared_to_branches"/>
+        <field name="json_value">"none"</field>
+    </record>
+</odoo>

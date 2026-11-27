@@ -40,7 +40,7 @@ class AccountMove(models.Model):
         # se lee en el contexto del PADRE (fuente de verdad), no de la branch.
         # El resto usa el flujo estándar de Odoo sin modificaciones.
         for line in self.invoice_line_ids.filtered(
-            lambda x: x.product_id.categ_id.sudo().with_company(parent_company).shared_to_branches
+            lambda x: x.product_id.categ_id._get_shared_valuation(parent_company) == "parent_stock"
         ):
             # Saltar líneas que no generan COGS o productos sin valoración en tiempo real
             if not line._eligible_for_stock_account() or line.product_id.valuation != "real_time":
